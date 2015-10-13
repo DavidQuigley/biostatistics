@@ -1,0 +1,68 @@
+---
+title: "Module 1.2: Study designs and data analysis"
+author: "David Quigley"
+date: "September 25, 2015"
+output: 
+    html_document:
+        toc: true
+        css: swiss.css
+---
+
+*In this module, we will outline several types of studies and describe how study design affects our ability to interpret causality. We will describe confounding and reverse-causation. It describes, at a high level, typical steps in a data analysis.*
+
+Types of studies
+==================================================
+
+In some studies we perform an intervention to change the state of the world. In others, we merely observe the world. Both kinds of studies are valuable, but they 
+
+cohort
+-------------------
+
+Cohort studies follow a set of subjects longitudinally over time, without a controlled intervention. The subjects 
+
+case-control
+--------------------
+
+When we begin to study a phenotype that can be distinguished into a yes/no call, a typical question is, what  Case-control studies contrast two populations that vary in one or more points of interest. 
+
+screens
+--------------------
+
+
+
+Interventional 
+-------------------
+
+Causal reasoning stems from interventions
+
+* One or more interventions, other variables held constant
+* Bench studies
+* Randomized Controlled Trial 
+
+Comparison between groups
+
+* Role of a placebo or control
+* variables
+* Uncontrolled sources of influence: confounding
+
+Continuum: strictly planned hypothesis testing to hypothesis generating
+
+
+
+
+Role of statistics in planning studies
+========================================================
+
+Coping with variability
+
+* Biological variation in organisms
+* Variation in sample subsets (intuition for CLT, law of large numbers)
+* Random error in measurements
+
+
+Typical steps in data analysis
+==================================================
+
+
+
+

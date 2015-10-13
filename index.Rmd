@@ -1,0 +1,62 @@
+---
+title: "UCSF Introduction to Biostatistics Online course"
+author: "David Quigley"
+date: "October 12, 2015"
+output: html_document
+---
+
+Course Syllabus
+-------------------
+
+Module | Description 
+------ | ------- 
+1.1    | [Introduction to biostatistics and data analysis](module_01.1.html)
+1.2    | [Study designs and process of data analysis](module_01.2.html)
+2      | [Just enough R to get started](module_02.html)
+3.1    | [Descriptive statistics with a single variable](module_03.1.html)
+3.2    | [Summarizing data with the mean and variance](module_03.2.html)
+4.1    | [Hypothesis testing: P values](module_04.1.html)
+4.2    | [Hypothesis testing: Probability and Multiple test correction](module_04.2.html)
+5.1    | Comparisons between two continuous variables: correlation
+5.2    | Comparisons between two continuous variables: linear models
+6.1    | Counts and categories: The Binomial, Chi-squared and Fisher's Exact tests
+6.2    | Counts and categories: ANOVA and categorical variables
+7.1    | Causation and Prediction
+7.2    | Causation and Prediction: Bayesian inference
+7.3    | Causation and Prediction: prevalence, predictive value, and the ROC
+8.1    | Robust statistics: non-parametric tests and rank transformation
+8.2    | Robust statistics: outliers
+9      | Reproducible statistical analysis and R Studio
+
+
+Instructor
+-------------------
+
+This course is being developed by [David Quigley](http://davidquigley.com), a member of the [UCSF Helen Diller Comprehensive Cancer Center](http://cancer.ucsf.edu) and the [UCSF Department of Epidemiology and Biostatistics](http://epibiostat.ucsf.edu). This work was supported by a grant from the UCSF Graduate division.
+
+Course overview
+-------------------
+
+Statistical maturity is a core competency for researchers and health professionals, but formal education in statistical methods and practice varies widely among the graduate schools at UCSF. Although graduate students may opt to take a full introductory course such as Biostat 183, no statistical classwork is required of BMS, Informatics, PSPG, or Tetrad students. Students arrive on a continuum between a complete lack of formal training and having completed Masters level work in statistics. This course will provide a flexible, introductory set of modules that will allow biomedical students to design studies, perform essential analysis, and consume statistical data.
+
+This course will emphasize practical considerations important to a working bench scientist. Mathematical detail and notation will be included where it is essential. The P value is both crucial and widely misunderstood, so the course places particular emphasis on what P means and interpreting P in the context of effect size and study power. Example data is placed in context through several interviews with the UCSF investigators who performed the studies. Material denoted in the syllabus as "intermediate topics" will not be covered in the first year’s version of these lessons.
+
+Core concepts and outcomes 
+----------------------------
+
+* Types of studies, causation, falsifiability, and hypothesis testing
+* Summarizing central tendency and variation 
+* How to perform and decide between frequently-used tests
+* Evaluating results using a combination of P value, effect size, confidence intervals, and statistical power, and not the P value alone
+* The intuition behind multiple testing correction
+* Performing reproducible statistical analysis with the R package
+
+Pedagogical method
+----------------------------
+
+Course material is organized into modules which consist of:
+
+* Recorded lectures
+* Written material produced as R Markdown documents that can be rendered as PDF or HTML, and loaded directly into R for worked examples
+* Exercises and projects
+
