@@ -1,0 +1,253 @@
+---
+title: "Module 5.1: Comparisons between two continuous variables: correlation"
+author: "David Quigley"
+date: "October 17, 2015"
+output: 
+    html_document:
+        toc: true
+        css: swiss.css
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(comment = NA)
+knitr::opts_chunk$set( prompt=TRUE ) 
+
+knitr::knit_hooks$set(small.mar = function(before, options, envir) {
+    if (before) par(mar = c(2, 2, 1, 1))  # smaller margin on top and right
+})
+
+knitr::knit_hooks$set(med.mar = function(before, options, envir) {
+    if (before) par(mar = c(4, 4, 1, 1))  # smaller margin on top and right
+})
+
+```
+*This module introduces correlation as a measure of the association between two variables.*
+
+Correlation 
+========================================================
+
+The long fat mouse and the short thin mouse
+--------------------------------------------
+
+Suppose I gave you a list of 20 numbers and told you they were the lengths of 20 mice measured from the tips of their noses to the ends of their tails, and then asked you to rank the mice in order from heaviest to lightest without seeing them or getting any other information. 
+
+```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=3}
+weights=c(23.31,28.43,24.51,31.14,21.60,19.90,27.91,23.10,23.38,18.27,18.02,
+          14.87,35.46,20.52,28.60,23.35,20.65,29.16,15.20,32.70)
+lengths=c(166,197,189,192,178,167,181,189,191,173,173,172,193,190,193,185,172,195,148,199)
+plot(sort( lengths ), xlab="mouse number", ylab="length (mm)", pch=19, las=1)
+```
+
+If you were to assume that longer mice are likely to be heavier than shorter mice, you might rank the mice by their lengths. If you did this, you would make some mistakes but do pretty well overall.
+
+```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=5}
+barplot( rank(weights)[ order(rank(lengths))], main="Weight rank order from lengths", las=1 )
+```
+
+Looking at some actual data, from an experiment using eight-week-old mice, it is clear that the longer a mouse was at eight weeks of age, the heavier it was likely to be. However, the relationship is not perfect.
+
+```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=3}
+plot(weights, lengths, xlab="Weight (grams)", ylab="length (mm)", pch=19, las=1)
+```
+
+The relationship between height and weight holds for humans as well, although there are many individuals who would violate our assumptions, such as very short and heavy men, or tall slim women. *Height and weight are correlated*; we could also say *there is an association between height and weight*. Correlation is a mathematical measure of the relationship between two continuous variables. Correlelation is appealingly simple, but correlation carries limitations and paradoxes that can trap the unwary. 
+
+
+Correlation is derived from covariance
+-------------------------------------------------
+
+Correlation can be quantified numerically as a number called the *correlation coefficient*. To calculate this coefficient, we must first calculate a value with a very similar name: the *covariance*. Covariance measures how much two random continuous variables tend to change together. 
+
+The mathematics of covariance depend on whether we are refering to the covariance of two *entire populations* of variables, or *samples* of those populations. Recall that a sample of the population is an estimate of value we would see if we could measure the entire population. In real-world analysis we obtain samples of the total population, and are therefore estimating the population covariance from what we can see in our samples.
+
+If we are calculating on the entire population, the covariance of two variables is written as:
+
+$\large{\textit{cov}_{X,Y} = \sigma_{X,Y} = E[(X-E[X])(Y-E[Y])] }$
+
+Intuitively, we are asking, "as individual values of X get farther from the mean of X, do matching individual values of Y diverge from the mean of Y in a similar proportion?". 
+
+Covariance is measuring the expected product of how much values X differ from their mean E[X] (read the "expected value" of X) and values Y differ from their mean E[Y]. If individual values of X and Y tend to differ from their respective means in syncronicity, then the variables covary strongly. This covariance can be positive (direct relationships) or negative (inverse relationships). If there is no linear relationship between how far X is from the mean of X *vs.* how far Y is from the mean of Y, then the covariance is zero.
+
+We usually wish to calculate the sample covariance. To calculate sample covariance, we divide the overall sum of products by N-1 rather than dividing by N. 
+
+$\large{ \sigma_{X,Y} = \frac{1}{N-1}\sum_{1}^N( (x_i-\bar{x})(y_i-\bar{y}) ) }$
+
+To illustrate the covariance, I'll show the distance from each point to the mean of points on the X and Y axis (drawn as a gray line).
+
+
+```{r echo=FALSE,  med.mar=TRUE, fig.height=3, fig.width=3}
+aa = c(1,2,4,5,6,9)
+bb = c(1.6,3,2,9,5.5,13)
+mu.aa = mean(aa)
+mu.bb = mean(bb)
+plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("covariance =",cov(aa,bb),sep=""))
+
+```
+
+```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=3}
+plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main="X - E[X]")
+lines(c(mu.aa, mu.aa), c(0, 100), col="gray", lty=2)
+for(i in 1:length(aa) ){
+    lines(c(aa[i], mu.aa), c(bb[i], bb[i]), lty=1, col="gray")
+}
+
+plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main="Y - E[Y]")
+lines( c(0, 500), c(mu.bb, mu.bb), col="gray", lty=2)
+for(i in 1:length(bb) ){
+    lines( c(aa[i], aa[i]),  c(bb[i], mu.bb),lty=1, col="gray")
+}
+
+```
+
+```{r echo=FALSE}
+
+
+print( data.frame( X_minus_meanX=round( aa-mu.aa, 2), 
+            Y_minus_meanY=round( bb-mu.bb, 2), 
+            product = round( (aa-mu.aa)*(bb-mu.bb), 2) ) )
+
+example.rho = sum( (aa-mu.aa)*(bb-mu.bb) ) / (length(aa)-1)
+```
+
+Sum of products: `r round(sum((aa-mu.aa)*(bb-mu.bb)),2)`.
+Sum of products / (N-1): `r round(sum((aa-mu.aa)*(bb-mu.bb))/( length(aa)-1),2 )`.
+
+> The sample covariance of two vectors can be calculated in R using the cov() function.
+
+Why don't we just use the covariance?
+------------------------------------------------------------------
+
+One disadvantage of the covariance is it is dependent on the magnitude of individual values of X and Y.
+
+```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=3}
+plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("covariance =",cov(aa,bb),sep=""))
+plot(aa*10,bb*10,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("covariance =",cov(aa*10,bb*10),sep="") )
+```
+
+
+Note that the values on the right bear the identical relationship to each other as the values on the left, but the values on the right have been scaled up by a factor of 10. Covariance is not standardized to a consistent range between -1 and 1; it can be infinitely high or low.
+
+
+
+The Pearson correlation coefficient
+================================================================
+
+The correlation coefficient, which is sometimes written with the greek letter rho, is calculated as
+
+$\large{ \rho = \frac{\textit{ covariance(x,y)} }{\sigma_x \sigma_y} }$
+
+where $\sigma_x$ means the standard deviation of x. Intuitively, we can see that the denominator (bottom) term in this new equation will scale with the total amount of variation in the X and Y distributions. The denominator forces rho to be bounded between -1 and 1, inclusive; in the jargon, we say that the denominator standardizes the covariance measure. 
+
+```{r med.mar=TRUE, echo=FALSE, fig.height=2, fig.width=2}
+
+pches = c( rep(19, 10), rep(1,10))
+colors = c( rep("cornflowerblue", 10), rep("black",10))
+xs = c(1:10, 1:10)
+
+va = 1:10
+vb = 1:10+1
+par(mar = c(3, 3, 1, 1))  # smaller margin on top and right
+
+
+plot(1:20, 1:20, pch=19, col="cornflowerblue", xlab="X", ylab="Y", axes=FALSE, main="rho = 1.0", mgp=c(0.5,1,0.5) )
+box()
+
+plot(1:20, 20:1, pch=19, col="cornflowerblue", xlab="X", ylab="Y", axes=FALSE, main="rho = -1.0", mgp=c(0.5,1,0.5) )
+box()
+
+vb = rep(5,10)
+plot(1:20, rep(10,20), pch=19, col="cornflowerblue", xlab="X", ylab="Y", axes=FALSE, main="rho = 0", mgp=c(0.5,1,0.5) )
+box()
+```
+
+Here I plot the correlation between two variables (X and Y), demonstrating the correlation coefficient for each set of pairs.
+
+
+Using the definition of covariance from above, and the definition of the standard deviation defined in module 3.2:
+
+$\large{ \sigma_x = \sqrt{ \frac{ \sum_{i=1}^N(X_i-\bar{X})^2} { N-1 } }  }$
+
+$\large{\rho = \frac{ \frac{1}{N-1}\sum_{1}^N( (x_i-\bar{x})(y_i-\bar{y}) ) }{ \sqrt{ \frac{ \sum_{i=1}^N(X_i-\bar{X})^2} { N-1 } } \sqrt{ \frac{ \sum_{i=1}^N(Y_i-\bar{Y})^2} { N-1 } } } }$
+
+For the whole population, the equivalent calculation would be:
+
+$\large{\rho = \frac{ \sum_{i=1}^N(X_i - \bar{X})(Y_i - \bar{Y})  }{  \sqrt{ \sum_{i=1}^N(X_i-\bar{X})^2} \sqrt{ \sum_{i=1}^N(Y_i-\bar{Y})^2}  } }$
+
+```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=3}
+example.rho = cor.test(aa,bb)$estimate
+plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("rho =", round( example.rho, 2),sep=" "))
+plot(aa*10,bb*10,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("rho =", round( cor.test(aa*10,bb*10)$estimate, 2),sep=" ") )
+```
+
+> Pearson's correlation coefficent can be calculated in R with the *cor()* function.
+
+
+Assessing the statistical strength of correlation
+========================================================
+
+calculating a P value
+-------------------------
+
+We can assess the statistical strength of a correlation using the null hypothesis testing framework introduced in module 4.1. The simplest and most natural null hypothesis for correlation is that correlation equals zero. This hypothesis is a polite fiction. In any non-trivial data set, it is almost impossible for correlation to be equal to precicisely zero. However, this fiction is still very useful, because it allows for a principled answer to the question of how likely it would be to see a particular correlation value by chance.
+
+We are often interested in more than one continuous variable at a time. In some cases this is incidental: an experiment designed to measure the effect of nutritional supplements on mouse litter sizes may also capture information about the weight of each mouse. In some cases experiments are explicitly designed to measure the association between two variables
+
+Calculate a t statistic from the rho value:
+
+$\large{t = r\sqrt{\frac{n-2}{1-r^2}}}$
+
+```{r echo=FALSE}
+example.t = as.numeric( example.rho * sqrt( (length(aa)-2)/(1-example.rho^2)) )
+```
+
+In the case of our example above, with rho = `r round( example.rho, 3)`, the t statistic is `r round( example.t, 3)` with a corresponding P value of 
+`r round( 2*( 1-pt(example.t, df=4) ), 3)`
+
+```{r echo=FALSE}
+
+bnd = 5
+plot( seq(from=-bnd, to=bnd, by=0.01),  dt(seq(from=-bnd, to=bnd, by=0.01), df=length(aa)-2), 
+    xlab="t statistic", main="t distribution", pch=19, cex=0.1, ylab="" )
+for(i in seq(from=example.t, to=bnd, by=0.01)){
+    lines(c( i,i ), c(0, dt(i, df=length(aa)-2)) )
+    lines(c( -1*i,-1*i ), c(0, dt(i, df=length(aa)-2)) )
+}
+```
+
+Recall that the P value corresponds to the area under the corresponding distribution that is as far or farther from zero than our test statstic. In the plot above, this is indicated by the shaded area of the t distribution. Both the positive and negative sides of the distribution are shared because a two-tailed test is used; we are testing the possibility that our t statistic could be either larger than zero, or less than zero.
+
+
+Obtaining confidence intervals
+-------------------------------
+
+Convert correlation coefficients to Z scores
+
+$\large{ z = \frac{1}{2}ln(\frac{1+r}{1-r} ) }$
+
+$\large{ se = \frac{1}{\sqrt{N-3}} }$
+
+A Z score for the difference in these two values can be calculated with: 
+
+$\large{ \textit{Z test} = \frac{Z_1 - Z_2}{ SE_{ZD} } }$
+
+Recall that the null hypothesis is that correlation equals zero. For the example shown above:
+
+$\large{ \rho = 0.88 }$
+
+$\large{ z_{H1} = \frac{1}{2}ln(\frac{1+0.88}{1-0.88} ) = }$
+
+$\large{ z_{H0} = \frac{1}{2}ln(\frac{1+0.0}{1-0.0} ) = 0}$
+
+$\large{ se = \frac{1}{\sqrt{6-3}} } = 0.577$
+
+$\large{ Z_{score} = \frac{1.293 - 0}{0.577} = 2.240}$
+
+What percentage of a standard normal distribution lies between 2.24 and positive infinity, and between -2.24 and negative infinity?
+
+
+
+If method is "pearson", the test statistic is based on Pearson's product moment correlation coefficient cor(x, y) and follows a t distribution with length(x)-2 degrees of freedom if the samples follow independent normal distributions. If there are at least 4 complete pairs of observation, an asymptotic confidence interval is given based on Fisher's Z transform.
+
+
+
+Using a Z lookup table, or the *dnorm()* function in R, we find a P value of 0.065
