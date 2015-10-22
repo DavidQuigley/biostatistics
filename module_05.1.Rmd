@@ -21,15 +21,21 @@ knitr::knit_hooks$set(med.mar = function(before, options, envir) {
 })
 
 ```
-*This module introduces correlation as a measure of the association between two variables.*
+*This module introduces correlation as a measure of the association between two variables. It shows how correlation is derived from covariance, how to calculate a P value for a correlation, and how to derive confidence intervals for correlation. It describes the limits of correlation.*
 
 Correlation 
 ========================================================
 
+![xkcd](images/xkcd.png)
+
+*(XKCD, https://xkcd.com/552)*
+
 The long fat mouse and the short thin mouse
 --------------------------------------------
 
+
 Suppose I gave you a list of 20 numbers and told you they were the lengths of 20 mice measured from the tips of their noses to the ends of their tails, and then asked you to rank the mice in order from heaviest to lightest without seeing them or getting any other information. 
+![mouse](images/mouse.png)
 
 ```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=3}
 weights=c(23.31,28.43,24.51,31.14,21.60,19.90,27.91,23.10,23.38,18.27,18.02,
@@ -38,7 +44,7 @@ lengths=c(166,197,189,192,178,167,181,189,191,173,173,172,193,190,193,185,172,19
 plot(sort( lengths ), xlab="mouse number", ylab="length (mm)", pch=19, las=1)
 ```
 
-If you were to assume that longer mice are likely to be heavier than shorter mice, you might rank the mice by their lengths. If you did this, you would make some mistakes but do pretty well overall.
+If you assumed that longer mice were heavier than shorter mice, you might guess their weights should be ranked by their lengths. If you did this, you would make some mistakes but do pretty well overall.
 
 ```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=5}
 barplot( rank(weights)[ order(rank(lengths))], main="Weight rank order from lengths", las=1 )
@@ -64,27 +70,13 @@ If we are calculating on the entire population, the covariance of two variables 
 
 $\large{\textit{cov}_{X,Y} = \sigma_{X,Y} = E[(X-E[X])(Y-E[Y])] }$
 
-Intuitively, we are asking, "as individual values of X get farther from the mean of X, do matching individual values of Y diverge from the mean of Y in a similar proportion?". 
+E[X] means, "the expected value of X", and in this context it is equal to the mean value of X. We are asking, "as individual values of X get farther from the mean of X, do matching individual values of Y diverge from the mean of Y in a similar proportion?" If so, the covariance will be large, since the mean product of differences will be positive. If X and Y tend to move in opposite directions, we will be mutliplying a positive and negative number together and the covariance will tend to be negative. If differences are equally likely to be positive or negative, they will tend to cancel each other out, and the mean difference will be close to zero. 
 
-Covariance is measuring the expected product of how much values X differ from their mean E[X] (read the "expected value" of X) and values Y differ from their mean E[Y]. If individual values of X and Y tend to differ from their respective means in syncronicity, then the variables covary strongly. This covariance can be positive (direct relationships) or negative (inverse relationships). If there is no linear relationship between how far X is from the mean of X *vs.* how far Y is from the mean of Y, then the covariance is zero.
-
-We usually wish to calculate the sample covariance. To calculate sample covariance, we divide the overall sum of products by N-1 rather than dividing by N. 
-
-$\large{ \sigma_{X,Y} = \frac{1}{N-1}\sum_{1}^N( (x_i-\bar{x})(y_i-\bar{y}) ) }$
-
-To illustrate the covariance, I'll show the distance from each point to the mean of points on the X and Y axis (drawn as a gray line).
-
-
-```{r echo=FALSE,  med.mar=TRUE, fig.height=3, fig.width=3}
+```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=3}
 aa = c(1,2,4,5,6,9)
 bb = c(1.6,3,2,9,5.5,13)
 mu.aa = mean(aa)
 mu.bb = mean(bb)
-plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("covariance =",cov(aa,bb),sep=""))
-
-```
-
-```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=3}
 plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main="X - E[X]")
 lines(c(mu.aa, mu.aa), c(0, 100), col="gray", lty=2)
 for(i in 1:length(aa) ){
@@ -99,9 +91,19 @@ for(i in 1:length(bb) ){
 
 ```
 
+*distance from each point to the mean of points on the X and Y axis (drawn as a gray line)*
+
+We usually wish to calculate the sample covariance. To calculate sample covariance, we divide the overall sum of products by N-1 rather than dividing by N. 
+
+$\large{ \sigma_{X,Y} = \frac{1}{N-1}\sum_{1}^N( (x_i-\bar{x})(y_i-\bar{y}) ) }$
+
+
+```{r echo=FALSE,  med.mar=TRUE, fig.height=3, fig.width=3}
+plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("covariance = ",cov(aa,bb),sep=""))
+```
+
+
 ```{r echo=FALSE}
-
-
 print( data.frame( X_minus_meanX=round( aa-mu.aa, 2), 
             Y_minus_meanY=round( bb-mu.bb, 2), 
             product = round( (aa-mu.aa)*(bb-mu.bb), 2) ) )
@@ -120,23 +122,20 @@ Why don't we just use the covariance?
 One disadvantage of the covariance is it is dependent on the magnitude of individual values of X and Y.
 
 ```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=3}
-plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("covariance =",cov(aa,bb),sep=""))
-plot(aa*10,bb*10,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("covariance =",cov(aa*10,bb*10),sep="") )
+plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("covariance =",cov(aa,bb),sep=" "))
+plot(aa*10,bb*10,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("covariance =",cov(aa*10,bb*10),sep=" ") )
 ```
 
-
-Note that the values on the right bear the identical relationship to each other as the values on the left, but the values on the right have been scaled up by a factor of 10. Covariance is not standardized to a consistent range between -1 and 1; it can be infinitely high or low.
-
-
+Note that the values on the right bear the identical relationship to each other as the values on the left, but the values on the right are all larger than those on the left by a factor of 10. **Covariance is not standardized to a consistent range** between -1 and 1; it can be infinitely high or low. This makes it hard to compare two covariance measurements.
 
 The Pearson correlation coefficient
 ================================================================
 
-The correlation coefficient, which is sometimes written with the greek letter rho, is calculated as
+To obtain a consistent, standard measure of covariance we can use Pearson's correlation coefficient. Pearson's correlation, formally called Pearson's Product-Moment correlation coefficient, is sometimes written as the Greek letter ρ (rho). It is is calculated as:
 
 $\large{ \rho = \frac{\textit{ covariance(x,y)} }{\sigma_x \sigma_y} }$
 
-where $\sigma_x$ means the standard deviation of x. Intuitively, we can see that the denominator (bottom) term in this new equation will scale with the total amount of variation in the X and Y distributions. The denominator forces rho to be bounded between -1 and 1, inclusive; in the jargon, we say that the denominator standardizes the covariance measure. 
+where $\sigma_x$ means the standard deviation of x and the covariance is as described above. The denominator (bottom) term in this equation will scale in proportion to the total amount of variation in the X and Y distributions. The denominator forces rho to be bounded between -1 and 1, inclusive; in the jargon, we say that the denominator standardizes the covariance measure. 
 
 ```{r med.mar=TRUE, echo=FALSE, fig.height=2, fig.width=2}
 
@@ -160,10 +159,9 @@ plot(1:20, rep(10,20), pch=19, col="cornflowerblue", xlab="X", ylab="Y", axes=FA
 box()
 ```
 
-Here I plot the correlation between two variables (X and Y), demonstrating the correlation coefficient for each set of pairs.
+*correlation between two variables*
 
-
-Using the definition of covariance from above, and the definition of the standard deviation defined in module 3.2:
+Using the definition of sample covariance from above, and the definition of the sample standard deviation defined in module 3.2, the correlation coefficient is equal to:
 
 $\large{ \sigma_x = \sqrt{ \frac{ \sum_{i=1}^N(X_i-\bar{X})^2} { N-1 } }  }$
 
@@ -181,12 +179,18 @@ plot(aa*10,bb*10,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=pa
 
 > Pearson's correlation coefficent can be calculated in R with the *cor()* function.
 
+```{r}
+x = c(1,2,4,5,6,9)
+y = c(1.6,3,2,9,5.5,13)
+cor( x, y )
+```
+
 
 Assessing the statistical strength of correlation
 ========================================================
 
-calculating a P value
--------------------------
+calculating a P value for Pearson's correlation
+--------------------------------------------------------
 
 We can assess the statistical strength of a correlation using the null hypothesis testing framework introduced in module 4.1. The simplest and most natural null hypothesis for correlation is that correlation equals zero. This hypothesis is a polite fiction. In any non-trivial data set, it is almost impossible for correlation to be equal to precicisely zero. However, this fiction is still very useful, because it allows for a principled answer to the question of how likely it would be to see a particular correlation value by chance.
 
@@ -216,9 +220,25 @@ for(i in seq(from=example.t, to=bnd, by=0.01)){
 
 Recall that the P value corresponds to the area under the corresponding distribution that is as far or farther from zero than our test statstic. In the plot above, this is indicated by the shaded area of the t distribution. Both the positive and negative sides of the distribution are shared because a two-tailed test is used; we are testing the possibility that our t statistic could be either larger than zero, or less than zero.
 
+Correlation testing in R
+-----------------------------------
 
-Obtaining confidence intervals
--------------------------------
+We can perform a correlation test in R using the *cor.test()* function. Called with only the two vectors, cor.test will print out the results of a correlation test:
+
+> P values for Pearson's correlation can be calculated in R with the *cor.test()* function.
+
+```{r}
+x = c(1,2,4,5,6,9)
+y = c(1.6,3,2,9,5.5,13)
+cor.test( x, y )
+```
+
+After reminding us that a Pearson's product-moment correlation is being calculated, R reports the t statistic and the P value for that t statistic using a test with four degrees of freedom. There are four degrees of freedom because we can calculate the mean value of each vector, and so if we were given all but one of the values in x and y, we could calculate the remaining values. There are only six values to begin with, so that leaves four degrees of freedom.
+
+R then reports a 95% confidence interval for rho, and finally reports the sample estimate for rho itself (0.8783637). To understand where the confidence interval comes from, we need to learn how to transform rho into a value that is normally distributed.
+
+Obtaining confidence intervals for Pearson's product-moment correlation
+---------------------------------------------------------------------------------------------
 
 Convert correlation coefficients to Z scores
 
@@ -244,10 +264,62 @@ $\large{ Z_{score} = \frac{1.293 - 0}{0.577} = 2.240}$
 
 What percentage of a standard normal distribution lies between 2.24 and positive infinity, and between -2.24 and negative infinity?
 
+Limitations of Correlation 
+================================================================================
 
+Linear relationships only, please
+------------------------------------------------------------
 
-If method is "pearson", the test statistic is based on Pearson's product moment correlation coefficient cor(x, y) and follows a t distribution with length(x)-2 degrees of freedom if the samples follow independent normal distributions. If there are at least 4 complete pairs of observation, an asymptotic confidence interval is given based on Fisher's Z transform.
+Correlation can only detect linear relationships between variables. Pratically speaking, this means the relationship between the variables can be described by a function where the parameters are constants or multiplied by coefficients. When plotted, linear relationships will form a straight line.
 
+Examples of non-linear relationships that correlation cannot capture adequately:
 
+```{r echo=FALSE, small.mar=TRUE}
 
-Using a Z lookup table, or the *dnorm()* function in R, we find a P value of 0.065
+layout( matrix(1:4,2,2))
+plot(sin( seq(from=0, to=pi*2, by=0.001)), pch=19, cex=0.25, axes=FALSE, xlab="", ylab="")
+box()
+
+plot( 0,0, col="white", xlim=c(-1,1), ylim=c(-1,1), axes=FALSE)
+symbols(0,0,circles=c(0.6), inches=FALSE, lwd=2,  xlab="", ylab="", add=TRUE)
+box()
+
+plot( rnorm(100)+5, rnorm(100)+5, xlim=c(0, 20), ylim=c(0,20), axes=FALSE, xlab="", ylab="")
+points( rnorm(100)+5, rnorm(100)+15 )
+points( rnorm(100)+15, rnorm(100)+5 )
+points( rnorm(100)+15, rnorm(100)+15 )
+box()
+
+plot(sin( seq(from=0, to=pi, by=0.001)), pch=19, cex=0.25, axes=FALSE, xlab="", ylab="")
+box()
+
+```
+
+In some cases, correlation can capture part of the relationship between two variables, but only part of that relationship. This plot is an exponential function $\large{Y=2^X}$, so the Y and X coordinates are perfectly correlated if one knows the distribution. However, the correlation coefficient is only 0.51:
+
+```{r echo=FALSE, small.mar=TRUE, fig.width=3, fig.height=3}
+plot( 2^ seq(from=0, to=30, by=0.001), pch=19, cex=0.25, axes=FALSE, xlab="", ylab="", main="rho = 0.51")
+box()
+```
+
+Correlation is highly susceptible to outliers
+---------------------------------------------------
+
+The plot on the left was made by randomly generating 50 points from a normal distribution. Since the points were randomly generated, any correlation between them should only that expected by chance. The plot on the right was generated by adding a single point to the distribution on the left, colored in black. This pathological case shows that a single outlier point can radically change the Pearson correlation, despite not representing the distribution as a whole. Strategies for detecting and coping with this situation will be described in Module 8.
+
+```{r echo=FALSE, small.mar=TRUE, fig.height=3, fig.width=6 }
+aa = c(rnorm(10)+3, 10)
+bb = c(rnorm(10)+3, 10)
+cols=c(rep("cornflowerblue", 10), "black")
+layout(matrix(1:2,1,2))
+c10 = cor.test(aa[1:10], bb[1:10])
+c11 = cor.test(aa,bb)
+cor.10 = round( c10$estimate, 3)
+cor.11 = round( c11$estimate, 3)
+p.10 = round( c10$p.value, 3)
+p.11 = round( c11$p.value, 3)
+
+plot(aa[1:10],bb[1:10], pch=19, col=cols[1:10], xlim=c(0,10), ylim=c(0,10), las=1, main=paste("rho =", cor.10,"P=",p.10))
+plot(aa,bb, pch=19, col=cols, xlim=c(0,10), ylim=c(0,10), las=1, main=paste("rho =", cor.11,"P=",p.11))
+
+```
