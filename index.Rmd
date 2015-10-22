@@ -20,7 +20,7 @@ Module | Description
 3.2    | [Summarizing data with the mean and variance](module_03.2.html)
 4.1    | [Hypothesis testing: P values](module_04.1.html)
 4.2    | [Hypothesis testing: Probability and Multiple test correction](module_04.2.html)
-5.1    | Comparisons between two continuous variables: correlation
+5.1    | [Comparisons between two continuous variables: correlation](module_05.1.html)
 5.2    | Comparisons between two continuous variables: linear models
 6.1    | Counts and categories: The Binomial, Chi-squared and Fisher's Exact tests
 6.2    | Counts and categories: ANOVA and categorical variables
