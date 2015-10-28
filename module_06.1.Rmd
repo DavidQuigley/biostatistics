@@ -26,29 +26,32 @@ knitr::knit_hooks$set(med.mar = function(before, options, envir) {
 The Binomial distribution and Bionomial tests
 ===============================================================
 
-Sometimes experimental results take the form of observations that divide cleanly into two distinct events. The canonical example of such a process is is flipping a coin: each trial produces either a heads or a tails result. In this case the expected frequency of heads is 50% if the coin is fair. In 100 flips, we might be unsurprised to see 46 heads, or 52 heads, as these are not too far from the theoretical expected 50%. However, if we saw 17 heads in 100 flips, we would be justifably suspicious that the coin was somehow rigged to come up tails.
+Some experiments produce results that can be divided cleanly into two distinct events. The canonical example of such a process is is flipping a coin: each trial produces either a heads or a tails result. If the coin is fair and balanced, the expected frequency of heads is 50%. In 100 flips, we might be unsurprised to see 46 heads, or 52 heads, as these are not too far from the theoretical expected 50 heads. However, if we saw 17 heads in 100 flips, we would be justifably suspicious that the coin was somehow rigged to come up tails. The Binomial test allows us to quantify the probability of such an event. 
 
-Binomial events have two possible outcomes. These outcomes are frequently termed the "success" and "failure" cases. There isn't any statistical meaning to those labels: either category can be arbitrarily assigned to be the "success", regardless of whether the outcome was desirable or not. Note that the expected probability of success does not have to be 50%. The expected probability of rolling a "six" with a fair die is $\frac{1}{6}$, or 16.7%. This probability can be posed as a binomal test, where success is rolling a six, and failure is rolling one of the other five outcomes.
+Binomial events have two possible outcomes. These outcomes are frequently termed the "success" and "failure" cases. There isn't any statistical meaning to those labels: either result could arbitrarily be assigned to be the "success", regardless of whether the outcome was desirable or not. Note that the expected probability of success does not have to be 50%. The expected probability of rolling a "six" with a fair die is $\frac{1}{6}$, or 16.7%. The probability of rolling a six can be framed as a binomal test, where success is rolling a six, and failure is rolling one of the other five outcomes.
 
 
 The binomial distribution
 ------------------------------------------------------------------------
 
-The frequency of binomial outcomes has a distribution that depends on the number of trials *n* and the probability that any given trial is a success. 
+The frequency of success in a series of binomial trials has a distribution that depends on the number of trials *n* and the probability that any given trial is a success. 
 
-Note that we could, given enough time, enumerate all of the possible outcomes of a binomial trial: there is a finite number of trials (specified by *n*), each of which has one of two possible results. The distribution of possible outcomes is therefore a discrete distribution rather than a continuous distribution. Although the number of possible outcomes becomes very large very quickly, this doesn't trouble computers even when the number of trials larger than one million.
+Note that we could, given enough time, enumerate all of the possible outcomes of a binomial trial: there is a finite number of trials (specified by *n*), each of which has one of two possible results. The distribution of possible outcomes is therefore a discrete distribution rather than a continuous distribution. Although the number of possible outcomes becomes large very quickly, for pratical purposes this is unlikely to be a problem, even when the number of trials exceeds one million.
 
-Given 40 trials and *p*=0.5 (meaning 50%, an equal chance of success or failure), the binomial distribution looks like:
+Given 40 trials and *p*=0.5 (meaning a 50% chance of success on any trial), the binomial distribution looks like this:
 
 ```{r echo=FALSE}
 par(mar=c(4,4,2,1))
-x=barplot(dbinom( 1:40, 40, 0.5), col="#ff000033", las=1,
+x=barplot(dbinom( 1:40, 40, 0.5), col="#ff000033", las=1, ylim=c(0,.14),
           ylab="density", xlab="number of successes", main="binomial distribution")
 axis(1, at=c( x[1], x[10], x[20], x[30], x[40] ), labels=c(0, 10, 20, 30, 40) )
 box()
 ```
 
-If we modify p to equal 0.2 or 0.7, the distribution shifts to reflect this:
+With *p* = 0.5, there is an equal chance of larger than 20 successes or smaller than 20 successes. As the number of successes gets farther from 20, the number of paths to that event dwindles. This is the basis for deriving a statistical judgement about whether the coin is far or not: we can calculate the frequency with which we would observe 17 heads in 100 flips of a fair coin and judge accordingly the evidence against a null hypothesis of a fair coin. In the case of 17 heads in 100 flips, $P = 1.3\times10^{-11}$, strong evidence that the coin is unlikely to be fair.
+
+
+If we modify *p* to equal 0.2 or 0.7, the binomial distribution shifts:
 
 ```{r echo=FALSE}
 par(mar=c(4,4,2,1))
@@ -66,7 +69,7 @@ $\large{ {n \choose x} p^x(1-p)^{(n-x)} }$
 
 The ${n \choose x}$ component is read, "n choose x", and it accounts for the different possible orderings of the outcomes. The next section, $p^x(1-p)^{(n-x)}$, is the probability of a success *p(x)* occurring *x* times multipled by the probability of a failure (1-*p*) occurring *n-x* times. Note that there is an **explicit assumption that individual trials are independent**; if that were not the case, we could not calculate their combined probability by multiplication, which assumes independence.
 
-Binomial tests
+Generating a *P* value from Binomial tests
 ------------------------------------------------------------------------
 
 Given a binomial distribution, one can test the likelihood of a particular number of successes compared to a null hypothesis. The null hypothesis is stated when you define a value for *p*, and can take any value between 0 and 1. The probability of seeing *x* successes in *n* trials for a given probability of success *p* can be calculated exactly, producing a P value reflecting the likelihood of seeing as extreme or more extreme of a number of successes. 
@@ -75,11 +78,38 @@ Given a binomial distribution, one can test the likelihood of a particular numbe
 
 Note that to perform a two-tailed binomial test, one cannot simply double the *P* value from a single-tailed test. When *p* is not 0.5 the binomial distribution is not symmetrical. For a concrete evidence of this, look at the green plot for the distribution of *binomial(n=40, p=0.2)* above. By default, R will calculate a two-tailed test.
 
+To replicate this result in R:
+
+```{r}
+n_successes=17
+n=100
+p=0.5
+
+# one-tailed binomial
+binom.test( n_successes, n, p, alternative="less")$p.value 
+
+# sum the P values for as-extreme or more-extreme values of x
+P_onetail=0
+for( x in 0:n_successes){
+    P_onetail = P_onetail + (choose(n,x)*(p^x)*((1-p)^(n-x)))
+}
+P_onetail
+
+# two-tailed binomial
+binom.test( n_successes, n, p)$p.value 
+
+# sum the P values for the other tail
+P_othertail = 0
+for( x in (n-n_successes):n){
+    P_othertail = P_othertail + (choose(n,x)*(p^x)*((1-p)^(n-x)))
+}
+P_onetail + P_othertail
+```
 
 What if I have more than two categories?
 ------------------------------------------------------------------------
 
-We won't cover it in these lessons, but there is a more general version of the binomial test called the multinomial test.
+What if my question is, given a roll of a die, is each of the six possible outcomes equally likely? Note that in this case it could be that four of the numbers are equally likely, while two are unequally weighted. How would I detect that? We won't cover it in these lessons, but there is a more general version of the binomial test called the multinomial test. The number of calculations required begins to become excessive with this test, and one would generally prefer to use the Chi-squared or Fisher's Exact tests, which will be described in the next section.
 
 
 Chi-Squared
