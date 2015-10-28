@@ -1,0 +1,90 @@
+---
+title: "Module 6.1: Counts and categories: The Binomial, Chi-squared and Fisher's Exact tests"
+author: "David Quigley"
+date: "October 24, 2015"
+output: 
+    html_document:
+        toc: true
+        css: swiss.css
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(comment = NA)
+knitr::opts_chunk$set( prompt=TRUE ) 
+
+knitr::knit_hooks$set(small.mar = function(before, options, envir) {
+    if (before) par(mar = c(2, 2, 1, 1))  # smaller margin on top and right
+})
+
+knitr::knit_hooks$set(med.mar = function(before, options, envir) {
+    if (before) par(mar = c(4, 4, 1, 1))  # smaller margin on top and right
+})
+
+```
+*This module shows methods for evaluating counts.*
+
+The Binomial distribution and Bionomial tests
+===============================================================
+
+Sometimes experimental results take the form of observations that divide cleanly into two distinct events. The canonical example of such a process is is flipping a coin: each trial produces either a heads or a tails result. In this case the expected frequency of heads is 50% if the coin is fair. In 100 flips, we might be unsurprised to see 46 heads, or 52 heads, as these are not too far from the theoretical expected 50%. However, if we saw 17 heads in 100 flips, we would be justifably suspicious that the coin was somehow rigged to come up tails.
+
+Binomial events have two possible outcomes. These outcomes are frequently termed the "success" and "failure" cases. There isn't any statistical meaning to those labels: either category can be arbitrarily assigned to be the "success", regardless of whether the outcome was desirable or not. Note that the expected probability of success does not have to be 50%. The expected probability of rolling a "six" with a fair die is $\frac{1}{6}$, or 16.7%. This probability can be posed as a binomal test, where success is rolling a six, and failure is rolling one of the other five outcomes.
+
+
+The binomial distribution
+------------------------------------------------------------------------
+
+The frequency of binomial outcomes has a distribution that depends on the number of trials *n* and the probability that any given trial is a success. 
+
+Note that we could, given enough time, enumerate all of the possible outcomes of a binomial trial: there is a finite number of trials (specified by *n*), each of which has one of two possible results. The distribution of possible outcomes is therefore a discrete distribution rather than a continuous distribution. Although the number of possible outcomes becomes very large very quickly, this doesn't trouble computers even when the number of trials larger than one million.
+
+Given 40 trials and *p*=0.5 (meaning 50%, an equal chance of success or failure), the binomial distribution looks like:
+
+```{r echo=FALSE}
+par(mar=c(4,4,2,1))
+x=barplot(dbinom( 1:40, 40, 0.5), col="#ff000033", las=1,
+          ylab="density", xlab="number of successes", main="binomial distribution")
+axis(1, at=c( x[1], x[10], x[20], x[30], x[40] ), labels=c(0, 10, 20, 30, 40) )
+box()
+```
+
+If we modify p to equal 0.2 or 0.7, the distribution shifts to reflect this:
+
+```{r echo=FALSE}
+par(mar=c(4,4,2,1))
+x=barplot(dbinom( 1:40, 40, 0.5), ylim=c(0, 0.2), col="#ff000033", ylab="density", 
+        xlab="number of successes" )
+axis(1, at=c( x[1], x[10], x[20], x[30], x[40] ), labels=c(0, 20, 20, 30, 40) )
+barplot(dbinom( 1:40, 40, 0.2), add=TRUE, col="#00ff0033")
+barplot(dbinom( 1:40, 40, 0.7), add=TRUE, col="#0000ff33")
+legend( 35, 0.2, c("P=0.2","P=0.5", "P=0.7"), col=c("#00ff00","#ff0000", "#0000ff"), pch=19)
+```
+
+The probability of a x successful outcomes in n trials is defined by the probability of success in any individual trial and the number of different ways that one could order all of the outcomes to make at least x successes. This is written as:
+
+$\large{ {n \choose x} p^x(1-p)^{(n-x)} }$
+
+The ${n \choose x}$ component is read, "n choose x", and it accounts for the different possible orderings of the outcomes. The next section, $p^x(1-p)^{(n-x)}$, is the probability of a success *p(x)* occurring *x* times multipled by the probability of a failure (1-*p*) occurring *n-x* times. Note that there is an **explicit assumption that individual trials are independent**; if that were not the case, we could not calculate their combined probability by multiplication, which assumes independence.
+
+Binomial tests
+------------------------------------------------------------------------
+
+Given a binomial distribution, one can test the likelihood of a particular number of successes compared to a null hypothesis. The null hypothesis is stated when you define a value for *p*, and can take any value between 0 and 1. The probability of seeing *x* successes in *n* trials for a given probability of success *p* can be calculated exactly, producing a P value reflecting the likelihood of seeing as extreme or more extreme of a number of successes. 
+
+> To perform a binomial test in R, use binom.test( x, n, p )
+
+Note that to perform a two-tailed binomial test, one cannot simply double the *P* value from a single-tailed test. When *p* is not 0.5 the binomial distribution is not symmetrical. For a concrete evidence of this, look at the green plot for the distribution of *binomial(n=40, p=0.2)* above. By default, R will calculate a two-tailed test.
+
+
+What if I have more than two categories?
+------------------------------------------------------------------------
+
+We won't cover it in these lessons, but there is a more general version of the binomial test called the multinomial test.
+
+
+Chi-Squared
+=====================
+
+
+Fisher's exact test
+=====================
