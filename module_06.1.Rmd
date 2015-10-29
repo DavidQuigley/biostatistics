@@ -31,7 +31,7 @@ Some experiments produce results that can be divided cleanly into two distinct e
 Binomial events have two possible outcomes. These outcomes are frequently termed the "success" and "failure" cases. There isn't any statistical meaning to those labels: either result could arbitrarily be assigned to be the "success", regardless of whether the outcome was desirable or not. Note that the expected probability of success does not have to be 50%. The expected probability of rolling a "six" with a fair die is $\frac{1}{6}$, or 16.7%. The probability of rolling a six can be framed as a binomal test, where success is rolling a six, and failure is rolling one of the other five outcomes.
 
 
-The binomial distribution
+The Binomial distribution
 ------------------------------------------------------------------------
 
 The frequency of success in a series of binomial trials has a distribution that depends on the number of trials *n* and the probability that any given trial is a success. 
@@ -106,15 +106,178 @@ for( x in (n-n_successes):n){
 P_onetail + P_othertail
 ```
 
-What if I have more than two categories?
+What if I have more than two values in a category?
 ------------------------------------------------------------------------
 
 What if my question is, given a roll of a die, is each of the six possible outcomes equally likely? Note that in this case it could be that four of the numbers are equally likely, while two are unequally weighted. How would I detect that? We won't cover it in these lessons, but there is a more general version of the binomial test called the multinomial test. The number of calculations required begins to become excessive with this test, and one would generally prefer to use the Chi-squared or Fisher's Exact tests, which will be described in the next section.
 
 
-Chi-Squared
-=====================
+The Chi-Squared test
+===============================================================
 
+There are many cases where we would like to assess whether there is a significant difference in counts but the data cannot be assessed in a test limited to one category with two possible values. Some examples:
+
+* Is a six-sided die fair?
+    + One category, six values
+* In a survey of smokers, did more males than females die of lung cancer? 
+    + Two categories: sex, death from lung cancer
+* Are girls with high levels of circulating estrogen more likely to reach menarche before age 13? 
+    + Two categories: high/low estrogen, menarche before age 13?
+
+In the other two examples, we collected two distinct categorical values and would like to test whether the distribution of values is similar across both categories. Data from two-category cases is usually presented in a **two-by-two contingency table**:
+
+```{r warning=FALSE, echo=FALSE, results='hide'}
+library(knitr)
+```
+
+```{r echo=FALSE, warnings=FALSE, results='asis'}
+m_sm = matrix( c( 890,4070,912,3500 ), nrow=2, ncol=2 )
+sm = data.frame( male=m_sm[,1], female=m_sm[,2] )
+rownames(sm) = c("non-smoker", "smoker")
+kable( sm )
+```
+
+Pearson's Chi-squared test (chi is the Greek letter $\chi$, so this test can be called the $\chi^2 test$) can be used to test for significantly different distributions of counts when categorical data do not divide into two possible values in a single category. Like the Binomial test, to perform a Chi-squared test you specify an expected distribution of counts and then compare the expected distribution to what you actually observed. The size of the difference between observed and expected distributions is reflected in the test statistic. In Binomial tests, the expected number of successes = *p* x *n*.
+
+Discrete uniform distribution
+------------------------------------
+
+In the case of the six-sided die, the null hypothesis of a fair die implies a *uniform* distribution of counts: that there is no systematic difference in the number of counts for any one of the six numbers. The expected number of counts for a uniform discrete distribution with *n* trials is $\frac{n}{\textit{number of categories}}$; for *100* throws of a fair die with six sides that value is $\frac{100}{6} = 16.67$. We cannot actually observe 0.67 occurrences of an event, but that doesn't change the mathematics. We will have one fewer degree of freedom than the number of observations, because if we were given values for all but one of the observations plus the total *n*, we could calculate the last observation without seeing it.
+
+
+
+Calculating the chi-squared statistic: one category
+------------------------------------------------------------------------
+
+As the difference between observed and expected counts increases, so does the chi-squared statistic. The statistic therefore reflects the diference between the observed and expected number of counts, normalized by the expected value of counts. We use the square of the difference to constrain the difference to be positive:
+
+$\large{\sum_{i=1}^n\frac{(O_i-E_i)^2}{E_i}}$
+
+Note that because of the $(O_i-E_i)^2$ term, the chi-squared statistic is always positive.
+
+*Example:* we roll a die 120 times to evaluate whether it is fair and observe the following results:
+
+```{r echo=FALSE, results='asis'}
+sm = matrix(c(20,20,20,20,20,20,18,22,17,18,30,15), byrow=TRUE, ncol=6, nrow=2)
+sm = data.frame( sm )
+names(sm) = c("one", "two", "three", "four", "five", "six")
+rownames(sm) = c("expected", "observed")
+kable(sm)
+```
+
+The chi-squared statistic for these data is:
+$\chi^2 = \frac{(20-18)^2}{20} + \frac{(20-22)^2}{20} + \frac{(20-17)^2}{20} + \frac{(20-18)^2}{20} + \frac{(20-30)^2}{20} + \frac{(20-15)^2}{20}$
+
+$\chi^2 = \frac{4+4+9+4+100+25}{20}$
+
+$\chi^2 = 7.3$
+
+> To perform a chi-squared test in R, use the chisqu.test() function
+
+Calculating the chi-squared statistic: two categories
+------------------------------------------------------------------------
+
+If there are two categories, we can arrange the categories and their possible values into a contingency table as noted above. To calculate the expected value for each element of the table, make the assumption that if there were no difference in the distribution of counts across the categories, each element would take on a value proportional to the number of counts in each category. The proportion of elements in *n* observations that have value *i* is $p_i=\frac{O_i}{n}$. This is simply the number of counts in a category, without sub-dividing by the other category, divided by the total number of counts. The expected value for each element is then $N p_i p_j$
+```{r echo=FALSE, warnings=FALSE, results='asis'}
+
+sm = data.frame( male=c(m_sm[1,1],m_sm[2,1],sum(m_sm[,1]) ), 
+                 female=c(m_sm[1,2],m_sm[2,2],sum(m_sm[,2]) ), 
+                 sum=c( sum(m_sm[1,]), sum(m_sm[2,]), sum(m_sm) ) )
+rownames(sm) = c("non-smoker", "smoker", "sum")
+kable( sm )
+```
+
+Here $P_{smoker} = \frac{7570}/{9372} = 0.81$, and $P_{male} = \frac{4960}{9372} = 0.53$. 
+
+This makes the expected values of the distribution:
+```{r echo=FALSE, as.is=TRUE}
+N = sum(m_sm)
+prop_male = sum( m_sm[,1] ) / N
+prop_female = 1-prop_male
+prop_nonsmoker = sum( m_sm[1,] ) / N
+prop_smoker = 1-prop_nonsmoker
+sm_ex = data.frame( round( matrix( c( prop_male*prop_nonsmoker*N, prop_female*prop_nonsmoker*N,
+                prop_male*prop_smoker*N, prop_female*prop_smoker*N ), nrow=2, ncol=2, byrow=TRUE ), 1) )
+names(sm_ex)=c("male", "female")
+rownames(sm_ex) = c("non-smoker", "smoker")
+kable(sm_ex)
+```
+
+In the same manner as with the one-category test, the chi-squared statistic is the sum of the squared deviations of observed from expected, divided by the expected values:
+
+$\large{\chi^2 = \sum_{i=1}^{row} \sum_{j=1}^{col}\frac{ (O_{i,j} - E_{i,j})^2}{E_{i,j}}}$
+
+The two sum symbols next to each other just mean to sum in both directions. The value works out to `r sum( ( ( (sm[1:2,1:2]-sm_ex) )^2 ) / sm_ex )`
+
+The number of degrees of freedom for the test is equal to (# rows-1) * (# columns-1); for a 2x2 contingency table, this value is 1.
+
+
+Calculating a P value for the chi-squared statistic
+------------------------------------------------------------------------
+
+The shape of the chi-squared distribution varies depending on the number of degrees of freedom.
+
+```{r echo=FALSE}
+nn=length( seq(from=0,to=30, by=0.01) )
+plot(dchisq( seq(from=0,to=30, by=0.01), df=3), pch=19, ylim=c(0,0.25), xlim=c(0,nn),
+     type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, xlab="chi-squared statistic", ylab="density",
+     main="Chi-squared distributions")
+axis(2, c(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3), las=1)
+axis(1, at=(nn /6 * 0:6) , labels=seq(from=0, to=30, by=5), las=1)
+box()
+points(dchisq( seq(from=0,to=30, by=0.01), df=5), type="l", lwd=3, col="cornflowerblue" )
+points(dchisq( seq(from=0,to=30, by=0.01), df=7), type="l", lwd=3, col="orange" )
+points(dchisq( seq(from=0,to=30, by=0.01), df=9), type="l", lwd=3, col="gold" )
+legend( 2500, 0.24, c("DF=3", "DF=5", "DF=7", "DF=9"), col=c("black", "cornflowerblue", "orange", "gold"), pch=19)
+```
+
+The primary intuition to take from this plot is that for a given value of the chi-squared statistic, the larger the number of degrees of freedom (the larger the number of categories), the more frequently we would expect to see this result by chance. For a chi-squared statistic of 9:
+
+```{r echo=FALSE, results='asis'}
+dens = rep(0,4)
+dfs=c(3,5,7,9,11)
+for(i in 1:5){
+    dens[i] = 1-pchisq(9, dfs[i])
+}
+kable( data.frame( degrees_of_freedom=dfs, P=round(dens, 4) ) )
+```
+
+
+limitations and assumptions of the chi-squared test
+------------------------------------------------------
+
+The chi-squared test makes an approximation to the chi-squared distribution that is more close to exactly correct as the number of observations increases. In many cases the chi-squared test can be applied, but it bears several limitations:
+
+* Individual observations are assumed to be independent of each other
+* Individual cells must contain sufficient counts. 
+    + As a conservative rule of thumb, do not use the chi-squared test for two-variable tests if any cell contains fewer than 10 counts, or for one variable tests if any cell contains fewer than 5 counts.
+
+When the chi-squared test is inappropriate due to small sample sizes or highly unequal cell distribution, one can instead use Fisher's exact test.
 
 Fisher's exact test
 =====================
+
+Fisher's Exact test was named for its inventor Sir Ronald Fisher, a statistian who invented much of inferential statistics in the early part of the last century. Like the Binomial test, and in contrast to the chi-squared test, Fisher's exact test provides an exact P value rather than an approximation. 
+
+Fisher's exact test is almost applied to two-by-two contingency data, but there are extensions that allow the test to be applied to cases with more than two categories per variable.
+
+We will state without proof that the probability of obtaining values {a,b,c,d} in a contingency table with the form
+
+```{r echo=FALSE}
+fm = data.frame(matrix( c('a','c','b','d'), nrow=2, ncol=2))
+names(fm) = c("men","women")
+rownames(fm)=c("non-smoker", "smoker")
+kable(fm)
+```
+
+can be calculated using the Hypergeometric distribution:
+
+$\large{p = \frac{ {{a+b}\choose{a}} {{c+d}\choose{c}} } { n \choose{ a+c} } }$
+
+> Fisher's exact test can be performed in R using the fisher.test() function. 
+
+Calculating P values with Fisher's exact test
+------------------------------------------------------------------
+
+Calculating P values with Fisher's exact test is tricky because you need to identify the probability of distributions that are as extreme or more extreme than the one you observed, and this may be cumbersome or non-obvious. However, given a fixed N, you can enumerate through all possible allocations of four cells. To calculate a P value for Fisher's exact test, R reports the sum of all P values as small or smaller than the P value for the observed distribution.
+
