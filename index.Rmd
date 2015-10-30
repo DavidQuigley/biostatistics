@@ -23,7 +23,7 @@ Module | Description
 5.1    | [Comparisons between two continuous variables: correlation](module_05.1.html)
 5.2    | Comparisons between two continuous variables: linear models
 6.1    | [Counts and categories: The Binomial, Chi-squared and Fisher's Exact tests](module_06.1.html)
-6.2    | Counts and categories: ANOVA and categorical variables
+6.2    | [Counts and categories: ANOVA](module_0.6.2.html)
 7.1    | Causation and Prediction
 7.2    | Causation and Prediction: Bayesian inference
 7.3    | Causation and Prediction: prevalence, predictive value, and the ROC

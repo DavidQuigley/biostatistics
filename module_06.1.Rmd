@@ -21,24 +21,24 @@ knitr::knit_hooks$set(med.mar = function(before, options, envir) {
 })
 
 ```
-*This module shows methods for evaluating counts.*
+*This module shows methods for evaluating distributions of counts of the occurrences of categorical variables. First, it introduces the Binomial distribution, which can be used to characterize categorical variables with two possible values. It then introduces tests based on the chi-squared distribution, a method that generates approximations to the P value for categorical tests of one variable with two or more values, or two variable tests using contingency tables. Finally, Fisher's exact test, an exact method applicable to two-by-two contingency tables, is introduced.*
 
 The Binomial distribution and Bionomial tests
 ===============================================================
 
-Some experiments produce results that can be divided cleanly into two distinct events. The canonical example of such a process is is flipping a coin: each trial produces either a heads or a tails result. If the coin is fair and balanced, the expected frequency of heads is 50%. In 100 flips, we might be unsurprised to see 46 heads, or 52 heads, as these are not too far from the theoretical expected 50 heads. However, if we saw 17 heads in 100 flips, we would be justifably suspicious that the coin was somehow rigged to come up tails. The Binomial test allows us to quantify the probability of such an event. 
+Some experiments produce results that can be divided cleanly into two distinct events. A simple example of such a process is is flipping a coin: each trial produces either a heads or a tails. If the coin is fair and balanced, the expected frequency of heads is 50%. If I had the patience to flip a coin 100 times and record the results, I would be unsurprised to see 46 heads, or 52 heads, as these are not too far from the expected result of 50 heads. However, if I recorded only 17 heads in 100 flips, I would suspect that the coin was somehow rigged to come up tails. Tests that compare the observed distribution of counts against the expected distribution from some theoretical baseline allow us to quantify the probability of such an event. 
 
-Binomial events have two possible outcomes. These outcomes are frequently termed the "success" and "failure" cases. There isn't any statistical meaning to those labels: either result could arbitrarily be assigned to be the "success", regardless of whether the outcome was desirable or not. Note that the expected probability of success does not have to be 50%. The expected probability of rolling a "six" with a fair die is $\frac{1}{6}$, or 16.7%. The probability of rolling a six can be framed as a binomal test, where success is rolling a six, and failure is rolling one of the other five outcomes.
+Binomial events such as a coin flip have two possible outcomes. These outcomes are frequently termed the "success" and "failure" cases. There isn't any statistical meaning to those labels: either result could arbitrarily be assigned to be the "success", regardless of whether the outcome was desirable or not. Note that the expected probability of success does not have to be 50%. The expected probability of rolling a "six" with a fair die is $\frac{1}{6}$, or 16.7%. The probability of rolling a six can be framed as a binomal test, where success is rolling a six, and failure is rolling one of the other five outcomes. 
+
+This issue of how to frame test the harkens back to our earlier discussion of the decisions researchers make when framing an experiment measuring BMI: is it more informative to compare "six *vs.* not six", or should we test the frequency of all outcomes together? Both theoreical and practical arguments will influence your choices. 
+
+One common use for the Binomial test is when we wish to ask whether a sample population is unbalanced in according to a binary criterion such as the relative number of males *vs.* females, or pre- *vs.* post-menopausal patients. 
 
 
 The Binomial distribution
 ------------------------------------------------------------------------
 
-The frequency of success in a series of binomial trials has a distribution that depends on the number of trials *n* and the probability that any given trial is a success. 
-
-Note that we could, given enough time, enumerate all of the possible outcomes of a binomial trial: there is a finite number of trials (specified by *n*), each of which has one of two possible results. The distribution of possible outcomes is therefore a discrete distribution rather than a continuous distribution. Although the number of possible outcomes becomes large very quickly, for pratical purposes this is unlikely to be a problem, even when the number of trials exceeds one million.
-
-Given 40 trials and *p*=0.5 (meaning a 50% chance of success on any trial), the binomial distribution looks like this:
+The frequency of success in a series of *n* binomial trials has a distribution that depends on two values: *n* and the probability *p* that any given trial is a success. With *p* = 0.5, there is an equal chance of more than 20 successes or fewer than 20 successes. The most frequent result will be exactly 20 successes, which is expected; $E_{binomial}(n,p) = n \times p = 40 \times 0.5 = 20$. As an example, given a *n* of 40 trials and *p*=0.5 (meaning a 50% chance of success on any trial), the binomial distribution looks like this:
 
 ```{r echo=FALSE}
 par(mar=c(4,4,2,1))
@@ -48,8 +48,9 @@ axis(1, at=c( x[1], x[10], x[20], x[30], x[40] ), labels=c(0, 10, 20, 30, 40) )
 box()
 ```
 
-With *p* = 0.5, there is an equal chance of larger than 20 successes or smaller than 20 successes. As the number of successes gets farther from 20, the number of paths to that event dwindles. This is the basis for deriving a statistical judgement about whether the coin is far or not: we can calculate the frequency with which we would observe 17 heads in 100 flips of a fair coin and judge accordingly the evidence against a null hypothesis of a fair coin. In the case of 17 heads in 100 flips, $P = 1.3\times10^{-11}$, strong evidence that the coin is unlikely to be fair.
+Note that we can enumerate all of the possible outcomes of a binomial trial: we observe a finite number of trials, each of which has one of two possible results. The distribution of possible outcomes is therefore a discrete distribution (with steps between possible outcomes), rather than a continuous distribution like the normal distribution. Although the number of possible outcomes becomes large very quickly, for pratical purposes of computation this is rarely a problem, even when the number of trials exceeds one million.
 
+As the number of successes gets farther from 20, the number of coin flips that could produce that event dwindles, making that result less likely by sheer chance. This is the basis for deriving a statistical judgement about whether the coin is far or not: we can calculate the frequency with which we would observe 17 heads in 100 flips of a fair coin and judge accordingly the evidence against a null hypothesis of a fair coin. In the case of 17 heads in 100 flips, $P = 1.3\times10^{-11}$, strong evidence that the coin is unlikely to be fair.
 
 If we modify *p* to equal 0.2 or 0.7, the binomial distribution shifts:
 
@@ -63,22 +64,22 @@ barplot(dbinom( 1:40, 40, 0.7), add=TRUE, col="#0000ff33")
 legend( 35, 0.2, c("P=0.2","P=0.5", "P=0.7"), col=c("#00ff00","#ff0000", "#0000ff"), pch=19)
 ```
 
-The probability of a x successful outcomes in n trials is defined by the probability of success in any individual trial and the number of different ways that one could order all of the outcomes to make at least x successes. This is written as:
+The probability of some number *x* successful outcomes in *n* trials is determined by the product of the probability of success in any individual trial and the number of different ways that one could order all of the outcomes to make at least *x* successes. This is written as:
 
 $\large{ {n \choose x} p^x(1-p)^{(n-x)} }$
 
-The ${n \choose x}$ component is read, "n choose x", and it accounts for the different possible orderings of the outcomes. The next section, $p^x(1-p)^{(n-x)}$, is the probability of a success *p(x)* occurring *x* times multipled by the probability of a failure (1-*p*) occurring *n-x* times. Note that there is an **explicit assumption that individual trials are independent**; if that were not the case, we could not calculate their combined probability by multiplication, which assumes independence.
+The ${n \choose x}$ component is read, "*n* choose *x*", and it accounts for the different possible orderings of the outcomes. The second part of the equation, $p^x(1-p)^{(n-x)}$, is the probability of a success *p(x)* occurring *x* times multiplied by the probability of a failure (1-*p*) occurring *n-x* times. Note that there is an **explicit assumption that individual trials are independent**; if that were not the case, we could not calculate their combined probability by multiplication, which assumes independence.
 
 Generating a *P* value from Binomial tests
 ------------------------------------------------------------------------
 
-Given a binomial distribution, one can test the likelihood of a particular number of successes compared to a null hypothesis. The null hypothesis is stated when you define a value for *p*, and can take any value between 0 and 1. The probability of seeing *x* successes in *n* trials for a given probability of success *p* can be calculated exactly, producing a P value reflecting the likelihood of seeing as extreme or more extreme of a number of successes. 
+Using the definition of a *P* value and the formula for a particular Binomial distribution, we can calculate exactly the likelihood of any number of successes compared to a null hypothesis. To state the null hypothesis, define values for *n* and for *p*. The probability of seeing between *x* and *n* successes in *n* trials for a given probability of success *p* can be calculated exactly, producing a P value reflecting the likelihood of seeing as extreme or more extreme of a number of successes. 
 
 > To perform a binomial test in R, use binom.test( x, n, p )
 
-Note that to perform a two-tailed binomial test, one cannot simply double the *P* value from a single-tailed test. When *p* is not 0.5 the binomial distribution is not symmetrical. For a concrete evidence of this, look at the green plot for the distribution of *binomial(n=40, p=0.2)* above. By default, R will calculate a two-tailed test.
+Note that to perform a two-tailed binomial test (testing whether the observed data are either significantly larger *or* significantly smaller than the theoretial distribution, one cannot simply double the *P* value from a single-tailed test. The reason is that the binomial distribution is not symmetrical for values of *p* other than 0.5. For a concrete evidence of this, look at the green plot for the distribution of *binomial(n=40, p=0.2)* above. By default, R will calculate a two-tailed test.
 
-To replicate this result in R:
+To calculate *P* values for a binomial(100, 0.5) distribution in R:
 
 ```{r}
 n_successes=17
@@ -106,25 +107,25 @@ for( x in (n-n_successes):n){
 P_onetail + P_othertail
 ```
 
-What if I have more than two values in a category?
+What if I my variable can take more than two values?
 ------------------------------------------------------------------------
 
-What if my question is, given a roll of a die, is each of the six possible outcomes equally likely? Note that in this case it could be that four of the numbers are equally likely, while two are unequally weighted. How would I detect that? We won't cover it in these lessons, but there is a more general version of the binomial test called the multinomial test. The number of calculations required begins to become excessive with this test, and one would generally prefer to use the Chi-squared or Fisher's Exact tests, which will be described in the next section.
+Many categorical variables can take more than two values. As a simple example, given a roll of a six-sided die, is each of the six possible outcomes equally likely? If the die were weighted to produce an excess of one outcome over the other five results, the distribution would not be uniform. If I had a hypothesis about which number was rigged, I could test that number with a *p*=.167, but what if I didn't know *a priori* which number might be rigged? There is a more general version of the binomial test called the multinomial test, but we won't cover it in these lessons. The number of calculations required begins to become excessive. The preferred method for this situation would be the **Chi-squared test** or **Fisher's Exact test**, which will be described next.
 
 
 The Chi-Squared test
 ===============================================================
 
-There are many cases where we would like to assess whether there is a significant difference in counts but the data cannot be assessed in a test limited to one category with two possible values. Some examples:
+There are many cases where we would like to assess whether the observed distribution of counts is significantly different from an expected distribution, but our data take more than two values, or there is more than one variable. Some examples:
 
 * Is a six-sided die fair?
     + One category, six values
-* In a survey of smokers, did more males than females die of lung cancer? 
-    + Two categories: sex, death from lung cancer
-* Are girls with high levels of circulating estrogen more likely to reach menarche before age 13? 
-    + Two categories: high/low estrogen, menarche before age 13?
+* In a survey of 9,372 smokers, did more males than females develop lung cancer? 
+    + Two categories: sex, presence of lung cancer
+* In a survey of 16,000 girls, was ethnicity associated with early menarche? 
+    + Two categories: race, early menarche
 
-In the other two examples, we collected two distinct categorical values and would like to test whether the distribution of values is similar across both categories. Data from two-category cases is usually presented in a **two-by-two contingency table**:
+In the first example, we collected information on one categorical variable with six possible values. In the second and third examples, we collected two distinct categorical variables and would like to test whether the distribution of values for one variable was similar across both values of the other variable. Data from two-variable tests is usually presented in a **two-by-two contingency table**, with counts of one variable on the vertical axis and the other variable on the horizontal axis:
 
 ```{r warning=FALSE, echo=FALSE, results='hide'}
 library(knitr)
@@ -137,17 +138,74 @@ rownames(sm) = c("non-smoker", "smoker")
 kable( sm )
 ```
 
-Pearson's Chi-squared test (chi is the Greek letter $\chi$, so this test can be called the $\chi^2 test$) can be used to test for significantly different distributions of counts when categorical data do not divide into two possible values in a single category. Like the Binomial test, to perform a Chi-squared test you specify an expected distribution of counts and then compare the expected distribution to what you actually observed. The size of the difference between observed and expected distributions is reflected in the test statistic. In Binomial tests, the expected number of successes = *p* x *n*.
+Pearson's Chi-squared test (chi is the Greek letter $\chi$, pronounced to rhyme with "my", and this test is sometimes written as the $\chi^2$ test) can be used to test for significantly different distributions of counts when categorical data do not divide into two possible values in a single category. Like the Binomial test, to perform a Chi-squared test you specify an expected distribution of counts and then compare the expected distribution to what you actually observed. The size of the difference between observed and expected distributions is reflected in the test statistic. 
 
-Discrete uniform distribution
-------------------------------------
+Deriving the chi-squared distribution
+----------------------------------------
 
-In the case of the six-sided die, the null hypothesis of a fair die implies a *uniform* distribution of counts: that there is no systematic difference in the number of counts for any one of the six numbers. The expected number of counts for a uniform discrete distribution with *n* trials is $\frac{n}{\textit{number of categories}}$; for *100* throws of a fair die with six sides that value is $\frac{100}{6} = 16.67$. We cannot actually observe 0.67 occurrences of an event, but that doesn't change the mathematics. We will have one fewer degree of freedom than the number of observations, because if we were given values for all but one of the observations plus the total *n*, we could calculate the last observation without seeing it.
+The Binomial test provides an exact calculation of the *P* value. The chi-squared test, in contrast, provides an approximation of the *P* value. Don't be put off by that: when the assumptions of the test are met, the approximation is very useful. Like all probability density functions, the chi-squared distribution is a continuous function whose area sums to one. The chi-squared distribution is obtained by summing together the squared values of one or more standard normal distributions. The number of standard normal distributions that were summed is usually written as *k*, and it corresponds to the degrees of freedom for the chi-squared distribution.
 
+For *k* standard normal distributions *X*,
 
+$\chi^2_k = \sum_{i=1}^kX_i^2$
 
-Calculating the chi-squared statistic: one category
+The shape of the chi-squared distribution varies depending on the number of degrees of freedom.
+
+```{r echo=FALSE}
+nn=length( seq(from=0,to=30, by=0.01) )
+plot(dchisq( seq(from=0,to=30, by=0.01), df=2), pch=19, ylim=c(0,0.5), xlim=c(0,nn),
+     type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, xlab="chi-squared statistic", ylab="density",
+     main="Chi-squared distributions")
+axis(2, c(0, 0.1, 0.2, 0.3, 0.4, 0.5), las=1)
+axis(1, at=(nn /6 * 0:6) , labels=seq(from=0, to=30, by=5), las=1)
+box()
+points(dchisq( seq(from=0,to=30, by=0.01), df=4), type="l", lwd=3, col="cornflowerblue" )
+points(dchisq( seq(from=0,to=30, by=0.01), df=9), type="l", lwd=3, col="orange" )
+points(dchisq( seq(from=0,to=30, by=0.01), df=12), type="l", lwd=3, col="gold" )
+points(dchisq( seq(from=0,to=30, by=0.01), df=15), type="l", lwd=3, col="pink" )
+legend( 2500, 0.24, c("DF=2", "DF=4", "DF=9", "DF=12", "DF=15"), col=c("black", "cornflowerblue", "orange", "gold", "pink"), pch=19)
+```
+
+As the number of degrees of freedom increases, the shape of the chi-squared distribution changes and becomes a closer approximation to a normal distribution:
+
+```{r echo=FALSE}
+layout(matrix(1:3,1,3))
+nn=length( seq(from=0,to=30, by=0.01) )
+plot(dchisq( seq(from=0,to=30, by=0.01), df=10), pch=19, ylim=c(0,0.1), xlim=c(0,nn),
+     type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, xlab="chi-squared statistic", ylab="density",
+     main="Chi-squared distributions")
+axis(2, c(0, 0.05, 0.1), las=1)
+axis(1, at=(nn /6 * 0:6) , labels=seq(from=0, to=30, by=5), las=1)
+box()
+points(dnorm( seq(from=0,to=30, by=0.01), mean=8, sd=4.47), type="l", lwd=3, col="cornflowerblue" )
+legend( 1150, 0.09, c("chi-sq DF=10", "normal(8,4.47)"), col=c("black", "cornflowerblue"), pch=19)
+
+nn=length( seq(from=0,to=60, by=0.01) )
+plot(dchisq( seq(from=0,to=60, by=0.01), df=30), pch=19, ylim=c(0,0.1), xlim=c(0,nn),
+     type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, xlab="chi-squared statistic", ylab="density",
+     main="Chi-squared distributions")
+axis(2, c(0, 0.05, 0.1), las=1)
+axis(1, at=(nn / 6 * 0:6) , labels=seq(from=0, to=60, by=10), las=1)
+box()
+points(dnorm( seq(from=0,to=60, by=0.01), mean=28, sd=7.74), type="l", lwd=3, col="cornflowerblue" )
+legend( 1800, 0.09, c("chi-sq DF=30", "normal(28,7.74)"), col=c("black", "cornflowerblue"), pch=19)
+
+nn=length( seq(from=0,to=100, by=0.01) )
+plot(dchisq( seq(from=0,to=100, by=0.01), df=60), pch=19, ylim=c(0,0.1), xlim=c(0,nn),
+     type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, xlab="chi-squared statistic", ylab="density",
+     main="Chi-squared distributions")
+axis(2, c(0, 0.05, 0.1), las=1)
+axis(1, at=(nn / 10 * 0:10) , labels=seq(from=0, to=100, by=10), las=1)
+box()
+points(dnorm( seq(from=0,to=100, by=0.01), mean=58, sd=10.95445), type="l", lwd=3, col="cornflowerblue" )
+legend( 2600, 0.09, c("chi-sq DF=60", "normal(58,10.95)"), col=c("black", "cornflowerblue"), pch=19)
+
+```
+
+Calculating the chi-squared statistic: one variable
 ------------------------------------------------------------------------
+
+In the case of the six-sided die, the null hypothesis of a fair die implies a *uniform* distribution of counts: that there is no systematic difference in the number of counts for any one of the six numbers. The expected number of counts for a uniform discrete distribution with *n* trials is $\frac{n}{\textit{number of categories}}$; for *100* throws of a fair die with six sides that value is $\frac{100}{6} = 16.67$. We cannot actually observe 0.67 occurrences of an event, but that doesn't change the mathematics. It does, however, hint at a weakness of the chi-squared distribution: when the number of observations is small, the differences between observed and expected counts can become a large enough fraction of the total number of counts to affect the statistic. 
 
 As the difference between observed and expected counts increases, so does the chi-squared statistic. The statistic therefore reflects the diference between the observed and expected number of counts, normalized by the expected value of counts. We use the square of the difference to constrain the difference to be positive:
 
@@ -172,12 +230,15 @@ $\chi^2 = \frac{4+4+9+4+100+25}{20}$
 
 $\chi^2 = 7.3$
 
+We will have one fewer degree of freedom than the number of observations, because if we were given values for all but one of the observations plus the total *n*, we could calculate the last observation without seeing it.
+
 > To perform a chi-squared test in R, use the chisqu.test() function
 
-Calculating the chi-squared statistic: two categories
+Calculating the chi-squared statistic: two variables
 ------------------------------------------------------------------------
 
-If there are two categories, we can arrange the categories and their possible values into a contingency table as noted above. To calculate the expected value for each element of the table, make the assumption that if there were no difference in the distribution of counts across the categories, each element would take on a value proportional to the number of counts in each category. The proportion of elements in *n* observations that have value *i* is $p_i=\frac{O_i}{n}$. This is simply the number of counts in a category, without sub-dividing by the other category, divided by the total number of counts. The expected value for each element is then $N p_i p_j$
+If there are two variables, we can arrange the variables and their possible values into a contingency table. To calculate the expected value for each element of the table, make the assumption that if there were no difference in the distribution of counts across the categories, each element would take on a value proportional to the number of counts in each of the two variables. The proportion of elements in *n* total observations that have value *i* is $p_i=\frac{O_i}{n}$. This is simply the number of counts in a category, without sub-dividing by the other category, divided by the total number of counts. The expected value for each element is then $N p_i p_j$
+
 ```{r echo=FALSE, warnings=FALSE, results='asis'}
 
 sm = data.frame( male=c(m_sm[1,1],m_sm[2,1],sum(m_sm[,1]) ), 
@@ -187,7 +248,8 @@ rownames(sm) = c("non-smoker", "smoker", "sum")
 kable( sm )
 ```
 
-Here $P_{smoker} = \frac{7570}/{9372} = 0.81$, and $P_{male} = \frac{4960}{9372} = 0.53$. 
+There were 9,372 observations in the entire experiment. Here $P_{smoker} = \frac{4070+3500}{9372} = \frac{7570}{9372} = 0.81$, and 
+$P_{male} = \frac{4070+890}{9372} = \frac{4960}{9372} = 0.53$. 
 
 This makes the expected values of the distribution:
 ```{r echo=FALSE, as.is=TRUE}
@@ -215,7 +277,7 @@ The number of degrees of freedom for the test is equal to (# rows-1) * (# column
 Calculating a P value for the chi-squared statistic
 ------------------------------------------------------------------------
 
-The shape of the chi-squared distribution varies depending on the number of degrees of freedom.
+As noted above, the shape of the chi-squared distribution varies depending on the number of degrees of freedom. For two-by-two contingency tables this value will be 1, but many other possible values exist. For a one-variable test with five categories, there would be four degrees of freedom.
 
 ```{r echo=FALSE}
 nn=length( seq(from=0,to=30, by=0.01) )
@@ -259,7 +321,7 @@ Fisher's exact test
 
 Fisher's Exact test was named for its inventor Sir Ronald Fisher, a statistian who invented much of inferential statistics in the early part of the last century. Like the Binomial test, and in contrast to the chi-squared test, Fisher's exact test provides an exact P value rather than an approximation. 
 
-Fisher's exact test is almost applied to two-by-two contingency data, but there are extensions that allow the test to be applied to cases with more than two categories per variable.
+Fisher's exact test is almost always applied to two-by-two contingency data, but there are extensions that allow the test to be applied to cases with more than two categories per variable.
 
 We will state without proof that the probability of obtaining values {a,b,c,d} in a contingency table with the form
 
@@ -281,3 +343,11 @@ Calculating P values with Fisher's exact test
 
 Calculating P values with Fisher's exact test is tricky because you need to identify the probability of distributions that are as extreme or more extreme than the one you observed, and this may be cumbersome or non-obvious. However, given a fixed N, you can enumerate through all possible allocations of four cells. To calculate a P value for Fisher's exact test, R reports the sum of all P values as small or smaller than the P value for the observed distribution.
 
+R will warn you if you are performing a chi-squared test with low counts.
+
+```{r}
+matrix_small_counts = matrix( c(8,11,3,22), nrow=2, ncol=2 )
+matrix_small_counts
+fisher.test( matrix_small_counts )
+chisq.test( matrix_small_counts )
+```
