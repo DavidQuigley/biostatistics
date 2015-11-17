@@ -1,7 +1,7 @@
 ---
-title: "Module 6.1: Counts and categories: The Binomial, Chi-squared and Fisher's Exact tests"
+title: "Module 6.1: Comparisons between two continuous variables: correlation"
 author: "David Quigley"
-date: "October 24, 2015"
+date: "October 17, 2015"
 output: 
     html_document:
         toc: true
@@ -21,333 +21,332 @@ knitr::knit_hooks$set(med.mar = function(before, options, envir) {
 })
 
 ```
-*This module shows methods for evaluating distributions of counts of the occurrences of categorical variables. First, it introduces the Binomial distribution, which can be used to characterize categorical variables with two possible values. It then introduces tests based on the chi-squared distribution, a method that generates approximations to the P value for categorical tests of one variable with two or more values, or two variable tests using contingency tables. Finally, Fisher's exact test, an exact method applicable to two-by-two contingency tables, is introduced.*
+*This module introduces correlation as a measure of the association between two variables. It shows how correlation is derived from covariance, how to calculate a P value for a correlation, and how to derive confidence intervals for correlation. It describes the limits of correlation.*
 
-The Binomial distribution and Bionomial tests
-===============================================================
+Correlation 
+========================================================
 
-Some experiments produce results that can be divided cleanly into two distinct events. A simple example of such a process is is flipping a coin: each trial produces either a heads or a tails. If the coin is fair and balanced, the expected frequency of heads is 50%. If I had the patience to flip a coin 100 times and record the results, I would be unsurprised to see 46 heads, or 52 heads, as these are not too far from the expected result of 50 heads. However, if I recorded only 17 heads in 100 flips, I would suspect that the coin was somehow rigged to come up tails. Tests that compare the observed distribution of counts against the expected distribution from some theoretical baseline allow us to quantify the probability of such an event. 
+![xkcd](images/xkcd.png)
 
-Binomial events such as a coin flip have two possible outcomes. These outcomes are frequently termed the "success" and "failure" cases. There isn't any statistical meaning to those labels: either result could arbitrarily be assigned to be the "success", regardless of whether the outcome was desirable or not. Note that the expected probability of success does not have to be 50%. The expected probability of rolling a "six" with a fair die is $\frac{1}{6}$, or 16.7%. The probability of rolling a six can be framed as a binomal test, where success is rolling a six, and failure is rolling one of the other five outcomes. 
+*(XKCD, https://xkcd.com/552)*
 
-This issue of how to frame test the harkens back to our earlier discussion of the decisions researchers make when framing an experiment measuring BMI: is it more informative to compare "six *vs.* not six", or should we test the frequency of all outcomes together? Both theoreical and practical arguments will influence your choices. 
+The long fat mouse and the short thin mouse
+--------------------------------------------
 
-One common use for the Binomial test is when we wish to ask whether a sample population is unbalanced in according to a binary criterion such as the relative number of males *vs.* females, or pre- *vs.* post-menopausal patients. 
 
+Suppose I gave you a list of 20 numbers and told you they were the lengths of 20 mice measured from the tips of their noses to the ends of their tails, and then asked you to rank the mice in order from heaviest to lightest without seeing them or getting any other information. 
+![mouse](images/mouse.png)
 
-The Binomial distribution
-------------------------------------------------------------------------
-
-The frequency of success in a series of *n* binomial trials has a distribution that depends on two values: *n* and the probability *p* that any given trial is a success. With *p* = 0.5, there is an equal chance of more than 20 successes or fewer than 20 successes. The most frequent result will be exactly 20 successes, which is expected; $E_{binomial}(n,p) = n \times p = 40 \times 0.5 = 20$. As an example, given a *n* of 40 trials and *p*=0.5 (meaning a 50% chance of success on any trial), the binomial distribution looks like this:
-
-```{r echo=FALSE}
-par(mar=c(4,4,2,1))
-x=barplot(dbinom( 1:40, 40, 0.5), col="#ff000033", las=1, ylim=c(0,.14),
-          ylab="density", xlab="number of successes", main="binomial distribution")
-axis(1, at=c( x[1], x[10], x[20], x[30], x[40] ), labels=c(0, 10, 20, 30, 40) )
-box()
+```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=3}
+weights=c(23.31,28.43,24.51,31.14,21.60,19.90,27.91,23.10,23.38,18.27,18.02,
+          14.87,35.46,20.52,28.60,23.35,20.65,29.16,15.20,32.70)
+lengths=c(166,197,189,192,178,167,181,189,191,173,173,172,193,190,193,185,172,195,148,199)
+plot(sort( lengths ), xlab="mouse number", ylab="length (mm)", pch=19, las=1)
 ```
 
-Note that we can enumerate all of the possible outcomes of a binomial trial: we observe a finite number of trials, each of which has one of two possible results. The distribution of possible outcomes is therefore a discrete distribution (with steps between possible outcomes), rather than a continuous distribution like the normal distribution. Although the number of possible outcomes becomes large very quickly, for pratical purposes of computation this is rarely a problem, even when the number of trials exceeds one million.
+If you assumed that longer mice were heavier than shorter mice, you might guess their weights should be ranked by their lengths. If you did this, you would make some mistakes but do pretty well overall.
 
-As the number of successes gets farther from 20, the number of coin flips that could produce that event dwindles, making that result less likely by sheer chance. This is the basis for deriving a statistical judgement about whether the coin is far or not: we can calculate the frequency with which we would observe 17 heads in 100 flips of a fair coin and judge accordingly the evidence against a null hypothesis of a fair coin. In the case of 17 heads in 100 flips, $P = 1.3\times10^{-11}$, strong evidence that the coin is unlikely to be fair.
-
-If we modify *p* to equal 0.2 or 0.7, the binomial distribution shifts:
-
-```{r echo=FALSE}
-par(mar=c(4,4,2,1))
-x=barplot(dbinom( 1:40, 40, 0.5), ylim=c(0, 0.2), col="#ff000033", ylab="density", 
-        xlab="number of successes" )
-axis(1, at=c( x[1], x[10], x[20], x[30], x[40] ), labels=c(0, 20, 20, 30, 40) )
-barplot(dbinom( 1:40, 40, 0.2), add=TRUE, col="#00ff0033")
-barplot(dbinom( 1:40, 40, 0.7), add=TRUE, col="#0000ff33")
-legend( 35, 0.2, c("P=0.2","P=0.5", "P=0.7"), col=c("#00ff00","#ff0000", "#0000ff"), pch=19)
+```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=5}
+barplot( rank(weights)[ order(rank(lengths))], main="Weight rank order from lengths", las=1 )
 ```
 
-The probability of some number *x* successful outcomes in *n* trials is determined by the product of the probability of success in any individual trial and the number of different ways that one could order all of the outcomes to make at least *x* successes. This is written as:
+Looking at some actual data, from an experiment using eight-week-old mice, it is clear that the longer a mouse was at eight weeks of age, the heavier it was likely to be. However, the relationship is not perfect.
 
-$\large{ {n \choose x} p^x(1-p)^{(n-x)} }$
+```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=3}
+plot(weights, lengths, xlab="Weight (grams)", ylab="length (mm)", pch=19, las=1)
+```
 
-The ${n \choose x}$ component is read, "*n* choose *x*", and it accounts for the different possible orderings of the outcomes. The second part of the equation, $p^x(1-p)^{(n-x)}$, is the probability of a success *p(x)* occurring *x* times multiplied by the probability of a failure (1-*p*) occurring *n-x* times. Note that there is an **explicit assumption that individual trials are independent**; if that were not the case, we could not calculate their combined probability by multiplication, which assumes independence.
+The relationship between height and weight holds for humans as well, although there are many individuals who would violate our assumptions, such as very short and heavy men, or tall slim women. *Height and weight are correlated*; we could also say *there is an association between height and weight*. Correlation is a mathematical measure of the relationship between two continuous variables. Correlelation is appealingly simple, but correlation carries limitations and paradoxes that can trap the unwary. 
 
-Generating a *P* value from Binomial tests
-------------------------------------------------------------------------
 
-Using the definition of a *P* value and the formula for a particular Binomial distribution, we can calculate exactly the likelihood of any number of successes compared to a null hypothesis. To state the null hypothesis, define values for *n* and for *p*. The probability of seeing between *x* and *n* successes in *n* trials for a given probability of success *p* can be calculated exactly, producing a P value reflecting the likelihood of seeing as extreme or more extreme of a number of successes. 
+Correlation is derived from covariance
+-------------------------------------------------
 
-> To perform a binomial test in R, use binom.test( x, n, p )
+Correlation can be quantified numerically as a number called the *correlation coefficient*. To calculate this coefficient, we must first calculate a value with a very similar name: the *covariance*. Covariance measures how much two random continuous variables tend to change together. 
 
-Note that to perform a two-tailed binomial test (testing whether the observed data are either significantly larger *or* significantly smaller than the theoretial distribution, one cannot simply double the *P* value from a single-tailed test. The reason is that the binomial distribution is not symmetrical for values of *p* other than 0.5. For a concrete evidence of this, look at the green plot for the distribution of *binomial(n=40, p=0.2)* above. By default, R will calculate a two-tailed test.
+The mathematics of covariance depend on whether we are refering to the covariance of two *entire populations* of variables, or *samples* of those populations. Recall that a sample of the population is an estimate of value we would see if we could measure the entire population. In real-world analysis we obtain samples of the total population, and are therefore estimating the population covariance from what we can see in our samples.
 
-To calculate *P* values for a binomial(100, 0.5) distribution in R:
+If we are calculating on the entire population, the covariance of two variables is written as:
 
-```{r}
-n_successes=17
-n=100
-p=0.5
+$\large{\textit{cov}_{X,Y} = \sigma_{X,Y} = E[(X-E[X])(Y-E[Y])] }$
 
-# one-tailed binomial
-binom.test( n_successes, n, p, alternative="less")$p.value 
+E[X] means, "the expected value of X", and in this context it is equal to the mean value of X. We are asking, "as individual values of X get farther from the mean of X, do matching individual values of Y diverge from the mean of Y in a similar proportion?" If so, the covariance will be large, since the mean product of differences will be positive. If X and Y tend to move in opposite directions, we will be mutliplying a positive and negative number together and the covariance will tend to be negative. If differences are equally likely to be positive or negative, they will tend to cancel each other out, and the mean difference will be close to zero. 
 
-# sum the P values for as-extreme or more-extreme values of x
-P_onetail=0
-for( x in 0:n_successes){
-    P_onetail = P_onetail + (choose(n,x)*(p^x)*((1-p)^(n-x)))
+```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=3}
+aa = c(1,2,4,5,6,9)
+bb = c(1.6,3,2,9,5.5,13)
+mu.aa = mean(aa)
+mu.bb = mean(bb)
+plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main="X - E[X]")
+lines(c(mu.aa, mu.aa), c(0, 100), col="gray", lty=2)
+for(i in 1:length(aa) ){
+    lines(c(aa[i], mu.aa), c(bb[i], bb[i]), lty=1, col="gray")
 }
-P_onetail
 
-# two-tailed binomial
-binom.test( n_successes, n, p)$p.value 
-
-# sum the P values for the other tail
-P_othertail = 0
-for( x in (n-n_successes):n){
-    P_othertail = P_othertail + (choose(n,x)*(p^x)*((1-p)^(n-x)))
+plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main="Y - E[Y]")
+lines( c(0, 500), c(mu.bb, mu.bb), col="gray", lty=2)
+for(i in 1:length(bb) ){
+    lines( c(aa[i], aa[i]),  c(bb[i], mu.bb),lty=1, col="gray")
 }
-P_onetail + P_othertail
+
 ```
 
-What if I my variable can take more than two values?
-------------------------------------------------------------------------
+*distance from each point to the mean of points on the X and Y axis (drawn as a gray line)*
 
-Many categorical variables can take more than two values. As a simple example, given a roll of a six-sided die, is each of the six possible outcomes equally likely? If the die were weighted to produce an excess of one outcome over the other five results, the distribution would not be uniform. If I had a hypothesis about which number was rigged, I could test that number with a *p*=.167, but what if I didn't know *a priori* which number might be rigged? There is a more general version of the binomial test called the multinomial test, but we won't cover it in these lessons. The number of calculations required begins to become excessive. The preferred method for this situation would be the **Chi-squared test** or **Fisher's Exact test**, which will be described next.
+We usually wish to calculate the sample covariance. To calculate sample covariance, we divide the overall sum of products by N-1 rather than dividing by N. 
+
+$\large{ \sigma_{X,Y} = \frac{1}{N-1}\sum_{1}^N( (x_i-\bar{x})(y_i-\bar{y}) ) }$
 
 
-The Chi-Squared test
-===============================================================
-
-There are many cases where we would like to assess whether the observed distribution of counts is significantly different from an expected distribution, but our data take more than two values, or there is more than one variable. Some examples:
-
-* Is a six-sided die fair?
-    + One category, six values
-* In a survey of 9,372 smokers, did more males than females develop lung cancer? 
-    + Two categories: sex, presence of lung cancer
-* In a survey of 16,000 girls, was ethnicity associated with early menarche? 
-    + Two categories: race, early menarche
-
-In the first example, we collected information on one categorical variable with six possible values. In the second and third examples, we collected two distinct categorical variables and would like to test whether the distribution of values for one variable was similar across both values of the other variable. Data from two-variable tests is usually presented in a **two-by-two contingency table**, with counts of one variable on the vertical axis and the other variable on the horizontal axis:
-
-```{r warning=FALSE, echo=FALSE, results='hide'}
-library(knitr)
+```{r echo=FALSE,  med.mar=TRUE, fig.height=3, fig.width=3}
+plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("covariance = ",cov(aa,bb),sep=""))
 ```
 
-```{r echo=FALSE, warnings=FALSE, results='asis'}
-m_sm = matrix( c( 890,4070,912,3500 ), nrow=2, ncol=2 )
-sm = data.frame( male=m_sm[,1], female=m_sm[,2] )
-rownames(sm) = c("non-smoker", "smoker")
-kable( sm )
-```
-
-Pearson's Chi-squared test (chi is the Greek letter $\chi$, pronounced to rhyme with "my", and this test is sometimes written as the $\chi^2$ test) can be used to test for significantly different distributions of counts when categorical data do not divide into two possible values in a single category. Like the Binomial test, to perform a Chi-squared test you specify an expected distribution of counts and then compare the expected distribution to what you actually observed. The size of the difference between observed and expected distributions is reflected in the test statistic. 
-
-Deriving the chi-squared distribution
-----------------------------------------
-
-The Binomial test provides an exact calculation of the *P* value. The chi-squared test, in contrast, provides an approximation of the *P* value. Don't be put off by that: when the assumptions of the test are met, the approximation is very useful. Like all probability density functions, the chi-squared distribution is a continuous function whose area sums to one. The chi-squared distribution is obtained by summing together the squared values of one or more standard normal distributions. The number of standard normal distributions that were summed is usually written as *k*, and it corresponds to the degrees of freedom for the chi-squared distribution.
-
-For *k* standard normal distributions *X*,
-
-$\chi^2_k = \sum_{i=1}^kX_i^2$
-
-The shape of the chi-squared distribution varies depending on the number of degrees of freedom.
 
 ```{r echo=FALSE}
-nn=length( seq(from=0,to=30, by=0.01) )
-plot(dchisq( seq(from=0,to=30, by=0.01), df=2), pch=19, ylim=c(0,0.5), xlim=c(0,nn),
-     type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, xlab="chi-squared statistic", ylab="density",
-     main="Chi-squared distributions")
-axis(2, c(0, 0.1, 0.2, 0.3, 0.4, 0.5), las=1)
-axis(1, at=(nn /6 * 0:6) , labels=seq(from=0, to=30, by=5), las=1)
-box()
-points(dchisq( seq(from=0,to=30, by=0.01), df=4), type="l", lwd=3, col="cornflowerblue" )
-points(dchisq( seq(from=0,to=30, by=0.01), df=9), type="l", lwd=3, col="orange" )
-points(dchisq( seq(from=0,to=30, by=0.01), df=12), type="l", lwd=3, col="gold" )
-points(dchisq( seq(from=0,to=30, by=0.01), df=15), type="l", lwd=3, col="pink" )
-legend( 2500, 0.24, c("DF=2", "DF=4", "DF=9", "DF=12", "DF=15"), col=c("black", "cornflowerblue", "orange", "gold", "pink"), pch=19)
+print( data.frame( X_minus_meanX=round( aa-mu.aa, 2), 
+            Y_minus_meanY=round( bb-mu.bb, 2), 
+            product = round( (aa-mu.aa)*(bb-mu.bb), 2) ) )
+
+example.rho = sum( (aa-mu.aa)*(bb-mu.bb) ) / (length(aa)-1)
 ```
 
-As the number of degrees of freedom increases, the shape of the chi-squared distribution changes and becomes a closer approximation to a normal distribution:
+Sum of products: `r round(sum((aa-mu.aa)*(bb-mu.bb)),2)`.
+Sum of products / (N-1): `r round(sum((aa-mu.aa)*(bb-mu.bb))/( length(aa)-1),2 )`.
 
-```{r echo=FALSE}
-layout(matrix(1:3,1,3))
-nn=length( seq(from=0,to=30, by=0.01) )
-plot(dchisq( seq(from=0,to=30, by=0.01), df=10), pch=19, ylim=c(0,0.1), xlim=c(0,nn),
-     type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, xlab="chi-squared statistic", ylab="density",
-     main="Chi-squared distributions")
-axis(2, c(0, 0.05, 0.1), las=1)
-axis(1, at=(nn /6 * 0:6) , labels=seq(from=0, to=30, by=5), las=1)
-box()
-points(dnorm( seq(from=0,to=30, by=0.01), mean=8, sd=4.47), type="l", lwd=3, col="cornflowerblue" )
-legend( 1150, 0.09, c("chi-sq DF=10", "normal(8,4.47)"), col=c("black", "cornflowerblue"), pch=19)
+> The sample covariance of two vectors can be calculated in R using the cov() function.
 
-nn=length( seq(from=0,to=60, by=0.01) )
-plot(dchisq( seq(from=0,to=60, by=0.01), df=30), pch=19, ylim=c(0,0.1), xlim=c(0,nn),
-     type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, xlab="chi-squared statistic", ylab="density",
-     main="Chi-squared distributions")
-axis(2, c(0, 0.05, 0.1), las=1)
-axis(1, at=(nn / 6 * 0:6) , labels=seq(from=0, to=60, by=10), las=1)
-box()
-points(dnorm( seq(from=0,to=60, by=0.01), mean=28, sd=7.74), type="l", lwd=3, col="cornflowerblue" )
-legend( 1800, 0.09, c("chi-sq DF=30", "normal(28,7.74)"), col=c("black", "cornflowerblue"), pch=19)
-
-nn=length( seq(from=0,to=100, by=0.01) )
-plot(dchisq( seq(from=0,to=100, by=0.01), df=60), pch=19, ylim=c(0,0.1), xlim=c(0,nn),
-     type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, xlab="chi-squared statistic", ylab="density",
-     main="Chi-squared distributions")
-axis(2, c(0, 0.05, 0.1), las=1)
-axis(1, at=(nn / 10 * 0:10) , labels=seq(from=0, to=100, by=10), las=1)
-box()
-points(dnorm( seq(from=0,to=100, by=0.01), mean=58, sd=10.95445), type="l", lwd=3, col="cornflowerblue" )
-legend( 2600, 0.09, c("chi-sq DF=60", "normal(58,10.95)"), col=c("black", "cornflowerblue"), pch=19)
-
-```
-
-Calculating the chi-squared statistic: one variable
-------------------------------------------------------------------------
-
-In the case of the six-sided die, the null hypothesis of a fair die implies a *uniform* distribution of counts: that there is no systematic difference in the number of counts for any one of the six numbers. The expected number of counts for a uniform discrete distribution with *n* trials is $\frac{n}{\textit{number of categories}}$; for *100* throws of a fair die with six sides that value is $\frac{100}{6} = 16.67$. We cannot actually observe 0.67 occurrences of an event, but that doesn't change the mathematics. It does, however, hint at a weakness of the chi-squared distribution: when the number of observations is small, the differences between observed and expected counts can become a large enough fraction of the total number of counts to affect the statistic. 
-
-As the difference between observed and expected counts increases, so does the chi-squared statistic. The statistic therefore reflects the diference between the observed and expected number of counts, normalized by the expected value of counts. We use the square of the difference to constrain the difference to be positive:
-
-$\large{\sum_{i=1}^n\frac{(O_i-E_i)^2}{E_i}}$
-
-Note that because of the $(O_i-E_i)^2$ term, the chi-squared statistic is always positive.
-
-*Example:* we roll a die 120 times to evaluate whether it is fair and observe the following results:
-
-```{r echo=FALSE, results='asis'}
-sm = matrix(c(20,20,20,20,20,20,18,22,17,18,30,15), byrow=TRUE, ncol=6, nrow=2)
-sm = data.frame( sm )
-names(sm) = c("one", "two", "three", "four", "five", "six")
-rownames(sm) = c("expected", "observed")
-kable(sm)
-```
-
-The chi-squared statistic for these data is:
-$\chi^2 = \frac{(20-18)^2}{20} + \frac{(20-22)^2}{20} + \frac{(20-17)^2}{20} + \frac{(20-18)^2}{20} + \frac{(20-30)^2}{20} + \frac{(20-15)^2}{20}$
-
-$\chi^2 = \frac{4+4+9+4+100+25}{20}$
-
-$\chi^2 = 7.3$
-
-We will have one fewer degree of freedom than the number of observations, because if we were given values for all but one of the observations plus the total *n*, we could calculate the last observation without seeing it.
-
-> To perform a chi-squared test in R, use the chisqu.test() function
-
-Calculating the chi-squared statistic: two variables
-------------------------------------------------------------------------
-
-If there are two variables, we can arrange the variables and their possible values into a contingency table. To calculate the expected value for each element of the table, make the assumption that if there were no difference in the distribution of counts across the categories, each element would take on a value proportional to the number of counts in each of the two variables. The proportion of elements in *n* total observations that have value *i* is $p_i=\frac{O_i}{n}$. This is simply the number of counts in a category, without sub-dividing by the other category, divided by the total number of counts. The expected value for each element is then $N p_i p_j$
-
-```{r echo=FALSE, warnings=FALSE, results='asis'}
-
-sm = data.frame( male=c(m_sm[1,1],m_sm[2,1],sum(m_sm[,1]) ), 
-                 female=c(m_sm[1,2],m_sm[2,2],sum(m_sm[,2]) ), 
-                 sum=c( sum(m_sm[1,]), sum(m_sm[2,]), sum(m_sm) ) )
-rownames(sm) = c("non-smoker", "smoker", "sum")
-kable( sm )
-```
-
-There were 9,372 observations in the entire experiment. Here $P_{smoker} = \frac{4070+3500}{9372} = \frac{7570}{9372} = 0.81$, and 
-$P_{male} = \frac{4070+890}{9372} = \frac{4960}{9372} = 0.53$. 
-
-This makes the expected values of the distribution:
-```{r echo=FALSE, as.is=TRUE}
-N = sum(m_sm)
-prop_male = sum( m_sm[,1] ) / N
-prop_female = 1-prop_male
-prop_nonsmoker = sum( m_sm[1,] ) / N
-prop_smoker = 1-prop_nonsmoker
-sm_ex = data.frame( round( matrix( c( prop_male*prop_nonsmoker*N, prop_female*prop_nonsmoker*N,
-                prop_male*prop_smoker*N, prop_female*prop_smoker*N ), nrow=2, ncol=2, byrow=TRUE ), 1) )
-names(sm_ex)=c("male", "female")
-rownames(sm_ex) = c("non-smoker", "smoker")
-kable(sm_ex)
-```
-
-In the same manner as with the one-category test, the chi-squared statistic is the sum of the squared deviations of observed from expected, divided by the expected values:
-
-$\large{\chi^2 = \sum_{i=1}^{row} \sum_{j=1}^{col}\frac{ (O_{i,j} - E_{i,j})^2}{E_{i,j}}}$
-
-The two sum symbols next to each other just mean to sum in both directions. The value works out to `r sum( ( ( (sm[1:2,1:2]-sm_ex) )^2 ) / sm_ex )`
-
-The number of degrees of freedom for the test is equal to (# rows-1) * (# columns-1); for a 2x2 contingency table, this value is 1.
-
-
-Calculating a P value for the chi-squared statistic
-------------------------------------------------------------------------
-
-As noted above, the shape of the chi-squared distribution varies depending on the number of degrees of freedom. For two-by-two contingency tables this value will be 1, but many other possible values exist. For a one-variable test with five categories, there would be four degrees of freedom.
-
-```{r echo=FALSE}
-nn=length( seq(from=0,to=30, by=0.01) )
-plot(dchisq( seq(from=0,to=30, by=0.01), df=3), pch=19, ylim=c(0,0.25), xlim=c(0,nn),
-     type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, xlab="chi-squared statistic", ylab="density",
-     main="Chi-squared distributions")
-axis(2, c(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3), las=1)
-axis(1, at=(nn /6 * 0:6) , labels=seq(from=0, to=30, by=5), las=1)
-box()
-points(dchisq( seq(from=0,to=30, by=0.01), df=5), type="l", lwd=3, col="cornflowerblue" )
-points(dchisq( seq(from=0,to=30, by=0.01), df=7), type="l", lwd=3, col="orange" )
-points(dchisq( seq(from=0,to=30, by=0.01), df=9), type="l", lwd=3, col="gold" )
-legend( 2500, 0.24, c("DF=3", "DF=5", "DF=7", "DF=9"), col=c("black", "cornflowerblue", "orange", "gold"), pch=19)
-```
-
-The primary intuition to take from this plot is that for a given value of the chi-squared statistic, the larger the number of degrees of freedom (the larger the number of categories), the more frequently we would expect to see this result by chance. For a chi-squared statistic of 9:
-
-```{r echo=FALSE, results='asis'}
-dens = rep(0,4)
-dfs=c(3,5,7,9,11)
-for(i in 1:5){
-    dens[i] = 1-pchisq(9, dfs[i])
-}
-kable( data.frame( degrees_of_freedom=dfs, P=round(dens, 4) ) )
-```
-
-
-limitations and assumptions of the chi-squared test
-------------------------------------------------------
-
-The chi-squared test makes an approximation to the chi-squared distribution that is more close to exactly correct as the number of observations increases. In many cases the chi-squared test can be applied, but it bears several limitations:
-
-* Individual observations are assumed to be independent of each other
-* Individual cells must contain sufficient counts. 
-    + As a conservative rule of thumb, do not use the chi-squared test for two-variable tests if any cell contains fewer than 10 counts, or for one variable tests if any cell contains fewer than 5 counts.
-
-When the chi-squared test is inappropriate due to small sample sizes or highly unequal cell distribution, one can instead use Fisher's exact test.
-
-Fisher's exact test
-=====================
-
-Fisher's Exact test was named for its inventor Sir Ronald Fisher, a statistian who invented much of inferential statistics in the early part of the last century. Like the Binomial test, and in contrast to the chi-squared test, Fisher's exact test provides an exact P value rather than an approximation. 
-
-Fisher's exact test is almost always applied to two-by-two contingency data, but there are extensions that allow the test to be applied to cases with more than two categories per variable.
-
-We will state without proof that the probability of obtaining values {a,b,c,d} in a contingency table with the form
-
-```{r echo=FALSE}
-fm = data.frame(matrix( c('a','c','b','d'), nrow=2, ncol=2))
-names(fm) = c("men","women")
-rownames(fm)=c("non-smoker", "smoker")
-kable(fm)
-```
-
-can be calculated using the Hypergeometric distribution:
-
-$\large{p = \frac{ {{a+b}\choose{a}} {{c+d}\choose{c}} } { n \choose{ a+c} } }$
-
-> Fisher's exact test can be performed in R using the fisher.test() function. 
-
-Calculating P values with Fisher's exact test
+Why don't we just use the covariance?
 ------------------------------------------------------------------
 
-Calculating P values with Fisher's exact test is tricky because you need to identify the probability of distributions that are as extreme or more extreme than the one you observed, and this may be cumbersome or non-obvious. However, given a fixed N, you can enumerate through all possible allocations of four cells. To calculate a P value for Fisher's exact test, R reports the sum of all P values as small or smaller than the P value for the observed distribution.
+One disadvantage of the covariance is it is dependent on the magnitude of individual values of X and Y.
 
-R will warn you if you are performing a chi-squared test with low counts.
+```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=3}
+plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("covariance =",cov(aa,bb),sep=" "))
+plot(aa*10,bb*10,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("covariance =",cov(aa*10,bb*10),sep=" ") )
+```
+
+Note that the values on the right bear the identical relationship to each other as the values on the left, but the values on the right are all larger than those on the left by a factor of 10. **Covariance is not standardized to a consistent range** between -1 and 1; it can be infinitely high or low. This makes it hard to compare two covariance measurements.
+
+The Pearson correlation coefficient
+================================================================
+
+To obtain a consistent, standard measure of covariance we can use Pearson's correlation coefficient. Pearson's correlation, formally called Pearson's Product-Moment correlation coefficient, is sometimes written as the Greek letter ρ (rho). It is is calculated as:
+
+$\large{ \rho = \frac{\textit{ covariance(x,y)} }{\sigma_x \sigma_y} }$
+
+where $\sigma_x$ means the standard deviation of x and the covariance is as described above. The denominator (bottom) term in this equation will scale in proportion to the total amount of variation in the X and Y distributions. The denominator forces rho to be bounded between -1 and 1, inclusive; in the jargon, we say that the denominator standardizes the covariance measure. 
+
+```{r med.mar=TRUE, echo=FALSE, fig.height=2, fig.width=2}
+
+pches = c( rep(19, 10), rep(1,10))
+colors = c( rep("cornflowerblue", 10), rep("black",10))
+xs = c(1:10, 1:10)
+
+va = 1:10
+vb = 1:10+1
+par(mar = c(3, 3, 1, 1))  # smaller margin on top and right
+
+
+plot(1:20, 1:20, pch=19, col="cornflowerblue", xlab="X", ylab="Y", axes=FALSE, main="rho = 1.0", mgp=c(0.5,1,0.5) )
+box()
+
+plot(1:20, 20:1, pch=19, col="cornflowerblue", xlab="X", ylab="Y", axes=FALSE, main="rho = -1.0", mgp=c(0.5,1,0.5) )
+box()
+
+vb = rep(5,10)
+plot(1:20, rep(10,20), pch=19, col="cornflowerblue", xlab="X", ylab="Y", axes=FALSE, main="rho = 0", mgp=c(0.5,1,0.5) )
+box()
+```
+
+*correlation between two variables*
+
+Using the definition of sample covariance from above, and the definition of the sample standard deviation defined in module 3.2, the correlation coefficient is equal to:
+
+$\large{ \sigma_x = \sqrt{ \frac{ \sum_{i=1}^N(X_i-\bar{X})^2} { N-1 } }  }$
+
+$\large{\rho = \frac{ \frac{1}{N-1}\sum_{1}^N( (x_i-\bar{x})(y_i-\bar{y}) ) }{ \sqrt{ \frac{ \sum_{i=1}^N(X_i-\bar{X})^2} { N-1 } } \sqrt{ \frac{ \sum_{i=1}^N(Y_i-\bar{Y})^2} { N-1 } } } }$
+
+For the whole population, the equivalent calculation would be:
+
+$\large{\rho = \frac{ \sum_{i=1}^N(X_i - \bar{X})(Y_i - \bar{Y})  }{  \sqrt{ \sum_{i=1}^N(X_i-\bar{X})^2} \sqrt{ \sum_{i=1}^N(Y_i-\bar{Y})^2}  } }$
+
+```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=3}
+example.rho = cor.test(aa,bb)$estimate
+plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("rho =", round( example.rho, 2),sep=" "))
+plot(aa*10,bb*10,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("rho =", round( cor.test(aa*10,bb*10)$estimate, 2),sep=" ") )
+```
+
+> Pearson's correlation coefficent can be calculated in R with the *cor()* function.
 
 ```{r}
-matrix_small_counts = matrix( c(8,11,3,22), nrow=2, ncol=2 )
-matrix_small_counts
-fisher.test( matrix_small_counts )
-chisq.test( matrix_small_counts )
+x = c(1,2,4,5,6,9)
+y = c(1.6,3,2,9,5.5,13)
+cor( x, y )
 ```
+
+
+Assessing the statistical strength of correlation
+========================================================
+
+calculating a P value for Pearson's correlation
+--------------------------------------------------------
+
+We can assess the statistical strength of a correlation using the null hypothesis testing framework introduced in module 4.1. The simplest and most natural null hypothesis for correlation is that correlation equals zero. This hypothesis is a polite fiction. In any non-trivial data set, it is almost impossible for correlation to be equal to precicisely zero. However, this fiction is still very useful, because it allows for a principled answer to the question of how likely it would be to see a particular correlation value by chance.
+
+We are often interested in more than one continuous variable at a time. In some cases this is incidental: an experiment designed to measure the effect of nutritional supplements on mouse litter sizes may also capture information about the weight of each mouse. In some cases experiments are explicitly designed to measure the association between two variables
+
+Calculate a t statistic from the rho value:
+
+$\large{t = r\sqrt{\frac{n-2}{1-r^2}}}$
+
+```{r echo=FALSE}
+example.t = as.numeric( example.rho * sqrt( (length(aa)-2)/(1-example.rho^2)) )
+```
+
+In the case of our example above, with rho = `r round( example.rho, 3)`, the t statistic is `r round( example.t, 3)` with a corresponding P value of 
+`r round( 2*( 1-pt(example.t, df=4) ), 3)`
+
+```{r echo=FALSE}
+
+bnd = 5
+plot( seq(from=-bnd, to=bnd, by=0.01),  dt(seq(from=-bnd, to=bnd, by=0.01), df=length(aa)-2), 
+    xlab="t statistic", main="t distribution", pch=19, cex=0.1, ylab="" )
+for(i in seq(from=example.t, to=bnd, by=0.01)){
+    lines(c( i,i ), c(0, dt(i, df=length(aa)-2)) )
+    lines(c( -1*i,-1*i ), c(0, dt(i, df=length(aa)-2)) )
+}
+```
+
+Recall that the P value corresponds to the area under the corresponding distribution that is as far or farther from zero than our test statstic. In the plot above, this is indicated by the shaded area of the t distribution. Both the positive and negative sides of the distribution are shared because a two-tailed test is used; we are testing the possibility that our t statistic could be either larger than zero, or less than zero.
+
+Correlation testing in R
+-----------------------------------
+
+We can perform a correlation test in R using the *cor.test()* function. Called with only the two vectors, cor.test will print out the results of a correlation test:
+
+> P values for Pearson's correlation can be calculated in R with the *cor.test()* function.
+
+```{r}
+x = c(1,2,4,5,6,9)
+y = c(1.6,3,2,9,5.5,13)
+cor.test( x, y )
+```
+
+After reminding us that a Pearson's product-moment correlation is being calculated, R reports the t statistic and the P value for that t statistic using a test with four degrees of freedom. There are four degrees of freedom because we can calculate the mean value of each vector, and so if we were given all but one of the values in x and y, we could calculate the remaining values. There are only six values to begin with, so that leaves four degrees of freedom.
+
+R then reports a 95% confidence interval for rho, and finally reports the sample estimate for rho itself (0.8783637). To understand where the confidence interval comes from, we need to learn how to transform rho into a value that is normally distributed.
+
+Obtaining confidence intervals for Pearson's product-moment correlation
+---------------------------------------------------------------------------------------------
+
+Convert correlation coefficients to Z scores
+
+$\large{ z = \frac{1}{2}ln(\frac{1+r}{1-r} ) }$
+
+$\large{ se = \frac{1}{\sqrt{N-3}} }$
+
+A Z score for the difference in these two values can be calculated with: 
+
+$\large{ \textit{Z test} = \frac{Z_1 - Z_2}{ SE_{ZD} } }$
+
+Recall that the null hypothesis is that correlation equals zero. For the example shown above:
+
+$\large{ \rho = 0.88 }$
+
+$\large{ z_{H1} = \frac{1}{2}ln(\frac{1+0.88}{1-0.88} ) = }$
+
+$\large{ z_{H0} = \frac{1}{2}ln(\frac{1+0.0}{1-0.0} ) = 0}$
+
+$\large{ se = \frac{1}{\sqrt{6-3}} } = 0.577$
+
+$\large{ Z_{score} = \frac{1.293 - 0}{0.577} = 2.240}$
+
+What percentage of a standard normal distribution lies between 2.24 and positive infinity, and between -2.24 and negative infinity?
+
+Limitations of Correlation 
+================================================================================
+
+Linear relationships only, please
+------------------------------------------------------------
+
+Correlation can only detect linear relationships between variables. Pratically speaking, this means the relationship between the variables can be described by a function where the parameters are constants or multiplied by coefficients. When plotted, linear relationships will form a straight line.
+
+Examples of non-linear relationships that correlation cannot capture adequately:
+
+```{r echo=FALSE, small.mar=TRUE}
+
+layout( matrix(1:4,2,2))
+plot(sin( seq(from=0, to=pi*2, by=0.001)), pch=19, cex=0.25, axes=FALSE, xlab="", ylab="")
+box()
+
+plot( 0,0, col="white", xlim=c(-1,1), ylim=c(-1,1), axes=FALSE)
+symbols(0,0,circles=c(0.6), inches=FALSE, lwd=2,  xlab="", ylab="", add=TRUE)
+box()
+
+plot( rnorm(100)+5, rnorm(100)+5, xlim=c(0, 20), ylim=c(0,20), axes=FALSE, xlab="", ylab="")
+points( rnorm(100)+5, rnorm(100)+15 )
+points( rnorm(100)+15, rnorm(100)+5 )
+points( rnorm(100)+15, rnorm(100)+15 )
+box()
+
+plot(sin( seq(from=0, to=pi, by=0.001)), pch=19, cex=0.25, axes=FALSE, xlab="", ylab="")
+box()
+
+```
+
+In some cases, correlation can capture part of the relationship between two variables, but only part of that relationship. This plot is an exponential function $\large{Y=2^X}$, so the Y and X coordinates are perfectly correlated if one knows the distribution. However, the correlation coefficient is only 0.51:
+
+```{r echo=FALSE, small.mar=TRUE, fig.width=3, fig.height=3}
+plot( 2^ seq(from=0, to=30, by=0.001), pch=19, cex=0.25, axes=FALSE, xlab="", ylab="", main="rho = 0.51")
+box()
+```
+
+Correlation is highly susceptible to outliers
+---------------------------------------------------
+
+The plot on the left was made by randomly generating 50 points from a normal distribution. Since the points were randomly generated, any correlation between them should only that expected by chance. The plot on the right was generated by adding a single point to the distribution on the left, colored in black. This pathological case shows that a single outlier point can radically change the Pearson correlation, despite not representing the distribution as a whole. Strategies for detecting and coping with this situation will be described in Module 8.
+
+```{r echo=FALSE, small.mar=TRUE, fig.height=3, fig.width=6 }
+aa = c(rnorm(10)+3, 10)
+bb = c(rnorm(10)+3, 10)
+cols=c(rep("cornflowerblue", 10), "black")
+layout(matrix(1:2,1,2))
+c10 = cor.test(aa[1:10], bb[1:10])
+c11 = cor.test(aa,bb)
+cor.10 = round( c10$estimate, 3)
+cor.11 = round( c11$estimate, 3)
+p.10 = round( c10$p.value, 3)
+p.11 = round( c11$p.value, 3)
+
+plot(aa[1:10],bb[1:10], pch=19, col=cols[1:10], xlim=c(0,10), ylim=c(0,10), las=1, main=paste("rho =", cor.10,"P=",p.10))
+plot(aa,bb, pch=19, col=cols, xlim=c(0,10), ylim=c(0,10), las=1, main=paste("rho =", cor.11,"P=",p.11))
+
+```
+
+Very different data can produce equivalent mean, variance, and correlation values in pathological circumstances. The following demonstration, called Anscombe's quartet after statistician Francis Anscombe, shows the importance of looking at the data.
+
+```{r echo=FALSE}
+
+one_x = c(10,8,13,9,11,14,6,4,12,7,5)
+one_y = c(8.04,6.95,7.58,8.81,8.33,9.96,7.24,4.26,10.84,4.82,5.68)
+two_x = c(10,8,13,9,11,14,6,4,12,7,5)
+two_y = c(9.14,8.14,8.74,8.77,9.26,8.1,6.13,3.1,9.13,7.26,4.74)
+three_x = c(10,8,13,9,11,14,6,4,12,7,5)
+three_y = c(7.46,6.77,12.74,7.11,7.81,8.84,6.08,5.39,8.15,6.42,5.73)
+four_x = c(8,8,8,8,8,8,8,19,8,8,8)
+four_y = c(6.58,5.76,7.71,8.84,8.47,7.04,5.25,12.5,5.56,7.91,6.89)
+
+layout(matrix(1:4,2,2))
+par(mar=c(2,2,2,2))
+plot(one_x, one_y, pch=19, col="cornflowerblue", xlab="", ylab="", las=1)
+abline(lm(one_y~one_x))
+plot(two_x, two_y, pch=19, col="cornflowerblue", xlab="", ylab="", las=1)
+abline(lm(two_y~two_x))
+plot(three_x, three_y, pch=19, col="cornflowerblue", xlab="", ylab="", las=1)
+abline(lm(three_y~three_x))
+plot(four_x, four_y, pch=19, col="cornflowerblue", xlab="", ylab="", las=1)
+abline(lm(four_y~four_x))
+```
+
+These four plots all show pairs of data with the same mean (X=9, Y=7.5); the same sample variance (X=11, Y=4.122); the same same Pearson's correlation coefficient (0.816); and the same linear regression coefficients (Y = 3 + 0.5X).

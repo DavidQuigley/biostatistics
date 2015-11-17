@@ -1,0 +1,26 @@
+---
+title: 'Module 5.2: The t test: deriving P values from statistics'
+author: "David Quigley"
+date: "November 4, 2015"
+output: html_document
+---
+
+
+The t distribution and the t test
+===============================================================
+
+We frequently wish to test whether two samples of modest size are likely to have come from distinct populations. For example:
+
+* Do mice of the C57BL/6 strain run on a wheel more hours per night than FVB/N mice?
+* Patients in a clinical trial were randomized to receive drug or a placebo. Do subjects receiving the drug have a lower blood pressure than when they started?
+* Did tenured scientists whose PhD was supervised by a member of the National Academy of Science receive their first RO1 at a younger age than those who were not supervised by a NAS member?
+
+The *t* statistic is a ratio: roughly speaking, it measures the difference in means of two samples, divided by sample variance, normalized by the number of samples. Stated more formally, *t* for two samples is the difference in sample means divided by the sum of squared standard deviations, with each group's standard deviation normalized by the number of samples in that group:
+
+$\large{t = \frac{ \bar{Y_1} - \bar{Y_2}} { \sqrt{ \frac{s_1^2}{N_1} + \frac{s_2^2}{N_2} } } }$
+
+Recall that $\bar{Y_1}$ is the mean of group Y_1 and $s_1^2$ is the variance of group 1. 
+
+The null hypothesis of the *t* test is that both samples are random samples from the same population. The farther the *t* statistic is from zero, the less likely it is that the two samples came from the same original distribution. If we have exactly two groups defined by a categorical variable, then the *t* test is often appropriate. 
+
+> To perform a *t* test in R, use the t.test() function

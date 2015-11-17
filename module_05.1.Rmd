@@ -1,325 +1,108 @@
 ---
-title: "Module 5.1: Comparisons between two continuous variables: correlation"
+title: "Module 4.1: Hypothesis testing: what's a P value?"
 author: "David Quigley"
-date: "October 17, 2015"
+date: "September 25, 2015"
 output: 
     html_document:
         toc: true
         css: swiss.css
 ---
 
-```{r global_options, include=FALSE}
-knitr::opts_chunk$set(comment = NA)
-knitr::opts_chunk$set( prompt=TRUE ) 
 
-knitr::knit_hooks$set(small.mar = function(before, options, envir) {
-    if (before) par(mar = c(2, 2, 1, 1))  # smaller margin on top and right
-})
+*In this module, I will briefly introduce the history of scientific thinking about whether we can prove a hypothesis about the natural world to be correct. Popper's contention that positive proof of a hypothesis cannot be obtained, and the central role of falsifiability, will motivate the P value.*
 
-knitr::knit_hooks$set(med.mar = function(before, options, envir) {
-    if (before) par(mar = c(4, 4, 1, 1))  # smaller margin on top and right
-})
 
-```
-*This module introduces correlation as a measure of the association between two variables. It shows how correlation is derived from covariance, how to calculate a P value for a correlation, and how to derive confidence intervals for correlation. It describes the limits of correlation.*
 
-Correlation 
-========================================================
+The scientific method and proof
+=================================================
 
-![xkcd](images/xkcd.png)
+A practical reason to study the philosophy of science
+------------------------------------------------------
 
-*(XKCD, https://xkcd.com/552)*
+What does it mean to prove a biological hypothesis to be true? Is experimental research that investigating the natural world similar in a strong sense to what mathematicians do when they explore the bounds of mathematics? 
 
-The long fat mouse and the short thin mouse
---------------------------------------------
+Thinking about what it means to prove a fact, and whether it is even possible to establish a claim about the natural world to be true, is a problem that philosophers have been struggling with for centuries. That might seem rather far removed from the day to day concerns of a molecular biologist or clinical researcher, but there are good reasons to spend some time with these ideas. 
 
+The first, fundamental reason for considering this issue is that thinking carefully about what it means to prove a fact to be true, and considering that it might not be possible to do so, has deep implications for how we think about what we are doing day to day. It affects how we talk and think about study designs, and how we interpret results. 
 
-Suppose I gave you a list of 20 numbers and told you they were the lengths of 20 mice measured from the tips of their noses to the ends of their tails, and then asked you to rank the mice in order from heaviest to lightest without seeing them or getting any other information. 
-![mouse](images/mouse.png)
+The second, practical reason for thinking about proof is that grappling with this issue is the only way to understand what a *P* value is. Many experimental scientists work with *P* values and the hypothesis testing framework, and many of those scientists don’t have a clear understanding of what a *P* value actually is. They know it’s good when *P* values are low, and that they give some information about whether a result would be seen by chance. The idea behind the *P* value, and therefore behind much of a biomedical researcher’s relationship to quantitative measures of an experiment, remains somewhat counter-intuitive. It takes practice before it becomes second nature.
 
-```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=3}
-weights=c(23.31,28.43,24.51,31.14,21.60,19.90,27.91,23.10,23.38,18.27,18.02,
-          14.87,35.46,20.52,28.60,23.35,20.65,29.16,15.20,32.70)
-lengths=c(166,197,189,192,178,167,181,189,191,173,173,172,193,190,193,185,172,195,148,199)
-plot(sort( lengths ), xlab="mouse number", ylab="length (mm)", pch=19, las=1)
-```
+One formulation for the general process of the scientific method is that we make specific observations and then generalize these observations into models and even into laws. Some philosophers, such as David Hume, had a fundamental concern with this. We can think about their concern using a simple example. If we visit a lake crowded with birds day after day and only ever observe white swans, we may be tempted to make the induction that all swans are white. 
 
-If you assumed that longer mice were heavier than shorter mice, you might guess their weights should be ranked by their lengths. If you did this, you would make some mistakes but do pretty well overall.
 
-```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=5}
-barplot( rank(weights)[ order(rank(lengths))], main="Weight rank order from lengths", las=1 )
-```
+![swan](images/white_swan.png)
+![swan](images/white_swan.png)
+![swan](images/white_swan.png)
 
-Looking at some actual data, from an experiment using eight-week-old mice, it is clear that the longer a mouse was at eight weeks of age, the heavier it was likely to be. However, the relationship is not perfect.
+What, is our assurance that there is no such creature as a black swan? Unlike mathematics, where one can define axioms and create a completely consistent world from those axioms, natural phenomena are not created by our hands. Since the color of swans is determined by our experience in nature and not an internally consistent logical system derived from axioms, how could we ever formally prove a fact to be true about the world? It takes only a single black swan to invalidate the hypothesis, and there may always be a black swan hiding around the corner. 
 
-```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=3}
-plot(weights, lengths, xlab="Weight (grams)", ylab="length (mm)", pch=19, las=1)
-```
+![swan](images/white_swan.png)
+![swan](images/black_swan.png)
+![swan](images/white_swan.png)
 
-The relationship between height and weight holds for humans as well, although there are many individuals who would violate our assumptions, such as very short and heavy men, or tall slim women. *Height and weight are correlated*; we could also say *there is an association between height and weight*. Correlation is a mathematical measure of the relationship between two continuous variables. Correlelation is appealingly simple, but correlation carries limitations and paradoxes that can trap the unwary. 
+Can we prove a hypothesis to be false?
+------------------------------------------------------
 
+![Karl](images/200px-Karl_Popper.jpg)
 
-Correlation is derived from covariance
--------------------------------------------------
+Karl was a philosopher of science who grappled with this problem. One of his best-known tenets is that in order to qualify as a scientific inquiry, **"it must be possible for an empirical scientific system to be refuted by experience"** (*The Logic of Scientific Discovery*). By this formulation, a statement that cannot be proved false- a statement that is not falsifiable--  is not a scientific statement. Popper argued that we cannot prove a hypothesis about the natural world to be true in a deep, formal sense. The existence of a single black swan disproves the idea that all swans are white. This idea-- that we can prove a hypothesis to be false, but not to be true-- is important because it is a powerful formulation of what we are doing as scientists. 
 
-Correlation can be quantified numerically as a number called the *correlation coefficient*. To calculate this coefficient, we must first calculate a value with a very similar name: the *covariance*. Covariance measures how much two random continuous variables tend to change together. 
+It is also how the null hypothesis statistical testing works. One reason this is counter-intuitive is that we generally don’t think of ourselves as providing evidence that things to be false.
 
-The mathematics of covariance depend on whether we are refering to the covariance of two *entire populations* of variables, or *samples* of those populations. Recall that a sample of the population is an estimate of value we would see if we could measure the entire population. In real-world analysis we obtain samples of the total population, and are therefore estimating the population covariance from what we can see in our samples.
+As a practical example, we might hypothesize in the laboratory that treating cells in culture with olaparib, a drug that inhibits activity of the protein PARP, would selectively kill cells that cannot make the protein BRCA1. As a test, we treat those cells with olaparib and with a control that contains no PARP inhibitor. We then measure the effect on cells treated with either drug or control and make a judgement about the accuracy of our hypothesis. 
 
-If we are calculating on the entire population, the covariance of two variables is written as:
+From a statistical and formal point of view, after stating our hypothesis that the intervention of olaparib will cause an effect, we then test a different hypothesis: **that there is no such effect**. We say, “if this model were false, then I would expect treating the cells with drug to have no effect. I’ll test the hypothesis that treatment has no effect. If I see an effect, my hypothesis is not supported.” This may seem like a strange way to go about things, but it is a natural consequence of the idea that we cannot positively prove the presence of an effect. In the jargon of statistics, **the hypothesis that no effect is present is called the null hypothesis**.
 
-$\large{\textit{cov}_{X,Y} = \sigma_{X,Y} = E[(X-E[X])(Y-E[Y])] }$
+Note that strong evidence that olaparib kills BRCA1-null cells *does not disprove* the null hypothesis, in a formal sense. It does have show that it is *very unlikely to be true*.
 
-E[X] means, "the expected value of X", and in this context it is equal to the mean value of X. We are asking, "as individual values of X get farther from the mean of X, do matching individual values of Y diverge from the mean of Y in a similar proportion?" If so, the covariance will be large, since the mean product of differences will be positive. If X and Y tend to move in opposite directions, we will be mutliplying a positive and negative number together and the covariance will tend to be negative. If differences are equally likely to be positive or negative, they will tend to cancel each other out, and the mean difference will be close to zero. 
+Measurements of events that take place in the natural world are not identical, due to real biological variation and the imperfections in our instruments. The effect of our drug treatment is therefore a variable, and a very practical use of statistics is to answer the question, what is the strength of evidence against our negative or null hypothesis? The *P* value is one way to answer that question.
 
-```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=3}
-aa = c(1,2,4,5,6,9)
-bb = c(1.6,3,2,9,5.5,13)
-mu.aa = mean(aa)
-mu.bb = mean(bb)
-plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main="X - E[X]")
-lines(c(mu.aa, mu.aa), c(0, 100), col="gray", lty=2)
-for(i in 1:length(aa) ){
-    lines(c(aa[i], mu.aa), c(bb[i], bb[i]), lty=1, col="gray")
-}
 
-plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main="Y - E[Y]")
-lines( c(0, 500), c(mu.bb, mu.bb), col="gray", lty=2)
-for(i in 1:length(bb) ){
-    lines( c(aa[i], aa[i]),  c(bb[i], mu.bb),lty=1, col="gray")
-}
 
-```
+The P value
+==================
 
-*distance from each point to the mean of points on the X and Y axis (drawn as a gray line)*
+The P value is defined as follows: P is **the probability of observing an effect as large or larger than observed, if the null hypothesis were true**. We can break this definition into several pieces and understand them one by one.
 
-We usually wish to calculate the sample covariance. To calculate sample covariance, we divide the overall sum of products by N-1 rather than dividing by N. 
+* **The probability of observing...**
+    + P is a probability. I will briefly describe the mechanics of probability, because along with its informal meaning probability has a specific formal meaning and we can do arithmetic with probabilities.
 
-$\large{ \sigma_{X,Y} = \frac{1}{N-1}\sum_{1}^N( (x_i-\bar{x})(y_i-\bar{y}) ) }$
+* **...an effect as large or larger than observed...**
+    + P depends on both effect size and sample size.
 
+* **if the null hypothesis were true?**
+    + P tests the assumption that the null hypothesis is true. It does not test the assumption that the alternate hypothesis is true. This goes back to Popper and the black swan problem.
 
-```{r echo=FALSE,  med.mar=TRUE, fig.height=3, fig.width=3}
-plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("covariance = ",cov(aa,bb),sep=""))
-```
+In testing properties of the natural world we often measure something with a continuous effect size: patient lifespan, the deviation from expected frequency of a trait among fruit flies, the growth rate of a cell. Our experimental results must therefore be tested using a model that produces a statistic that reflects the difference in this effect size and the consistency of the difference. We then need a way to ask, what is “the probability of observing an effect as large or larger than observed if the null hypothesis were true?” This is, not coincidentally, the definition of a P value. 
 
 
-```{r echo=FALSE}
-print( data.frame( X_minus_meanX=round( aa-mu.aa, 2), 
-            Y_minus_meanY=round( bb-mu.bb, 2), 
-            product = round( (aa-mu.aa)*(bb-mu.bb), 2) ) )
+Where did P < 0.05 come from?
+================================================
 
-example.rho = sum( (aa-mu.aa)*(bb-mu.bb) ) / (length(aa)-1)
-```
+Now that we have a way to quantify the likelihood of an event, we can use that tool to reason about the outcome of scientific experiments. One of the first people to do this was Sir Ronald Fisher, who invented much of modern statistics. Much of Fisher’s work was developed to evaluate agricultural experiments. A typical experiment might ask whether using a new fertilizer resulted in larger harvests of wheat. It would take a whole season to learn the result of a single trial, providing a strong incentive to design efficient trials. Fisher developed the P value as a tool for evaluating the strength of evidence against the null hypothesis; that is, the hypothesis that an intervention had no effect. Quoting one of his early writings gives a clue to a question that many people ask: what is so special about P < 0.05? 
 
-Sum of products: `r round(sum((aa-mu.aa)*(bb-mu.bb)),2)`.
-Sum of products / (N-1): `r round(sum((aa-mu.aa)*(bb-mu.bb))/( length(aa)-1),2 )`.
+>“If one in twenty does not seem high enough odds, we may, if we prefer it, draw the line at one in fifty (the 2 per cent point) or one in a hundred (the 1 per cent point). Personally, the writer prefers to set a low standard of significance at the 5 percent point... A scientific fact should be regarded as experimentally established only if a properly designed experiment rarely fails to give this level of significance.” 
+(*Statistical Methods for Research Workers*)
 
-> The sample covariance of two vectors can be calculated in R using the cov() function.
+So this is the essential origin of P < 0.05. There is no deep statistical theory that judges this level of statistical significance to be particularly important. Fisher’s argument was that low P values, in repeated experiments, were interesting and unlikely to be seen in the absence of a real effect. There are several points to make here. First, that using Fisher’s method, a P value is a tool used for *post hoc* interpretation of the results of an experiment. This interpretation was continuous, with no cut-off value determining a decision point. The P value here is used for inference, not for a decision procedure. A P value of 0.048 would be interpreted as nearly indistinguishable from a P value of 0.052.
 
-Why don't we just use the covariance?
-------------------------------------------------------------------
 
-One disadvantage of the covariance is it is dependent on the magnitude of individual values of X and Y.
 
-```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=3}
-plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("covariance =",cov(aa,bb),sep=" "))
-plot(aa*10,bb*10,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("covariance =",cov(aa*10,bb*10),sep=" ") )
-```
 
-Note that the values on the right bear the identical relationship to each other as the values on the left, but the values on the right are all larger than those on the left by a factor of 10. **Covariance is not standardized to a consistent range** between -1 and 1; it can be infinitely high or low. This makes it hard to compare two covariance measurements.
+Making decisions with P values: hypothesis testing
+===============================================================
 
-The Pearson correlation coefficient
-================================================================
+A subsequent use of P values was popularized by Neyman and Pearson, who developed a hypothesis testing framework. This framework, which was so widely adopted that many people think of it as the only way to do statistics, uses P values to make a decision. Here a particular P value is set before the experiment is performed. This P value, which has the technical name of alpha, is set as a cut-off. The most familiar alpha level is 0.05, but any value could in principle be used. Deciding on an alpha level for decision-making has several useful implications. The first, most obvious one, is that there is clarity about what to do with the results of a statistical interpretation. This is particularly important in very large, expensive experiments such as clinical trials, where the parties performing the experiment may have a vested financial interest in the results. In this framework, given an alpha level of 0.05, a result where P = 0.048 has very different implications from P = 0.052.
 
-To obtain a consistent, standard measure of covariance we can use Pearson's correlation coefficient. Pearson's correlation, formally called Pearson's Product-Moment correlation coefficient, is sometimes written as the Greek letter ρ (rho). It is is calculated as:
+Another important implication is that it is possible to plan about how frequently one is willing to make two distinct types of mistakes. The first mistake is to reject the hypothesis of no effect, that is the null hypothesis, when in fact the truth of the matter is the intervention had no effect. This error, technically referred to as a Type One error by Neyman and Pearson, can be though of as, “I shouldn’t have published that result”. The second sort of error comes from incorrectly failing to reject the null hypothesis; that is, to miss a real effect.  This error is technically referred to as a Type Two error, and can be though of as, “I missed the result and could have published it.” 
 
-$\large{ \rho = \frac{\textit{ covariance(x,y)} }{\sigma_x \sigma_y} }$
+There is a trade-off between the likelihood of making a type one and type two error; with greater statistical stringency we reduce the chances of type one and increase the chances of type two. The type two error is quantified by statistical power, which has the technical name of beta. Like the alpha, the beta is also a percentage. It represents the percentage of the time one will correctly reject the null hypothesis of no effect. Given a statistical model, alpha and beta levels, and an expected effect size, one can plan how many individual subjects to include in the study. A common formulation is to ask, “how many replicate samples must I include in my study to have an 80% power to detect an effect of given size, rejecting the null hypothesis at a 5% alpha level?” 
 
-where $\sigma_x$ means the standard deviation of x and the covariance is as described above. The denominator (bottom) term in this equation will scale in proportion to the total amount of variation in the X and Y distributions. The denominator forces rho to be bounded between -1 and 1, inclusive; in the jargon, we say that the denominator standardizes the covariance measure. 
+Critiques of the P value
+===============================================================
 
-```{r med.mar=TRUE, echo=FALSE, fig.height=2, fig.width=2}
+Although the use of a particular P value cut-off has been justifiably criticized as arbitrary, the ability to make power calculations, and to interpret positive and negative results in light of the power available to perform a test, is extremely valuable. 
 
-pches = c( rep(19, 10), rep(1,10))
-colors = c( rep("cornflowerblue", 10), rep("black",10))
-xs = c(1:10, 1:10)
+Another critique of the P value cannot be as easily answered, and that is that P values are not the same as effect sizes. We are generally interested in the size of an effect, whether that effect measures the result of an intervention or the association between two variables. P values are a function of both effect size and sample size. By increasing the sample size, one can drive the P value arbitrarily low, even when the effect size is too small to be meaningful. It is likewise the case that even in the presence of a truly strong effect, very small sample sizes will result in large P values. 
 
-va = 1:10
-vb = 1:10+1
-par(mar = c(3, 3, 1, 1))  # smaller margin on top and right
 
-
-plot(1:20, 1:20, pch=19, col="cornflowerblue", xlab="X", ylab="Y", axes=FALSE, main="rho = 1.0", mgp=c(0.5,1,0.5) )
-box()
-
-plot(1:20, 20:1, pch=19, col="cornflowerblue", xlab="X", ylab="Y", axes=FALSE, main="rho = -1.0", mgp=c(0.5,1,0.5) )
-box()
-
-vb = rep(5,10)
-plot(1:20, rep(10,20), pch=19, col="cornflowerblue", xlab="X", ylab="Y", axes=FALSE, main="rho = 0", mgp=c(0.5,1,0.5) )
-box()
-```
-
-*correlation between two variables*
-
-Using the definition of sample covariance from above, and the definition of the sample standard deviation defined in module 3.2, the correlation coefficient is equal to:
-
-$\large{ \sigma_x = \sqrt{ \frac{ \sum_{i=1}^N(X_i-\bar{X})^2} { N-1 } }  }$
-
-$\large{\rho = \frac{ \frac{1}{N-1}\sum_{1}^N( (x_i-\bar{x})(y_i-\bar{y}) ) }{ \sqrt{ \frac{ \sum_{i=1}^N(X_i-\bar{X})^2} { N-1 } } \sqrt{ \frac{ \sum_{i=1}^N(Y_i-\bar{Y})^2} { N-1 } } } }$
-
-For the whole population, the equivalent calculation would be:
-
-$\large{\rho = \frac{ \sum_{i=1}^N(X_i - \bar{X})(Y_i - \bar{Y})  }{  \sqrt{ \sum_{i=1}^N(X_i-\bar{X})^2} \sqrt{ \sum_{i=1}^N(Y_i-\bar{Y})^2}  } }$
-
-```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=3}
-example.rho = cor.test(aa,bb)$estimate
-plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("rho =", round( example.rho, 2),sep=" "))
-plot(aa*10,bb*10,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("rho =", round( cor.test(aa*10,bb*10)$estimate, 2),sep=" ") )
-```
-
-> Pearson's correlation coefficent can be calculated in R with the *cor()* function.
-
-```{r}
-x = c(1,2,4,5,6,9)
-y = c(1.6,3,2,9,5.5,13)
-cor( x, y )
-```
-
-
-Assessing the statistical strength of correlation
-========================================================
-
-calculating a P value for Pearson's correlation
---------------------------------------------------------
-
-We can assess the statistical strength of a correlation using the null hypothesis testing framework introduced in module 4.1. The simplest and most natural null hypothesis for correlation is that correlation equals zero. This hypothesis is a polite fiction. In any non-trivial data set, it is almost impossible for correlation to be equal to precicisely zero. However, this fiction is still very useful, because it allows for a principled answer to the question of how likely it would be to see a particular correlation value by chance.
-
-We are often interested in more than one continuous variable at a time. In some cases this is incidental: an experiment designed to measure the effect of nutritional supplements on mouse litter sizes may also capture information about the weight of each mouse. In some cases experiments are explicitly designed to measure the association between two variables
-
-Calculate a t statistic from the rho value:
-
-$\large{t = r\sqrt{\frac{n-2}{1-r^2}}}$
-
-```{r echo=FALSE}
-example.t = as.numeric( example.rho * sqrt( (length(aa)-2)/(1-example.rho^2)) )
-```
-
-In the case of our example above, with rho = `r round( example.rho, 3)`, the t statistic is `r round( example.t, 3)` with a corresponding P value of 
-`r round( 2*( 1-pt(example.t, df=4) ), 3)`
-
-```{r echo=FALSE}
-
-bnd = 5
-plot( seq(from=-bnd, to=bnd, by=0.01),  dt(seq(from=-bnd, to=bnd, by=0.01), df=length(aa)-2), 
-    xlab="t statistic", main="t distribution", pch=19, cex=0.1, ylab="" )
-for(i in seq(from=example.t, to=bnd, by=0.01)){
-    lines(c( i,i ), c(0, dt(i, df=length(aa)-2)) )
-    lines(c( -1*i,-1*i ), c(0, dt(i, df=length(aa)-2)) )
-}
-```
-
-Recall that the P value corresponds to the area under the corresponding distribution that is as far or farther from zero than our test statstic. In the plot above, this is indicated by the shaded area of the t distribution. Both the positive and negative sides of the distribution are shared because a two-tailed test is used; we are testing the possibility that our t statistic could be either larger than zero, or less than zero.
-
-Correlation testing in R
------------------------------------
-
-We can perform a correlation test in R using the *cor.test()* function. Called with only the two vectors, cor.test will print out the results of a correlation test:
-
-> P values for Pearson's correlation can be calculated in R with the *cor.test()* function.
-
-```{r}
-x = c(1,2,4,5,6,9)
-y = c(1.6,3,2,9,5.5,13)
-cor.test( x, y )
-```
-
-After reminding us that a Pearson's product-moment correlation is being calculated, R reports the t statistic and the P value for that t statistic using a test with four degrees of freedom. There are four degrees of freedom because we can calculate the mean value of each vector, and so if we were given all but one of the values in x and y, we could calculate the remaining values. There are only six values to begin with, so that leaves four degrees of freedom.
-
-R then reports a 95% confidence interval for rho, and finally reports the sample estimate for rho itself (0.8783637). To understand where the confidence interval comes from, we need to learn how to transform rho into a value that is normally distributed.
-
-Obtaining confidence intervals for Pearson's product-moment correlation
----------------------------------------------------------------------------------------------
-
-Convert correlation coefficients to Z scores
-
-$\large{ z = \frac{1}{2}ln(\frac{1+r}{1-r} ) }$
-
-$\large{ se = \frac{1}{\sqrt{N-3}} }$
-
-A Z score for the difference in these two values can be calculated with: 
-
-$\large{ \textit{Z test} = \frac{Z_1 - Z_2}{ SE_{ZD} } }$
-
-Recall that the null hypothesis is that correlation equals zero. For the example shown above:
-
-$\large{ \rho = 0.88 }$
-
-$\large{ z_{H1} = \frac{1}{2}ln(\frac{1+0.88}{1-0.88} ) = }$
-
-$\large{ z_{H0} = \frac{1}{2}ln(\frac{1+0.0}{1-0.0} ) = 0}$
-
-$\large{ se = \frac{1}{\sqrt{6-3}} } = 0.577$
-
-$\large{ Z_{score} = \frac{1.293 - 0}{0.577} = 2.240}$
-
-What percentage of a standard normal distribution lies between 2.24 and positive infinity, and between -2.24 and negative infinity?
-
-Limitations of Correlation 
-================================================================================
-
-Linear relationships only, please
-------------------------------------------------------------
-
-Correlation can only detect linear relationships between variables. Pratically speaking, this means the relationship between the variables can be described by a function where the parameters are constants or multiplied by coefficients. When plotted, linear relationships will form a straight line.
-
-Examples of non-linear relationships that correlation cannot capture adequately:
-
-```{r echo=FALSE, small.mar=TRUE}
-
-layout( matrix(1:4,2,2))
-plot(sin( seq(from=0, to=pi*2, by=0.001)), pch=19, cex=0.25, axes=FALSE, xlab="", ylab="")
-box()
-
-plot( 0,0, col="white", xlim=c(-1,1), ylim=c(-1,1), axes=FALSE)
-symbols(0,0,circles=c(0.6), inches=FALSE, lwd=2,  xlab="", ylab="", add=TRUE)
-box()
-
-plot( rnorm(100)+5, rnorm(100)+5, xlim=c(0, 20), ylim=c(0,20), axes=FALSE, xlab="", ylab="")
-points( rnorm(100)+5, rnorm(100)+15 )
-points( rnorm(100)+15, rnorm(100)+5 )
-points( rnorm(100)+15, rnorm(100)+15 )
-box()
-
-plot(sin( seq(from=0, to=pi, by=0.001)), pch=19, cex=0.25, axes=FALSE, xlab="", ylab="")
-box()
-
-```
-
-In some cases, correlation can capture part of the relationship between two variables, but only part of that relationship. This plot is an exponential function $\large{Y=2^X}$, so the Y and X coordinates are perfectly correlated if one knows the distribution. However, the correlation coefficient is only 0.51:
-
-```{r echo=FALSE, small.mar=TRUE, fig.width=3, fig.height=3}
-plot( 2^ seq(from=0, to=30, by=0.001), pch=19, cex=0.25, axes=FALSE, xlab="", ylab="", main="rho = 0.51")
-box()
-```
-
-Correlation is highly susceptible to outliers
----------------------------------------------------
-
-The plot on the left was made by randomly generating 50 points from a normal distribution. Since the points were randomly generated, any correlation between them should only that expected by chance. The plot on the right was generated by adding a single point to the distribution on the left, colored in black. This pathological case shows that a single outlier point can radically change the Pearson correlation, despite not representing the distribution as a whole. Strategies for detecting and coping with this situation will be described in Module 8.
-
-```{r echo=FALSE, small.mar=TRUE, fig.height=3, fig.width=6 }
-aa = c(rnorm(10)+3, 10)
-bb = c(rnorm(10)+3, 10)
-cols=c(rep("cornflowerblue", 10), "black")
-layout(matrix(1:2,1,2))
-c10 = cor.test(aa[1:10], bb[1:10])
-c11 = cor.test(aa,bb)
-cor.10 = round( c10$estimate, 3)
-cor.11 = round( c11$estimate, 3)
-p.10 = round( c10$p.value, 3)
-p.11 = round( c11$p.value, 3)
-
-plot(aa[1:10],bb[1:10], pch=19, col=cols[1:10], xlim=c(0,10), ylim=c(0,10), las=1, main=paste("rho =", cor.10,"P=",p.10))
-plot(aa,bb, pch=19, col=cols, xlim=c(0,10), ylim=c(0,10), las=1, main=paste("rho =", cor.11,"P=",p.11))
-
-```

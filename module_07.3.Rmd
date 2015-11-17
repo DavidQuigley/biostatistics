@@ -1,0 +1,255 @@
+---
+title: "Module 7.3: Counts and Categories: ANOVA"
+author: "David Quigley"
+date: "October 28, 2015"
+output: 
+    html_document:
+        toc: true
+        css: swiss.css
+---
+
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(comment = NA)
+knitr::opts_chunk$set( prompt=TRUE ) 
+
+knitr::knit_hooks$set(small.mar = function(before, options, envir) {
+    if (before) par(mar = c(2, 2, 1, 1))  # smaller margin on top and right
+})
+knitr::knit_hooks$set(left.mar = function(before, options, envir) {
+    if (before) par(mar = c(2, 4, 1, 1))  # smaller margin on top and right
+})
+knitr::knit_hooks$set(med.mar = function(before, options, envir) {
+    if (before) par(mar = c(4, 4, 1, 1))  # smaller margin on top and right
+})
+knitr::knit_hooks$set(bottom.mar = function(before, options, envir) {
+    if (before) par(mar = c(3, 2, 1, 1))  # smaller margin on top and right
+})
+```
+
+**This module defines ANOVA, showing how it is a more general form of the t test which we have already described.**
+
+ANOVA: a more general t test
+======================================================================
+
+How do I do a t test when my variable has three categories?
+------------------------------------------------------------------------------------------------------------
+
+The simplest way to introduce the ANOVA test is to remember the mechanism and limitations of a *t* test. The *t* test measures the difference in means of two samples, when accounting for the variance of each individual sample. Stated more formally, we are testing the extent to which the variability that comes from the category difference exceeds the variability within the two categories. 
+
+You may recall the *t* statistic is:
+
+$\large{t = \frac{ \bar{Y_1} - \bar{Y_2}} { \sqrt{ \frac{s_1^2}{N_1} + \frac{s_2^2}{N_2} } } }$
+
+The null hypothesis of the *t* test is that both samples are random samples from the same population. The farther the *t* statistic is from zero, the less likely it is that the two samples came from the same original distribution. If we have exactly two groups defined by a categorical variable, then the *t* test is often appropriate. However, there are many more complicated situations where the *t* test may not be the best choice:
+
+* Our observations are divided into more than two categories
+    + The count of CD8+ T cells in four different types of breast cancer: four categories.
+* Out observations are divided by more than one variable
+    + The count of CD8+ T cells in four different types of breast cancer, further subdivided by whether the tumors bear mutation in the *TP53* gene: eight categories, divided into a two-by-four grid.
+* We are interested in whether two or more variables show evidence for an interaction: that is, an effect that is non-additive when both variables take a particular value.
+    + If women tend to live longer than men, and people who live at high altitude tend to live longer than people at lower altitudes, do women who live at high altitude live disproportionately longer lives than you would expect from the individual benefits of being a woman and living at high altitudes?
+
+Analysis of Variance tests
+-------------------------------------------------
+
+One approach to the problem of more than two pairwise comparisons would be to perform a *t* test for each possible comparison. Recalling the material from Module 4.2 on multiple comparisons, it is clear that a mechanism that requires many tests would not be as statistically powerful approach that could test all of the combinations at the same time in a single test. The ANOVA, or Analysis of Variance test, is a family of tests that allow one to answer these question directly.
+
+The simplest form of the ANOVA is identical to a *t* test: a real-valued variable split into two groups, such as "treated patients" *vs.* "untreated patients". In this formulation, the categories themselves are fixed ahead of time, and the variance is derived from the observed values of the variable in each group. Other more complex designs will be described briefly later. Recall that statisticians call a categorical variable a factor, so an ANOVA test with one categorical variable is a "single factor ANOVA" or a "one-way ANOVA".
+
+If we have two groups of observations, we can refer to a particular observation $x_{i,j}$, meaning observation number *j* in group *i*.
+
+```{r echo=FALSE, fig.width=4, fig.height=4, small.mar=TRUE}
+y1=c(5, 6, 7, 4, 5.1, 5.5, 4.5, 6.2, 8, 6.4 )
+y2=c(9, 9.2, 9.8, 10.3, 8, 6.9, 12, 11.2, 14, 7.9)
+pches = c( rep(19, 10), rep(2,10))
+plot( c(rep(1, 10), rep(2,10)), c(y1, y2), pch=pches, axes=FALSE, ylab="", xlab="", xlim=c(0.5, 2.5), ylim=c(0,14))
+axis(2, 4:14, las=1, cex.axis=1)
+text(1, 3, "group 1", font=2)
+text(2, 3, "group 2", font=2)
+```
+
+From where does the variation arise in this set of observations? It can be shown that the sum of all variation in the data can be partitioned into two pieces: 
+
+1. the differences between the mean of each group, written as written as $\bar{X_1}$ and $\bar{X_2}$ respectively, and the mean value of all observations together (called the *grand mean*), written as $\bar{X}$
+2. The differences between individual members of each group and that group's mean value
+
+If far more of the total variation is *between* groups rather than *within* groups, that suggests that the two groups came from distinct populations. ANOVA quantifies this ratio and allows for hypothesis testing to ask whether we would expect to see a given level of difference by random chance. 
+
+```{r echo=FALSE, fig.width=4, fig.height=4, small.mar=TRUE}
+library(grDevices)
+pches = c( rep(19, 10), rep(2,10))
+plot( c(rep(1, 10), rep(2,10)), c(y1, y2), pch=pches, axes=FALSE, ylab="", xlab="", xlim=c(0.5, 2.75), ylim=c(0,14))
+axis(2, 4:14, las=1, cex.axis=1)
+text(1, 3,  expression(x[1]) )
+text(2, 3, expression(x[2]) )
+lines( c(1.2, 1.2), c( min(y1), max(y1) ), lwd=3, col="cornflowerblue")
+lines( c(1.15, 1.25), c( mean(y1), mean(y1) ), lwd=3, col="cornflowerblue")
+text(1.35, mean(y1), expression(bar(X[1] )), font=2 )
+lines( c(2.2, 2.2), c( min(y2), max(y2) ), lwd=3, col="cornflowerblue")
+lines( c(2.15, 2.25), c( mean(y2), mean(y2) ), lwd=3, col="cornflowerblue")
+text(2.35, mean(y2), expression(bar(X[2])), font=2 )
+
+grand_mean=mean(c(y1,y2))
+lines( c(2.6, 2.6), c( min(y1), max(y2) ), lwd=3, col="cornflowerblue")
+lines( c(2.55, 2.65), c( grand_mean, grand_mean ), lwd=3, col="cornflowerblue")
+text(2.7, grand_mean, expression(bar(X)), font=2 )
+```
+
+The following text is adapted from Peter Dalgaard's excellent *Introductory Statistics with R*:
+
+We quantify the variance with the sum of squared differences (SSD) between the individual values and the group mean:
+
+$SSD_{within} = \sum_i\sum_j( x_{ij}-\bar{x}_i)^2$, where $\bar(x)_i$ is the mean of group *i*. 
+
+The variation between groups is: 
+
+$SSD_{between} = \sum_i\sum_j( \bar{x}_i - \bar{x})^2$, where $\bar{x}$ is the grand mean.
+
+To account for the sample size and number of groups, we normalize the differences by the number of groups and total number of observations, respectively:
+
+$MS_{within} = \frac{SSD_{within}}{N - k}$
+
+$MS_{between} = \frac{SSD_{between}}{k-1}$
+
+These two values represent the variance within groups and between groups; if there is a true separation between the samples, then the value of $MS_between$ will be relatively large compared to $MS_within$. The ANOVA procedure is therefore a comparison of two measures of variance. This explains why a procedure that seemingly compares the *mean* value of two or more groups is called, "Analysis of *Variance*".
+
+The ANOVA statistic is a ratio called *F*:
+
+$\large{F = \frac{MS_{ between }}{ MS_{within} }}$
+
+As the difference in means $MS_{between}$ increases, so does the F statistic:
+
+```{r, echo=FALSE, fig.width=8, fig.height=3}
+#y1 = rnorm(20)+10
+#y2 = rnorm(20)+10
+y1=c(10.45,11.15,9.67,10.61,9.05,8.03,9.43,8.14,9.71,10.69,10.67,10.37,10.68,9.02,8.12,9.69,10.01,10.55,9.27,9.58)
+y2=c(8.11,8.37,9.37,10.48,11.03,10.03,9.52,10.49,10.85,10.69,9.99,10.54,9.85,10.59,8.43,10.36,9.57,9.79,11.06,10.90)
+pches = c( rep(19, 20), rep(2,20))
+layout(matrix(1:5,1,5))
+xs = c(rep(1, 20), rep(2,20))
+for(i in seq(from=0, to=2, by=0.5) ){
+    fstat=round( anova(lm(c(y1,y2+i)~factor(xs)))$"F value"[1], 2)
+    plot( xs, c(y1, y2+i), pch=pches, axes=FALSE, ylab="", xlab="", 
+          xlim=c(0.5, 2.75), ylim=c(8,14), main=paste("F =", fstat) )
+    lines( c(0.8, 1.2), c( mean(y1), mean(y1)), col="cornflowerblue", lwd=3)
+    lines( c(1.8, 2.2), c( mean(y2+i), mean(y2+i)), col="cornflowerblue", lwd=3)
+    lines( c(2.6, 2.6), c( mean(y1), mean(y2+i)), col="cornflowerblue", lwd=3)
+    axis(2, 8:14, las=1)
+    box()
+}
+```
+
+If I increase the $MS_{within}$ while holding $MS_{between}$ constant, the F statistic decreases:
+
+```{r echo=FALSE, fig.width=8, fig.height=3}
+layout(matrix(1:5,1,5))
+xs = c(rep(1, 20), rep(2,20))
+yy = c( seq(from=-2, to=2, by=0.21), seq(from=-1, to=3, by=0.21))
+for(i in seq(from=0, to=1, by=0.25) ){
+    fstat=round( anova(lm(c(yy)~factor(xs)))$"F value"[1], 2)
+    yy[1:20] = yy[1:20] + (yy[1:20] * i )
+    plot( xs, yy, pch=pches, axes=FALSE, ylab="", xlab="", 
+          xlim=c(0.5, 2.75), ylim=c(-14,14), main=paste("F =", fstat) )
+    lines( c(0.8, 1.2), c( mean(yy[1:20]), mean(yy[1:20])), col="cornflowerblue", lwd=3)
+    lines( c(1.8, 2.2), c( mean(yy[21:40]), mean(yy[21:40])), col="cornflowerblue", lwd=3)
+    lines( c(2.6, 2.6), c( mean(yy[1:20]), mean(yy[21:40])), col="cornflowerblue", lwd=3)
+    axis(2, seq(from=-14, to=14, by=2), las=1)
+    box()
+}
+```
+
+The F distribution
+---------------------------------------------------------------------------------
+
+The larger the value of F, the stronger the evidence that the samples were derived from distinct populations. To test this hypothesis, we compare the observed value of F to a distribution of values of F; since there are two components to the variance partition (total *N* and the number of groups *k*), the F statistic has the same two components to its degree of freedom: *k*-1 and *N*-*k*.
+
+```{r echo=FALSE}
+vals = seq(from=0,to=10, by=0.01)
+N = 20
+k=2
+plot(df( vals, df1=k-1, df2=N-k ), type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, 
+     xlab="F statistic", ylab="density", main="F distributions, N = 20", ylim=c(0,4) )
+axis(2, seq(from=0, to=4, by=1), las=1)
+axis(1, at=( length(vals) / 3 * 0:3) , labels=seq(from=0, to=12, by=4), las=1)
+k=3
+points(df( vals, df1=k-1, df2=N-k ), type="l", lwd=3, col="cornflowerblue" )
+k=4
+points(df( vals, df1=k-1, df2=N-k ), type="l", lwd=3, col="orange" )
+k=5
+points(df( vals, df1=k-1, df2=N-k ), type="l", lwd=3, col="gold" )
+box()
+legend( 800, 3, c("k=2", "k=3", "k=4", "k=5"), pch=19, col=c("black", "cornflowerblue", "orange" , "gold") )
+```
+
+As we increase *k*, the number of categories, the F distribution is shifted to the right. Intuitively this corresponds to the increasing likelihood of observing a group with low within-group variance compared to the between group variance when we have divided the samples in the a larger number of groups. Note that the F distribution has a minimum at zero, a logical consequence of its derivation as the ratio of two values that must be positive.
+
+Multiple factor ANOVA
+-----------------------------------------------------------------------------
+
+When there is more than one factor that can be used to partition the data (e.g., patient sex and presence/absence of disease), then the analysis is called multiple factor ANOVAl; if there are two factors, the analysis can be called two-way ANOVA.
+
+Limitations and caveats
+--------------------------------------------------------------------------------
+
+ANOVA is easiest to interpret when the factors contain a simliar number of elements, which is called a balanced distribution.
+
+ANOVA assumes:
+
+* individual samples are statistically independent. 
+* variance of measurements in the different categories are identical.
+* response variable residuals are normally distributed
+    + IMPORTANT: this is **not** the same as assuming that the observed values in the ANOVA are normally distributed
+* measurements for a group are independent and identically distributed normal random variables  
+
+ANOVA is robust to violations of the assumptions that relate to normal distributions.
+
+Performing an ANOVA in R
+================================================================================
+
+One-way ANOVA 
+--------------------------------------------------------------------------------
+
+R has a function *anova()* that takes a fitted linear model as input. The simplest way to perform this test is to embed the call to *lm()* in the call to *anova()*.
+
+First we'll fit a linear model for the groups shown in the example above
+```{r}
+y1=c(5, 6, 7, 4, 5.1, 5.5, 4.5, 6.2, 8, 6.4 )
+y2=c(9, 9.2, 9.8, 10.3, 8, 6.9, 12, 11.2, 14, 7.9)
+y = c(y1, y2)
+x = factor( c( rep(1, 10), rep(2, 10) ) )
+summary( lm( y~x ) )
+```
+
+R reports the call you performed, a summary of the residuals (the differences between fitted and observed values), and the coefficients for the model. In the coefficients table, R reports a *t* statistic for the fit of the intercept (which we can ignore) and the fit of the $\beta$ term (the x2 row) which is `r t.test(y1, y2)$statistic`. 
+
+Unsurprisingly, a direct *t* test assuming equal variance in the two groups produces the same *t* statistic and *P* value:
+
+```{r}
+t.test( y1, y2 , var.equal=TRUE)
+```
+
+Performing the ANOVA on a linear model with the same fitted data will produce a F statistic equals the square of the t statistic. Note that although the F statistic is the square of the t statistic, due to the different shapes of the distributions, the *P* values are identical.
+
+```{r}
+anova( lm( y~x )  )
+f_stat = anova( lm( y~x )  )$"F value"[1]
+t_stat = t.test(y1, y2)$statistic
+f_stat
+t_stat^2 
+```
+
+
+Two-way ANOVA 
+--------------------------------------------------------------------------------
+
+```{r}
+#y1 = rnorm(20)+10
+#y2 = y1+( 2*abs(rnorm(1, sd=0.5) ) )
+y1=c(8.58,9.01,9.30,9.40,9.53,9.54,9.58,9.63,9.82,10.02,10.26,10.33,10.43,10.87,10.90,10.92,11.03,11.51,11.63,11.69)
+y2=c(9.60,10.03,10.33,10.42,10.56,10.56,10.61,10.65,10.84,11.05,11.28,11.35,11.45,11.89,11.92,11.94,12.05,12.53,12.66,12.71)
+idx_z1 = 1:10
+idx_z2 = 11:20
+plot( c(rep(1, 20), rep(2,20)), c(y1, y2 ))
+t.test(y1[idx_z1], y2)
+```
