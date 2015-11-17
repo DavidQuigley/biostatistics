@@ -17,18 +17,41 @@ Why do we need biostatistics?
 
 -- Ernest Rutherford, Physicist.
 
-Studying natural organic systems is a reverse-engineering problem: how do complex systems that were not designed by humans function? How can we modify those systems? 
+Biologists and clinical researchers are engaged in a reverse-engineering problem: how do complex systems that were not designed by humans function? How can we modify those systems? Biomedical research (a term I will use to include research into molecular biology, genetics, computational biology, and epidemiology) presents a fundamentally different challenge from engineering or mathematics.
 
-Unlike mathematical functions, organic life forms
+Organic life forms:
 
 * are made of many parts which interact in complex ways 
 * never exist as identical copies
-* vary from moment to moment over time
+* vary in their behavior and composition over time
 * are subject to a mixture of invariant natural laws and random chance. 
+* are too numerous to measure exhaustively
 
+Biostatistics is a key tool for coping with this variation. In this short course, we will describe how biostatistics allows two of the fundmental tasks in biomedical investigations: **description** and **inference**. Organic systems vary in their attributes and behavior. Biostatistics provides methods to summarize these attribues and to describe how confident we can be that our summaries reflect the true state of the world. 
+
+Sampling from a population
+---------------------------------
+
+In tiny populations where members have a fixed characteristic we may be able to exhaustively catalog whole population. How many first-year students who started graduate programs at UCSF in 2015 reported that they were male? To answer this question we can obtain the records and count: of 933 students, 597 were female (*source: UCSF News Center*).
+
+We often would like to describe and make inferences about whole categories of distinct entities: all women with endometriosis, all lung tumors, all astrocytes in adult mice. This forces us to sample from a population, selecting a subset of all members of the population to get a picture of the whole. Biostatistics offers guidance for questions such as:
+
+* How many samples must I take to get a stable estimate of some property in the population?
+* How does my confidence in an estimate of the population change if I make my sample larger?
+* What other properties might be associated with the phenomenon I'm investigating?
+
+As an example, consider the question, "what is the height of a typical adult living in San Francisco?" If we stood at Market and Van Ness streets and somehow convinced passers-by to let us measure their heights, how many people would we need to measure? Would 10 people be enough? Or 100? Would we get different results if we measured on a street in Chinatown, or out in Seacliff? Deoes the sex of the individuals I sample influence my answer?
+
+
+Variation in measurements
+---------------------------------
+
+Measurement variability can be demonstrated by distributing short rulers to a group of people and asking them to measure the length of a long hallway. Everyone will come up with slightly different results. Measuring the length of a hallway is much easier than most tasks in biomedical research, as the hallway and rulers remain constant in their size. Most biological assays are attempting to use a nosier measuring stick on a moving target. 
 
 Biostatistics allows comparison
 -----------------------------------------
+
+Descriptive investigations are fundamental to the scientific process. When a new aspect of biology is uncovered, or a new technology allows for novel investigations, the first work is often simply asking, "what can be seen here?" However, deeper insights typically derived from forming a models that might explain the natural world and then testing tehse models.
 
 As we develop models for how the world works, these models are tested by controlled interventions into natural systems. These interventions may be artificial, as in a laboratory study or a randomized controlled trial. They may also be natural experiments, such as the transmission of rare mutations through families that are linked to the occurrence of a disease. We can use natural and artificial interventions to ask whether there is evidence to support causal relationships. We will discuss causal analysis briefly in philosophical and practical terms, but for now it is enough to state that we are often interested in causes and effects:
 
@@ -37,19 +60,6 @@ As we develop models for how the world works, these models are tested by control
 * Is a new hypertension drug superior in effect to the current standard of care?
 
 Measurements and responses to interventions are a mixture of deterministic predictable effects and random chance. Testing even individuals that seem identical, in rigorously controlled conditions, such as genetically identical cells in a plastic dish in a laboratory, will produce different responses to the same stimulus. Through repeated testing of the system, we attempt to identify consistent models that explain what we observe and predict responses to new interventions.
-
-Sampling from a population
----------------------------------
-
-In tiny populations where members have a fixed characteristic we may be able to exhaustively catalog whole population. How many first-year students who started graduate programs at UCSF in 2015 reported that they were male? To answer this question we can obtain the records and count: of 933 students, 597 were female (*source: UCSF News Center*).
-
-We often would like to describe and make inferences about whole categories of distinct entities: all women with endometriosis, all lung tumors, all astrocytes in adult mice. This forces us to sample from a population, selecting a subset of all members of the population to get a picture of the whole. 
-
-Variation in measurements
----------------------------------
-
-Measurement variability can be demonstrated by distributing short rulers to a group of people and asking them to measure the length of a long hallway. Everyone will come up with slightly different results. This problem is much easier than most tasks in biomedical research, as the hallway and rulers are constant in their size. Most biological assays are attempting to use a nosier measuring stick on a moving target. 
-
 
 **Does a new drug kill cancer cells?**
 
@@ -132,7 +142,4 @@ Although there are scientists who work on theoretical topics-- evolutionary biol
 Experiments are often expensive in time and money, and generally speaking it is far more expensive to do experimental work than statistical work. Even seemingly simple laboratory experiments can require extensive infrastructure: $10,000 freezers, high-speed centrifuges, protein antibodies, cell medium, disposable plastic material, etc.  Studies of human populations are often constrained by the availability of patients who are willing to donate tissue and by ethical constraints about what tissue can be collected and what treatment and biopsy procedures are in the best interest of the patient.
 
 A consequence of these constraints is that biologists tend to want to wring every possible piece of information out of their work. A biologist may be comfortable setting up a study with few subjects when a statistical analysis suggests it is unlikely to produce a well-substantiated result, or testing a large number of possible variables with a small number of samples. Faced with a choice between doing no experiment and learning nothing, and doing an experiment bearing a small chance of success, many biologists will forge ahead. Rather than recoiling and declaring the results uninterpretable, biostatististicians can make sure the study is interpreted realistically.  
-
-
-
 
