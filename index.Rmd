@@ -14,23 +14,24 @@ Course Syllabus
 Module | Description 
 ------ | ------- 
 1.1    | [Introduction to biostatistics and data analysis](module_01.1.html)
-1.2    | [Study designs and process of data analysis](module_01.2.html)
+1.2    | [Study designs and practical issues in data analysis](module_01.2.html)
 2      | [Just enough R to get started](module_02.html)
-3.1    | [Descriptive statistics with a single variable](module_03.1.html)
-3.2    | [Summarizing data with the mean and variance](module_03.2.html)
-4.1    | [Hypothesis testing: P values](module_04.1.html)
-4.2    | [Hypothesis testing: Probability and Multiple test correction](module_04.2.html)
-5.1    | [Comparisons between two continuous variables: correlation](module_05.1.html)
-5.2    | Comparisons between two continuous variables: linear models
-6.1    | [Counts and categories: The Binomial, Chi-squared and Fisher's Exact tests](module_06.1.html)
-6.2    | [Counts and categories: ANOVA](module_0.6.2.html)
-7.1    | Causation and Prediction
-7.2    | Causation and Prediction: Bayesian inference
-7.3    | Causation and Prediction: prevalence, predictive value, and the ROC
+3.1    | [Data types and visualizing a single variable](module_03.1.html)
+3.2    | [Summarizing data with the mean, variance, and standard deviation](module_03.2.html)
+4.1    | [Distributions: The normal distribution and the central limit theorem](module_04.1.html)
+4.2    | [Distributions: The t distribution](module_04.3.html)
+5.1    | [What's a P value?](module_05.1.html)
+5.2    | [The t test: deriving P values from statistics](module_05.2.html)
+5.3    | [Probability and Multiple test correction](module_05.3.html)
+6.1    | [Comparisons between two continuous variables: correlation](module_05.1.html)
+6.2    | Comparisons between two continuous variables: linear models
+7.1    | [Counts and categories: The Binomial, Chi-squared and Fisher's Exact tests](module_07.1.html)
+7.1    | [Counts and categories: The Poisson distribution](module_07.2.html)
+7.3    | [Counts and categories: ANOVA](module_07.3.html)
 8.1    | Robust statistics: non-parametric tests and rank transformation
 8.2    | Robust statistics: outliers
-9      | Reproducible statistical analysis and R Studio
-
+9.1    | Statistics in practice: Reading and interpreting statistics in the wild
+9.2    | Statistics in practice: Reproducible statistical analysis
 
 Instructor
 -------------------
