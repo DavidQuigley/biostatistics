@@ -1,0 +1,226 @@
+# https://www.cia.gov/library/publications/the-world-factbook/rankorder/2102rank.html
+country	years
+Monaco	89.52
+Japan	84.74
+Singapore	84.68
+Macau	84.51
+San Marino	83.24
+Iceland	82.97
+Hong Kong	82.86
+Andorra	82.72
+Switzerland	82.5
+Guernsey	82.47
+Israel	82.27
+Luxembourg	82.17
+Australia	82.15
+Italy	82.12
+Sweden	81.98
+Liechtenstein	81.77
+Jersey	81.76
+Canada	81.76
+France	81.75
+Norway	81.7
+Spain	81.57
+Austria	81.39
+Anguilla	81.31
+Netherlands	81.23
+Bermuda	81.15
+Cayman Islands	81.13
+Isle of Man	81.09
+New Zealand	81.05
+Belgium	80.88
+Finland	80.77
+Ireland	80.68
+Germany	80.57
+United Kingdom	80.54
+Greece	80.43
+Saint Pierre and Miquelon	80.39
+Malta	80.25
+Faroe Islands	80.24
+European Union	80.2
+Korea, South	80.04
+Taiwan	79.98
+Virgin Islands	79.89
+Turks and Caicos Islands	79.69
+United States	79.68
+Wallis and Futuna	79.57
+Saint Helena, Ascension, and Tristan da Cunha	79.36
+Gibraltar	79.28
+Denmark	79.25
+Puerto Rico	79.25
+Portugal	79.16
+Guam	78.98
+Bahrain	78.73
+Chile	78.61
+Qatar	78.59
+Cyprus	78.51
+Czech Republic	78.48
+Panama	78.47
+British Virgin Islands	78.46
+Costa Rica	78.4
+Cuba	78.39
+Albania	78.13
+Slovenia	78.01
+Curacao	77.98
+Dominican Republic	77.97
+Kuwait	77.82
+Northern Mariana Islands	77.82
+Argentina	77.69
+Sint Maarten	77.61
+Saint Lucia	77.6
+New Caledonia	77.5
+Lebanon	77.4
+Poland	77.4
+United Arab Emirates	77.29
+Uruguay	77
+Paraguay	76.99
+French Polynesia	76.98
+Brunei	76.97
+Slovakia	76.88
+Dominica	76.79
+Morocco	76.71
+Croatia	76.61
+Algeria	76.59
+Ecuador	76.56
+Aruba	76.56
+Sri Lanka	76.56
+Bosnia and Herzegovina	76.55
+Estonia	76.47
+Antigua and Barbuda	76.33
+Libya	76.26
+Tonga	76.04
+Macedonia	76.02
+Georgia	75.95
+West Bank	75.91
+Tunisia	75.89
+Hungary	75.69
+Mexico	75.65
+Cook Islands	75.6
+Saint Kitts and Nevis	75.52
+Colombia	75.48
+China	75.41
+Mauritius	75.4
+Maldives	75.37
+Serbia	75.26
+Oman	75.21
+Barbados	75.18
+American Samoa	75.14
+Solomon Islands	75.12
+Saint Vincent and the Grenadines	75.09
+Saudi Arabia	75.05
+Romania	74.92
+Gaza Strip	74.87
+Iraq	74.85
+Malaysia	74.75
+Lithuania	74.69
+Syria	74.69
+Turkey	74.57
+Venezuela	74.54
+Seychelles	74.49
+Thailand	74.43
+El Salvador	74.42
+Bulgaria	74.39
+Armenia	74.37
+Jordan	74.35
+Latvia	74.23
+Montserrat	74.14
+Grenada	74.05
+Egypt	73.7
+Jamaica	73.55
+Uzbekistan	73.55
+Brazil	73.53
+Peru	73.48
+Samoa	73.46
+Vietnam	73.16
+Vanuatu	73.06
+Nicaragua	72.98
+Palau	72.87
+Marshall Islands	72.84
+Micronesia, Federated States of	72.62
+Trinidad and Tobago	72.59
+Belarus	72.48
+Indonesia	72.45
+Fiji	72.43
+Bahamas, The	72.2
+Azerbaijan	72.2
+Greenland	72.1
+Guatemala	72.02
+Suriname	71.97
+Cabo Verde	71.85
+Ukraine	71.57
+Iran	71.15
+Honduras	71
+Bangladesh	70.94
+Kazakhstan	70.55
+Russia	70.47
+Moldova	70.42
+Kyrgyzstan	70.36
+Korea, North	70.11
+Turkmenistan	69.78
+Bhutan	69.51
+Mongolia	69.29
+Philippines	68.96
+Bolivia	68.86
+Belize	68.59
+India	68.13
+Guyana	68.09
+Timor-Leste	67.72
+Nepal	67.52
+Pakistan	67.39
+Tajikistan	67.39
+Papua New Guinea	67.03
+Nauru	66.75
+Burma	66.29
+Ghana	66.18
+Tuvalu	66.16
+Kiribati	65.81
+Madagascar	65.55
+Yemen	65.18
+Gambia, The	64.6
+Sao Tome and Principe	64.58
+Togo	64.51
+Cambodia	64.14
+Laos	63.88
+Comoros	63.85
+Equatorial Guinea	63.85
+Eritrea	63.81
+Kenya	63.77
+Sudan	63.68
+Haiti	63.51
+Djibouti	62.79
+Mauritania	62.65
+Western Sahara	62.64
+South Africa	62.34
+Tanzania	61.71
+Ethiopia	61.48
+Benin	61.47
+Senegal	61.32
+Malawi	60.66
+Burundi	60.09
+Guinea	60.08
+Rwanda	59.67
+Congo, Republic of the	58.79
+Liberia	58.6
+Cote d'Ivoire	58.34
+Cameroon	57.93
+Sierra Leone	57.79
+Zimbabwe	57.05
+Congo, Democratic Republic of the	56.93
+Angola	55.63
+Mali	55.34
+Niger	55.13
+Burkina Faso	55.12
+Uganda	54.93
+Botswana	54.18
+Nigeria	53.02
+Mozambique	52.94
+Lesotho	52.86
+Zambia	52.15
+Gabon	52.04
+Somalia	51.96
+Central African Republic	51.81
+Namibia	51.62
+Swaziland	51.05
+Afghanistan	50.87
+Guinea-Bissau	50.23
+Chad	49.81

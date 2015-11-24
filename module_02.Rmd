@@ -37,14 +37,14 @@ Introduction
 * how to call built-in methods
 * how to make simple plots
 
-Most people working near genetics, genomics, or statistics have heard of R. This oddly named tool has become ubiquitous in the world of academic statistics. R is powerful but also obscure, and has a justifiable reputation for bearing a steep learning curve. 
+Most people working in or near genetics, genomics, or statistics have heard of R. This oddly named tool has become ubiquitous in the world of academic statistics. R is powerful but also obscure, and has a justifiable reputation for bearing a steep learning curve. 
 
 The intention of this module is to provide just enough R that someone with no experience could download R and use it to complete the exercises in these modules. For a more complete introduction to R, I suggest the excellent **Introductory statistics with R**, by Peter Dalgaard, published by Springer in 2008. If you are on the UCSF campus, it is available online for free via the library.
 
 What problem does R solve?
 ------------------------------
 
-Any non-trivial numerical analysis will be done using some kind of software. A common first choice of software for many people who want to keep track of numbers, and who are not professional statisticians is Microsoft Excel. Excel makes it easy to perform simple tasks like adding two columns of numbers. You can sort columns, highlight rows, embed little plots in the sheets, and add up columns of numbers. You can freely intermix columns of words with columns of numbers. The barrier to getting started is very low. However, there are important drawbacks to using Excel for any important analytical task. From the point of view of a statistician, the drawbacks are fatal.
+Any non-trivial statistical analysis will be done using some kind of statistical software. A common first choice of software for many people who want to keep track of numbers, and who are not professional statisticians, is Microsoft Excel. Excel makes it easy to perform simple tasks like adding two columns of numbers. You can sort columns, highlight rows, embed little plots in the sheets, and add up columns of numbers. You can freely intermix columns of words with columns of numbers. The barrier to getting started is very low. However, there are important drawbacks to using Excel for any important analytical task. From the point of view of a statistician, the drawbacks are fatal.
 
 * To perform many elementary statistical tasks requires purchasing expensive add-on software. Excel is not designed as a tool for performing statistical analysis; its primary strength is tracking columns of numbers.  
 * It is nearly impossible to produce professional-quality plots in Excel. It’s almost as though Microsoft went out of its way to make the default choices as horrifying as possible. 

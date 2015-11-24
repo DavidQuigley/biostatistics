@@ -1,5 +1,5 @@
 ---
-title: "Module 4.2: The poisson, exponential, and Sigmoidal distributions"
+title: "Module 4.2: Student's t distribution
 author: "David Quigley"
 date: "September 25, 2015"
 output: 
@@ -9,26 +9,57 @@ output:
 ---
 
 
-Counts of rare events: the Poisson distribution
---------------------------------------------------------------------------------
+**In this module, I introduce the t distribution.**
 
-The Poisson distribution (from Siméon Poisson, and pronounced "Pwah-sohn", is a discrete probability distribution. It is useful for describing the probability of seeing an event when several constraints are met:
+Student's t distribution
+================================================================================
 
-* The number of events can be counted with whole numbers
-* You know the mean event frequency (perhaps through observation)
-* Events are independent of each other
-* You can count the number of times the event occurred, but not the number of times an event did not occur.
+The fact that as the number of observations increase, their values will often tend towards a normal frequency distribution allows statisticians to make important inferences about statistical properties. However, in practice, scientists often are constrained to use small sample sizes. Depending on experimental costs, expenses, or the availability of subject populations, it is not uncommon to operate on small sample sizes. The *t* distribution is very useful in these cases. The *t* distribution is sometimes named Student's *t* distribution after the pseudonym of the statistician William Sealy Gosset, who developed it while working at the Guiness Brewery.
 
-The last point is stated very clearly in material produced by the Warring States Project:  
+The t distribution describes the frequency distribution of small numbers of samples chosen from a normal distribution. Like the normal distribution, the function that defines its probability density is complex and understanding it is not required to make use of the *t* distribution.
 
->This last point sums up the contrast with the Binomial situation, where the probability of each of two mutually exclusive events (p and q) is known. The Poisson Distribution, so to speak, is the Binomial Distribution Without Q. In those circumstances, and they are surprisingly common, the Poisson Distribution gives the expected frequency profile for events.
+Recall that for *n* samples, the sample mean is defined:
 
-http://www.umass.edu/wsp/resources/poisson/index.html
+$\bar{x} = \frac{x_1 + ... + x_n}{n}$ 
 
+and the sample variance is defined:
 
-Up like a Hockey Stick: the exponential distribution
---------------------------------------------------------------------------------
+$s^2 = \frac{ \sum_{i=1}^n(x_i-\bar{x})^2 }{n-1}$. 
 
-The dose makes the poison: Sigmoidal distributions
---------------------------------------------------------------------------------
+The *t* value for an individual sample of size *n* from of a population with mean $\mu$ is given by:
 
+$\large{t = \frac{\bar{x}-\mu}{ \frac{s}{\sqrt{n} } }}$
+
+So *t* will increase as 
+
+1) *n* increases
+2) *s* (the standard deviation, $\sqrt(variance)$) decreases
+3) the difference between $\bar{x}$ and $\mu$ decreases
+
+Note that this equation defines the *t* statistic for a particular observation; the *t* distribution describes the frequency with which one would observe all possible *t* statistics for a given number of degrees of freedom. The distribution of the *t* statistic is symmetric around zero. It is shaped like a standard normal distribution, but its tails do not get close to zero quite as quickly as a standard normal curve; in statistical jargon, it has "fatter tails". The shape of the *t* distribution is influenced by on the number of degrees of freedom. The degrees of freedom for a *t* statistic is equal to the number of samples minus one. As the number of degrees of freedom increases, the *t* distribution becomes more simlar to a normal distribution:
+
+```{r echo=FALSE, fig.height=4, fig.width=8}
+vals = seq(from=-7,to=7, by=0.01)
+layout(matrix(1:2,1,2))
+par(mar=c(4,4,1,1))
+plot(dt( vals, df=1 ), type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, 
+     xlab="t statistic", ylab="density", main="t and standard normal distribution", ylim=c(0,.4) )
+points( dnorm( vals ), type="l", lwd=3, col="gray" )
+legend( 900,0.35, c("t DF=1", "normal"), col=c("black", "gray"), pch=19)
+axis(2, seq(from=0, to=0.4, by=0.1), las=1)
+axis(1, at=( length(vals) / 14 * 0:14) , labels=seq(from=-7, to=7, by=1), las=1)
+
+plot(dt( vals, df=1 ), type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, 
+     xlab="t statistic", ylab="density", main="t and standard normal distribution", ylim=c(0,.4) )
+axis(2, seq(from=0, to=0.4, by=0.1), las=1)
+axis(1, at=( length(vals) / 14 * 0:14) , labels=seq(from=-7, to=7, by=1), las=1)
+points( dt( vals, df=3 ), type="l", lwd=3, col="cornflowerblue" )
+points( dt( vals, df=6 ), type="l", lwd=3, col="gold" )
+points( dt( vals, df=20 ), type="l", lwd=3, col="darkgreen" )
+points( dnorm( vals ), type="l", lwd=3, col="gray" )
+legend( 900,0.35, c("t DF=1","t DF=3","t DF=6","t DF=20", "normal"), col=c("black", "cornflowerblue", "gold", "darkgreen", "gray"), pch=19)
+```
+
+The formula describing the *t* distribution is rather complicated. In the past to derive a specific value for the distribution, given a value for *t* and the number of degrees of freedom, one would have used a table of pre-computed values. Nowadays we can use a statistical package such as R to do this. 
+
+> R code to derive the *t* distribution value for a given degrees of freedom: dt(t_value, df=degrees)

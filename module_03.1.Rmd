@@ -52,9 +52,7 @@ MCV = c( 59.5,49.0,48.7,50.1,49.9,54.5,57.0,63.2,47.5,65.1,63.5,61.3,77.3,50.2,5
 
 ```
 
-
-
-**This module defines what is meant by a statistical variable. It introduces the fundamental tools used to describe the behavior of a variable, including the mean, standard deviation, histograms, and normal distribution.**
+**This module defines a statistical variable. It introduces the fundamental tools used to visualize the distribution of a single variable, including scatter plots, bar plots, and histograms.**
 
 --------------------------------------------------------------------------------
 
@@ -105,12 +103,10 @@ The choice of how to fit continuous data into categories is very important. In s
 
 In some cases, standardized value for the ranges of data that should fit into a particular category will be established by informal common scientific conventions or by formal standards bodies. Knowing whether these standard definitions apply to your analysis is extremely important for clear communication and for clinical relevance if your study describes medical information. 
 
+Categorical variables and Factors
+--------------------------------------------------------
 
-
-Factors
-----------------------------
-
-Statisticians often refer to categorical variables as *factors*. Although categorical variables are sometimes coded using numbers, this can lead to confusion if you apply a statistical test that interprets the numbers as having an inherent meaning. R has a function *factor()* which converts a vector of categorical variables, usually words, into factors. The variable then retains its appearance as words, but R will know that these words should be treated as categories.
+Statisticians often refer to categorical variables as *factors*. Although categorical variables are sometimes coded using numbers (e.g. "red=1, blue=2, orange=3...", this can lead to confusion if you apply a statistical test that interprets the numbers as having an inherent meaning. R has a function *factor()* which converts a vector of categorical variables, usually words, into factors. The variable then retains its appearance as words, but R will know that these words should be treated as categories.
 
 **Example 1: converting strings to factors**
 ```{r}
@@ -195,9 +191,18 @@ This histogram is divided into bins of size `r h$breaks[2]-h$breaks[1]`. The bin
 
 An alternate way to display a histogram is a called a *density plot*. In a density plot, the area covered by the histogram bars is constrained to sum to 1. Note that area is the product of bar height and bar width, so short wide bars can cover as much area as tall narrow bars.
 
+
+
 ```{r, fig.height=2.5, fig.width=4, med.mar=TRUE, echo=FALSE}
 h=hist(my_observations, las=1, xlab="", freq=FALSE, ylim=c(0,0.05),
        col="lightgray", main="Obs. 1: histogram (density)")
+```
+
+**The sum of the areas of bars in a density plot will always add up to 1**. Plotting the same data with fewer bars will produce a histogram with wider bars, maintaining the total area sum of 1.
+
+```{r, fig.height=2.5, fig.width=4, med.mar=TRUE, echo=FALSE}
+h=hist(my_observations, las=1, xlab="", freq=FALSE, ylim=c(0,0.05),
+       col="lightgray", main="Obs. 1: histogram (density)", breaks=5)
 ```
 
 

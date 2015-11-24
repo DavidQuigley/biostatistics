@@ -28,3 +28,9 @@ knitr::knit_hooks$set(bottom.mar = function(before, options, envir) {
 ```
 
 **This module defines linear models**
+
+
+
+Further resources:
+
+http://priceonomics.com/the-discovery-of-statistical-regression/

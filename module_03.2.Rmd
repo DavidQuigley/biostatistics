@@ -54,7 +54,7 @@ MCV = c( 59.5,49.0,48.7,50.1,49.9,54.5,57.0,63.2,47.5,65.1,63.5,61.3,77.3,50.2,5
 
 
 
-**This module defines what is meant by a statistical variable. It introduces the fundamental tools used to describe the behavior of a variable, including the mean, standard deviation, histograms, and normal distribution.**
+**This module fundamental tools used to summarize the behavior of a variable, including the mean, median, pecentiles, box and whiskers plots (box plots), variance, and the standard deviation.**
 
 --------------------------------------------------------------------------------
 
