@@ -411,9 +411,7 @@ axis(2,-1:3, las=1)
 axis(1,at=c(1,2), labels=c("Y1", "Y2"), tick=FALSE)
 ```
 
-A t test of these values reports P = `r round( t.test(y1,y2)$p.value,3)`, while a Wilcoxon Rank test reports P = `r round( wilcox.test(y1, y2)$p.value, 3)`.
-
-If we add an outlier to Y1, the results change dramatically for a t test but less so for the Wilcoxon Rank test:
+A t test of these values reports P = `r round( t.test(y1,y2)$p.value,3)`, while a Wilcoxon Rank test reports P = `r round( wilcox.test(y1, y2)$p.value, 3)`. If we add an outlier to Y1, the results change dramatically for a t test but less so for the Wilcoxon Rank test:
 
 ```{r echo=FALSE, fig.height=4, fig.width=3}
 y[1] = 8

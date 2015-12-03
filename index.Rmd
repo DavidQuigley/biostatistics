@@ -24,13 +24,11 @@ Module | Description
 5.2    | [The t test: deriving P values from statistics](module_05.2.html)
 5.3    | [Probability and Multiple test correction](module_05.3.html)
 6.1    | [Comparisons between two continuous variables: correlation](module_06.1.html)
-6.2    | [Comparisons between two continuous variables: linear models](module_06.2.html)
 7.1    | [Counts and categories: The Binomial, Chi-squared and Fisher's Exact tests](module_07.1.html)
 7.2    | [Counts and categories: The Poisson distribution](module_07.2.html)
 7.3    | [Counts and categories: ANOVA](module_07.3.html)
 8.1    | [Robust statistics and outliers](module_0.8.1.html)
-9.1    | Statistics in practice: Reading and interpreting statistics in the wild
-9.2    | Statistics in practice: Reproducible statistical analysis
+9.1    | [Reproducible statistical analysis](module_0.9.1.html)
 
 Instructor
 -------------------
