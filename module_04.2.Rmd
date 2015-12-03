@@ -1,5 +1,5 @@
 ---
-title: "Module 4.2: Student's t distribution
+title: "Module 4.2: Student's t distribution"
 author: "David Quigley"
 date: "September 25, 2015"
 output: 

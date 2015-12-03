@@ -1,0 +1,428 @@
+---
+title: 'Module 8.1: Robust Statistics and outliers'
+author: "David Quigley"
+date: "November 26, 2015"
+output: 
+    html_document:
+        toc: true
+        css: swiss.css
+---
+
+<style type="text/css">
+.table {
+    width: 25%;
+}
+</style>
+
+*The range of values for real-valued data do not always match our expectations. Extremely high or low values, commonly though inexactly called outliers, can exert a disproportionate influence on statistics. This module describes how to identify these observations, and suggests strategies for deciding what (if anything) to do about them. I will talk about how outliers can affect some statistical tests more than others, and how a class of statistical tests called "non-parametric tests" are one approach for insulating your study against their effects.*
+
+
+Unexpected data: the mouse that lived too long
+======================================================
+
+Extreme observations
+--------------------------------------------------------------------------------
+
+Experimental data often contain badly behaved observations.
+
+Real-valued data sometimes have extremely high or low values that deviate from the majority of our observations. These observations, commonly called outliers, can exert a disproportionately large influence on statistical analysis of the entire set of observations. Due to this concentration of influence, outliers have important consequences for our biological interpretation of the results. 
+
+In some cases the cause of the extreme observation can be assigned with a high degree of certainty to a specific **technical error**. These outliers are caused by procedural mistakes, and their inclusion in the final analysis is likely to result in a loss of information and accuracy.
+
+In other cases, the extreme observations are **exactly what we're looking for**. Screening experiments, where the effect of many different interventions on a phenotype are simultaneously measured, often take this form: mostly negative results, with a few extreme positive findings. The real world is rarely as well-behaved as our models, and rejecting extreme values without very careful consideration will discard many true (if inconvenient) findings.
+
+In other cases, there is **no observed convincing reason** explaining why these extreme results occur. Although there is a tendency to remove extreme values from the observed data, this action should only be taken with careful consideration and complete documentation. **Selectively removing data *post hoc* brings with it a strong possibility of introducing** bias, particularly if an unobserved covariate is confounded with the propensity to develop extreme values. Real variables sampled from a large population will contain rare extreme values, and removing these values without good reason is inappropriate.
+
+The mouse that survived
+--------------------------------------------------------------------------------
+
+The point of the following example is to demonstrate the importance of considering the technical context of an experiment when confronted with an extreme observation.
+
+As an example, the Pons lab studies glioblastoma, a brain tumor. They are investigating whether adamantium inhibitors would prolong life in patients with glioblastoma. The group plans a pre-clinical study using a mouse model that expresses an inducible oncogenic form of the *ras* gene in brain tissue. Expression of this ongogene causes the development of glioblastoma with characteristics in common with the human disease. This model is used widely, with many groups showing that after the gene is activated the mice uniformly die from brain tumors after approximately 21 days. 
+
+The group's hypothesis is that drug-treated mice will live significantly longer than 21 days; the null hypothesis is that the drug-treated mice will not live significantly longer than placebo-treated controls. The inhibitor must be administered three times a day orally, which is arduous for the post-doc running the experiment and requires a large amount of the hard-to-get drug, so the PI limits the size of this pilot study to 10 animals per arm. An alpha-level cut-off of 0.05 will be considered a significant effect justifying a larger study and further investigation. 
+
+The experiment is performed. Survival over time until death of each mouse is plotted using a Kaplan-Meier plot. The group tests for a significant difference in the time to the event of death between control and drug-treated animals using the log rank test. The results look like this:
+
+```{r echo=FALSE, warning=FALSE}
+library(survival)
+```
+
+```{r echo=FALSE, fig.height=4, fig.width=5}
+times=c(21,19,17,23,21,40,23,19,20,23,  26,22,24,22,23,24,20,25,22,21)
+conditions=c(rep("drug", 10), rep("control", 10))
+had.events =rep(1, 20)
+had.events[ 6 ] = 0
+surv.all = survfit(Surv(times, had.events)~conditions)
+cox = coxph(formula = Surv(times,had.events==1)~conditions)
+p.val = as.numeric(summary(cox)$logtest[3])
+plot(surv.all, lwd=3, col=c( "cornflowerblue","black"),
+        main=paste("Complete data: P =", round(p.val, 3)), las=1,
+        xlab="days", cex.axis=1.5, bty="n", xlim=c(0,40), ylab="Percent alive")
+legend( 1,0.4, c("drug", "control"), col=c("cornflowerblue","black"), pch=19)
+```
+
+These line plots show survival of the mice over time in each experimental arm; each drop in the height of the line represents an event, here the death of a mouse. The height of the drop corresponds to the number of animals still alive at that time in the experiment. The log rank test measures the likelihood that the two plots derive from the same population. 
+
+The P value for a log-rank test comparing the life-span post oncogene activation of the control mice, in black, to the drug-treated mice, in blue, is `r round(p.val, 3)`, failing to support the hypothesis that the drug extends life. However, note a data point that appears to defy our expectations: **one of the control animals was still alive at 40 days**, and an necropsy at that time showed it never developed a brain tumor. Given the 100% penetrance of the phenotype, the most likely biological explanation for a mouse surviving this experiment was failure to activate the oncogene. If the oncogene did not activate, then data from this mouse would be a technical error. Re-doing the analysis without the mouse that failed to develop a tumor produces the following result:
+
+```{r echo=FALSE, fig.height=4, fig.width=5}
+times=c(21,19,17,23,21,NA,23,19,20,23,  26,22,24,22,23,24,20,25,22,21)
+surv.all = survfit(Surv(times, had.events)~conditions)
+cox = coxph(formula = Surv(times,had.events==1)~conditions)
+p.val = as.numeric(summary(cox)$logtest[3])
+plot(surv.all, lwd=3, col=c("black", "cornflowerblue"),
+        main=paste("data minus one point: P =", round(p.val, 3)), las=1,
+        xlab="days", cex.axis=1.5, bty="n", xlim=c(0,40))
+legend( 1,0.4, c("drug", "control"), col=c("black", "cornflowerblue"), pch=19)
+```
+
+If we were to remove the anomalous mouse, the P value for a log-rank test is now `r round(p.val, 3)`, which is conventionally below the alpha-level threshold for reporting a significant effect.
+
+What to do?
+--------------------------------------------------------------------------------
+
+Is it appropriate to remove the mouse that didn't develop a tumor? This is a judgement call. One interpretation would be we must report the data precisely as they were collected. However, a mouse that didn't develop a brain tumor is not informative in the context of this experiment. It would be defensible to report an analysis both with and without the no-tumor mouse, making it clear that a choice was made and allowing the reader to make his or her own determination. 
+
+The strength of the prior likelihood that a mouse might survive despite a correctly activated oncogene is crucial. If the penetrance of the tumor phenotype were 95%, it would be far less defensible to remove a single observation where the mouse lacked a tumor, particularly given that this *post-hoc* analysis is the difference between a hypothesis test crossing a threshold for conventional significance.
+
+As an aside, even without the inclusion of the mouse that did not develop a brain tumor, the effect size of the drug is clearly quite small. A common way of measuring the increase in life expectancy for a survival analysis is the time until half of the events have occurred; in this case, the drug appears to extend life by only one day, suggesting the evidence that it is truly effective in this model and dose is not strong. Experiments with low power due to small sample sizes are particularly vulnerable to chance findings, so this small effect size is a warning that the result has low credibility in any case and should be carefully validated.
+
+Extreme values and robust statistics
+================================================================================
+
+The following example demonstrates how a single observation can radically alter the interpretation of an larger experiment. The point of the example is to 
+
+* illustrate the existence of this kind of observation 
+* illustrate the importance of looking at your data
+* motivate robust alternatives to statistics that are vulnerable to extreme observations
+
+```{r echo=FALSE}
+aa=c(2.24,2.65,3.01,3.17,2.69,1.59,1.77,3.06,3.92,2.51,10.00)
+bb=c(3.21,3.88,2.11,3.27,3.28,3.37,3.78,2.54,1.47,4.28,10.00)
+cols=c(rep("cornflowerblue", 10), "black")
+layout(matrix(1:2,1,2))
+c10 = cor.test(aa[1:10], bb[1:10])
+c11 = cor.test(aa,bb)
+cor.10 = round( c10$estimate, 2)
+cor.11 = round( c11$estimate, 2)
+p.10 = round( c10$p.value, 3)
+p.11 = round( c11$p.value, 3)
+```
+
+In this example experiment, two real-valued variables were measured in 11 subjects labeled with the letters "a" through "k". The question of interest was was whether the paired variables were correlated with each other. In this example, we will assume that the experiments were performed correctly and there was no reason to think that any of the measurements was technically flawed.
+
+```{r echo=FALSE, small.mar=TRUE, fig.height=4, fig.width=6.5 }
+#aa = c(rnorm(10)+3, 10
+layout(matrix(1:2,1,2))
+par(mar=c(3,3,3,1))
+plot(aa[1:10],bb[1:10], pch=19, col=cols[1:10], xlim=c(0,10), ylim=c(0,10), 
+     las=1, main=paste("rho =", cor.10,"P=",p.10), xlab="", ylab="", cex=1.25)
+text(aa[1:10], bb[1:10], 
+     c('a','b','c','d','e','f','g','h','i','j'), col="white", cex=0.75)
+
+plot(aa,bb, pch=19, col=cols, xlim=c(0,10), ylim=c(0,10), las=1, 
+     main=paste("rho =", cor.11,"P=",p.11), xlab="", ylab="", cex=1.25)
+text(aa, bb, c('a','b','c','d','e','f','g','h','i','j','k'), col="white", cex=0.75)
+```
+
+The plot on the left, generated using observations *a* through *j*, shows two variables with an inverse correlation. The plot on the right was generated by **adding a single point *k* to the distribution on the left** (colored in black). The correlation coefficient value changes from `r cor.10` to `r cor.11`. In both data sets the P value for a test of significant correlation is below 0.05. 
+
+What to do?
+-----------------
+
+Unlike the previous example, in this case there is no clear technical argument for dropping the extreme point from the analysis. This pathological case shows that a single outlier point can radically change the Pearson correlation, despite not representing the distribution as a whole. 
+
+How can the addition point *k* completely reverse the correlation coefficient from `r cor.10` to `r cor.11`? Recall the definition of correlation:
+
+$\large{ \rho = \frac{\textit{ covariance(x,y)} }{\sigma_x \sigma_y} }$
+
+where covariance is calculated as
+
+$\large{ \sigma_{X,Y} = \frac{1}{N-1}\sum_{1}^N( (x_i-\bar{x})(y_i-\bar{y}) ) }$
+
+The addition of point *k* shifts the values of $\bar{x}$ from `r round(mean(aa[1:10]),2)` to `r round(mean(aa),2)` and $\bar{y}$ from `r round( mean(bb[1:10]),2)` to `r round( mean(bb), 2)`. The covariance changes from 
+`r signif( sum( (aa[1:10]-mean(aa[1:10])) - (bb[1:10]-mean(bb[1:10])) ) / (10-1), 2)` to 
+`r signif( sum( (aa-mean(aa)) - (bb-mean(bb)) )/ (11-1), 2)`, moving from negative to positive. This accounts for the change in sign of the correlation coeffcient, from negative (inverse) to positive (direct) correlation.
+
+The change in signs is also clear from a linear model fit, as the line of best fit when including point *k* is nearly perpendicular to the line of best fit when *k* is excluded:
+
+```{r echo=FALSE, fig.height=4, fig.width=4}
+par(mar=c(3,3,3,1))
+plot(aa,bb, pch=19, col=cols, xlim=c(0,10), ylim=c(0,10), las=1, 
+     main="Linear model fit", xlab="", ylab="", cex=1.25)
+text(aa, bb, c('a','b','c','d','e','f','g','h','i','j','k'), col="white", cex=0.75)
+abline( lm( bb[1:10]~aa[1:10] ), col="cornflowerblue", lwd=2)
+text(1.5,6,"without K", col="cornflowerblue")
+abline( lm( bb~aa ), lwd=2)
+text(1.5,1,"with K")
+```
+
+Point K has a much larger impact on the overall statistic than any other point in the sample. When points have a disproportionate effect on the final statistic, they should be scrutinized as potential outliers. 
+
+**The importance of an outlier is not that it deviates from a model distribution describing the data, but that it has a disproportionate potential to change your interpretation of the results.**
+
+We can see how the effect of point K on the statistic varies as its position becomes more extreme by varying its position along the dotted line and noting the correlation values that are obtained:
+
+```{r echo=FALSE, fig.height=5, fig.width=8}
+
+layout(matrix(1:6,2,3,byrow=TRUE))
+par(mar=c(3,3,3,1))
+for(i in seq(from=0, to=10, by=2)){
+    cx = cor.test(c(aa[1:10],i), c(bb[1:10],i) )
+    cor.x = round( cx$estimate, 3)
+    p.x = round( cx$p.value, 3)
+    plot( c(aa[1:10],i), c(bb[1:10],i), pch=19, col=cols, xlim=c(0,10), ylim=c(0,10), 
+     las=1, main="", xlab="", ylab="", cex=1.25)
+    abline(0,1,lwd=1, col="#33333333", lty=2)
+    paste("rho =", cor.x,"P=",p.x)
+    text(10, 2,paste("Rho =", round( cor.x, 2) ), adj=1, font=2)
+    text(10, 1,paste("P =", round( p.x, 3) ), adj=1, font=2)
+}
+
+
+```
+
+
+Detecting outliers visually and through statistics
+================================================================================
+
+Look at the data
+--------------------------------------------------------------------------------
+
+A first step to detecting potential outliers is to look at summaries of the data, and the actual data themselves when this is feasable. This point is so fundamental it bears repeated in larger, bold letters:
+
+**Always look at the data. Never perform a statistical analysis without looking at the data themselves.**
+
+We have already seen scatterplots of the data above. Other summary methods were described in Module 3. The histogram summarizes the overall distribution of a continuous variable by binning values and drawing bars that represent the percentage of the overall distribution that fall into each bin. The box plot (a.k.a. box and whiskers plot) summarizes a distribution using five points: the median, a box spanning the 25th and 75th percentiles interquartile range, and whiskers that extend up to +/- 1.5 times the interquartile range. We can start by making these plots for the Y values of the data plotted above:
+
+```{r echo=FALSE, fig.height=4, fig.width=7}
+layout(matrix(1:2,1,2))
+par(mar=c(4,4,2,2))
+hist(bb, breaks=10, col="cornflowerblue", main="histogram", xlab="", freq=FALSE, 
+     las=1)
+boxplot(bb, main="boxplot", las=1, boxwex=0.5, pch=19)
+```
+
+Note that the histogram has almost all of of its density on the left side of the plot, with a single bar on the far right side. This is suggestive of an extreme value. More explicitly, the box plot shows an interquartile range that is only slightly smaller than the whiskers, with a single point plotted at 10. When you plot a box plot using R, points whose values lie outside of the whiskers are plotted individually. These points are informally called outliers. This terminology does not indicate that the values should be removed from the analysis, but only that they deviate dramatically from the central tendency of the data. 
+
+Cook's distance 
+--------------------------------------------------------------------------------
+
+There are also more formal methods to identify potential outliers when performing a correlation analysis or linear regression. 
+
+We can quantify the effect of a single point on a linear regression using a measure called **Cook's Distance** (or **Cook's D**). Every point in a linear model has a Cook's Distance, a number that is a function of the change that would occur in the estimate of the dependent variable of the model if one were one to remove that single observation. Large values for Cook's Distance are associated with large amounts of influence. For this example, Cook's distance is:
+
+```{r echo=FALSE, fig.height=3, fig.width=4, warning=FALSE}
+par(mar=c(3,5,3,1))
+plot( lm(bb~aa), which=4, axes=FALSE, lwd=2)
+box()
+axis(2, seq(from=0, to=50, by=10), las=1)
+axis(1, at=1:11, labels=letters[1:11])
+```
+
+There are several heuristics for values of Cook's Distance that indicate particularly influential values, including
+
+* Cook's Distance > 1
+* Cook's Distance > 4/*N* 
+* Distance > 4/(*N*−*k*−1)
+
+where *N* is the number of observations and *k* is the number of explanatory variables. By any measure, point *k* has an enormous Cook's distance and is therefore disproportionately influential.
+
+> To plot Cook's distance for a linear regression, pass a linear model to plot() with the "which" parameter set to 4
+
+> plot( lm(bb~aa), which=4 )
+
+What should be done about this observation? In the absence of any strong prior information that the data are *fundamentally mistaken* due to a technical error, it would be inappropriate to remove the errant point, partiularly in a *post-hoc* analysis. However, the point is clearly problematic due to its excessive influence. One approach would be to **replace the Pearson correlation with an analysis that is robust to outliers**.
+
+Robust statistics using ranks instead of real values
+================================================================================
+
+Correlation, linear models, and the *t* test are highly susceptible to the influence of extreme values. A simple and surprisingly useful method for dealing with extreme values is:
+
+1. convert real-valued observations into their rank
+2. perform the statistical analysis on the ranks instead of the real-valued numbers
+
+Converting the values (3.3, 5.1, 9.0, 2.5) to their ranks would produce (2,3,4,1). There are different heuristics for dealing with ties; R assigns tied values to be the mean of the ranks they would have occupied if they were all contiguous, so the values (3.3, 2, 2, 9) are ranked (3.0, 1.5, 1.5, 4.0) because two values are tied for first place, taking first and second place between them, and the mean of (1,2) is 1.5.
+
+> To convert a vector of numbers to ranks in R use the rank() function
+
+The correlation test using ranks is called the **Spearman rank correlation**. It is particularly useful when you are testing values that are likely to contain outliers.
+
+One disadvantage of converting to ranks is the **potential for a loss of statistical power** in cases where the assumptions of the pearson correlation are all met. However, this loss of power is often modest, and the potential benefit of reducing erroneous conclusions from extreme values that appear by chance is large.
+
+> To perform a Spearman rank correlation in R measuring correlation between vectors X and Y, use cor.test(X, Y, method="spearman")
+
+For well-behaved data, ranks and raw values produce similar results
+--------------------------------------------------------------------------------
+
+To show the effect of using ranks *vs.* raw values, here are ten plots. The upper-left corner is two random selections of 100 points from a standard normal distribution. Moving from left to right and then top to bottom, I mix in 10 additional points that were generated to have perfect correlation on the same scale. The Spearman and Pearson correlation values are listed at the bottom of each plot.
+
+```{r echo=FALSE, fig.height=5, fig.width=8, warning=FALSE}
+
+#aa.norm = rnorm(100)
+#bb.norm = rnorm(100)
+aa.norm=c(-0.72,-0.51,1.01,1.61,-0.54,-1.21,-1.78,-1.59,0.62,0.02,-0.76,2.74,
+          -0.76,-1.73,1.37,-2.3,-0.18,-1.58,-1.16,0.05,-1.8,-0.9,-0.6,1.12,0.39,
+          -0.12,0.65,0.91,-1.55,-1.13,1.2,0.08,1.75,0.51,-0.03,-0.14,0.83,0.07,
+          -0.27,-0.46,-1.46,-0.23,-0.7,-0.09,0.08,0.65,1.81,0.64,0.15,-1.02,
+          0.45,0.31,-1.6,1.46,-0.35,0.05,1.56,-0.89,1.3,3.31,2.01,1.34,-0.74,
+          -0.08,1.94,-0.39,-0.11,0.6,0.31,-0.28,0.61,0.43,-1.01,0.22,0.78,
+          -1.34,1.65,0.47,0.63,0.06,0.08,1.71,0.62,-0.21,0.12,0.01,0.37,0.24,
+          -0.46,0.45,1.22,-1.9,0.66,-0.77,0.62,-0.06,-1.91,-2.07,-0.08,0.8)
+bb.norm=c(-0.46,1.9,-0.36,0.37,-1.58,1.38,-0.78,-1.2,-0.27,1.08,-1.17,0.42,
+          1.66,0.45,1.68,1.42,-1.56,0.63,1.11,0.6,-1.85,0.61,0.22,-1.18,0.35,
+          -1.15,0.07,0.8,-0.88,-3,-0.4,1.95,1.52,-0.66,-0.58,-0.07,0.54,-0.62,
+          0.77,-0.51,-0.02,-0.56,1.48,-0.63,-1.23,-0.33,-0.19,-0.98,0.42,-1.01,
+          0.14,0.3,-0.59,-0.2,1.14,0.2,-0.24,0.5,-1.3,-0.14,-0.66,-0.29,1.89,
+          -0.55,-0.35,-1.28,3.15,-0.73,0.45,-0.79,-0.83,-0.57,1.71,0.46,1,1.1,
+          -0.72,-1.74,-0.12,-1.46,0.86,0.96,0.2,1.63,-0.1,0.69,-1.7,-1.45,0.47,
+          0.41,1.67,0.52,-1.56,0.14,0.16,-0.01,0.68,0.93,2,-0.4)
+min_a=min(c(aa.norm, bb.norm) )
+max_a=max(c(aa.norm, bb.norm) )
+aa.dir = seq(from=min_a, to=max_a, by=(max_a-min_a)/100)
+bb.dir = aa.dir
+cors.s = rep(0, 10)
+cors.p = rep(0, 10)
+layout(matrix(1:10,2,5, byrow=TRUE))
+par(mar=c(1,1,1,1))
+for(i in 1:10){
+    aa.x = aa.norm
+    bb.x = bb.norm
+    idx = sample( 1:100 )[1:(10*i)]
+    aa.x[idx] = aa.dir[idx]
+    bb.x[idx] = bb.dir[idx]
+    cors.s[i] = cor.test( aa.x, bb.x, method="spearman" )$estimate
+    cors.p[i] = cor.test( aa.x, bb.x, method="pearson" )$estimate
+    plot(aa.x, bb.x, axes=FALSE, xlim=c(min_a, max_a), ylim=c(min_a-1, max_a))
+    box()
+    text(max_a, min_a-0.5,paste("Spearman:",round( cors.s[i],2) ), adj=1)
+    text(max_a, min_a-0.8,paste("Pearson:",round( cors.p[i],2) ), adj=1)
+}
+```
+
+The point to take away from these plots: 
+
+1. It is generally safe to use the Spearman rank correlation in place of the Pearson correlation.
+2. Pearson correlation will often have modestly higher power to detect a real difference, if the data are well-behaved
+
+If the data are not well0behaved, using Pearson correlation can result in a dramatic loss of power. On the left below I show 100 points with a positive correlation. On the right I modify the plot by changing a single point to a much higher value. Note the dramatic effect on the Pearson correlation and the negligible effect on the Spearman rank correlation:
+
+
+```{r echo=FALSE, warning=FALSE}
+
+#y=rnorm(100, 0, 0.4) + (1+seq(from=0.01,to=1, by=0.01) )
+y=c(0.22,1.03,1.30,0.78,1.66,0.65,0.91,1.17,1.21,2.01,0.93,1.25,1.13,0.78,0.92,1.95,1.18,
+1.02,1.60,1.12,1.69,1.70,1.04,1.78,1.41,1.46,0.40,0.46,2.26,0.89,1.26,1.98,1.03,1.17,
+1.35,1.42,1.76,1.99,1.47,0.95,1.81,1.04,1.77,1.37,1.57,0.65,1.71,1.51,1.17,0.73,1.65,
+1.16,1.44,1.46,2.58,1.30,1.71,1.25,1.55,1.99,2.10,1.51,1.99,1.15,2.53,1.45,1.39,1.30,
+1.75,1.35,1.72,2.09,1.48,1.53,1.42,2.61,2.19,1.60,1.87,2.29,2.17,1.73,2.04,1.97,1.62,
+2.27,1.38,1.82,1.68,1.18,1.54,2.19,1.71,2.01,1.89,1.63,1.21,1.35,2.26,2.28)
+x=1:100
+cor.before.p = cor.test(x,y)$estimate
+cor.before.s = cor.test(x,y, method="spearman")$estimate
+yplus = y
+yplus[10] = 7.5
+cor.after.p = cor.test(x, yplus)$estimate
+cor.after.s = cor.test(x, yplus, method="spearman")$estimate
+
+layout(matrix(1:2,1,2))
+plot(x,y, axes=FALSE, ylim=c(0,8), ylab="Y", xlab="X", pch=19, 
+     col="cornflowerblue", main="original" )
+box()
+axis(2, seq(from=0, to=8, by=2), las=1)
+axis(1, seq(from=0, to=100, by=10), las=1 )
+text(100,8,paste("Pearson:",round( cor.before.p,2) ), adj=1)
+text(100,7.25,paste("Spearman:",round( cor.before.s,2) ), adj=1)
+
+cols = rep("cornflowerblue", 100)
+cols[10]="black"
+plot(x, yplus, axes=FALSE, ylim=c(0,8), ylab="Y", xlab="X", pch=19,col=cols,
+     main="move one point")
+box()
+axis(2,seq(from=0, to=8, by=2), las=1)
+axis(1,seq(from=0, to=100, by=10), las=1)
+text(100,8,paste("Pearson:",round( cor.after.p,2) ), adj=1)
+text(100,7.25,paste("Spearman:",round( cor.after.s,2)), adj=1)
+```
+
+Extreme data points produce different findings
+--------------------------------------------------------------------------------
+
+Applying rank conversion to the pathological data we examined above would produce:
+
+```{r echo=FALSE, results='as.is', warning=FALSE}
+library(knitr)
+df = data.frame(A=aa, A_ranks=rank(aa), B=bb, B_ranks=rank(bb))
+kable(df)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=8}
+layout(matrix(1:3,1,3))
+par(mar=c(4,4,4,2))
+cols=c(rep("cornflowerblue", 10), "black")
+
+plot(aa,bb, pch=19, col=cols, xlim=c(0,11), ylim=c(0,11), las=1, 
+     main=paste("original: rho =", cor.11,"P=",p.11), xlab="X value", ylab="Y value", cex=1.4)
+text(aa, bb, c('a','b','c','d','e','f','g','h','i','j','k'), 
+     col="white", cex=0.75)
+
+plot(aa[1:10],bb[1:10], pch=19, col=cols[1:10], xlim=c(0,11), ylim=c(0,11), las=1, 
+     main=paste("no K: rho =", cor.10,"P=",p.10), xlab="X value", ylab="Y value", cex=1.4)
+text(aa, bb, c('a','b','c','d','e','f','g','h','i','j'), 
+     col="white", cex=0.75)
+
+cor.rank = round( cor.test(rank(aa), rank(bb))$estimate, 2)
+p.rank = round( cor.test(rank(aa), rank(bb))$p.value, 2)
+plot(rank(aa),rank(bb), pch=19, col=cols, xlim=c(0,11), ylim=c(0,11), las=1, main=paste("ranks: rho =", cor.rank,"P=",p.rank), xlab="X rank", ylab="Y rank", cex=1.4)
+text(rank(aa), rank(bb), c('a','b','c','d','e','f','g','h','i','j','k'), 
+     cex=0.75, col="white")
+```
+
+The relative positioning of points "a" through "j" is not dramatically affected by replacing their actual values with ranks; it's only the position and relationship of point "k" (the outlier) that has shifted. The rank transformation has two consequences:
+
+1. The reported rho value is now once-again negative
+2. The P value for the correlation is now much higher, at `r p.rank`
+
+
+A rank-based t test: the Wilcoxon Rank Sum test
+================================================================================
+
+Similar in spirit to the Spearman rank correlation, the **Wilcoxon Rank Sum test** assesses the likelihood that two samples of numbers were derived from the same population. Although the t test is robust to moderate violations of its assumption of normality, the *t* test is compromised by more serious violations of normality. The Wilcoxon Rank Sum test makes no distributional assumptions.
+
+The primary assumption made by the Wilcoxon Rank Sum test is that the individual observations are independent and can be ordered somehow.
+
+The Wilcoxon Rank Sum test statistic is called *U*. There is more than one way to calculate it for samples we'll call X and Y. One method examines all possible pairings of a value in X and a value in Y, reporting the number of pairs where the value in Y is not greater than the value in X.
+
+> To perform a Wilcoxon Rank Sum test in R measuring between vectors X and Y, use wilcox.test( X, Y )
+
+```{r echo=FALSE, fig.height=4, fig.width=3}
+#y1 = rnorm(10)
+#y2 = rnorm(10)+0.5
+par(mar=c(4,3,3,1))
+y = c(1.58,-0.33,-0.47,-0.55,0.54,-0.42,-1.13,-0.96,0.69,-0.73,2.28,0.41,1.05,
+      1.14,3.47, 0.26,0.59,1.67,0.78,1.56)
+y1=y[1:10]
+y2=y[11:20]
+x=jitter( c(rep(1,10),rep(2,10)) )
+plot( x, y, las=1, pch=19, col="#0000ffaa", axes=FALSE, ylab="", xlab="")
+box()
+axis(2,-1:3, las=1)
+axis(1,at=c(1,2), labels=c("Y1", "Y2"), tick=FALSE)
+```
+
+A t test of these values reports P = `r round( t.test(y1,y2)$p.value,3)`, while a Wilcoxon Rank test reports P = `r round( wilcox.test(y1, y2)$p.value, 3)`.
+
+If we add an outlier to Y1, the results change dramatically for a t test but less so for the Wilcoxon Rank test:
+
+```{r echo=FALSE, fig.height=4, fig.width=3}
+y[1] = 8
+par(mar=c(4,3,3,1))
+plot( x, y, las=1, pch=19, col="#0000ffaa", axes=FALSE, ylab="", xlab="")
+axis(2,-1:8, las=1)
+axis(1,at=c(1,2), labels=c("Y1", "Y2"), tick=FALSE)
+box()
+y1 = y[1:10]
+```
+
+A t test of these values reports P = `r round( t.test(y1,y2)$p.value,3)`, while a Wilcoxon Rank test reports P = `r round( wilcox.test(y1, y2)$p.value, 3)`.

@@ -164,7 +164,9 @@ table tr {
    border-top: 1px solid #cccccc;
    background-color: white;
    margin: 0;
-   padding: 0; }
+   padding: 0; 
+   width:50%;
+}
 table tr:nth-child(2n) {
    background-color: #f8f8f8; }
 table tr th {
@@ -289,12 +291,6 @@ sup {
 }
 * {
 	 -webkit-print-color-adjust: exact;
-}
-@media screen and (min-width: 914px) {
-   body {
-      width: 854px;
-      margin:0 auto;
-   }
 }
 @media print {
 	 table, pre {

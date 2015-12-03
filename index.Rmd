@@ -26,10 +26,9 @@ Module | Description
 6.1    | [Comparisons between two continuous variables: correlation](module_06.1.html)
 6.2    | [Comparisons between two continuous variables: linear models](module_06.2.html)
 7.1    | [Counts and categories: The Binomial, Chi-squared and Fisher's Exact tests](module_07.1.html)
-7.1    | [Counts and categories: The Poisson distribution](module_07.2.html)
+7.2    | [Counts and categories: The Poisson distribution](module_07.2.html)
 7.3    | [Counts and categories: ANOVA](module_07.3.html)
-8.1    | Robust statistics: non-parametric tests and rank transformation
-8.2    | Robust statistics: outliers
+8.1    | [Robust statistics and outliers](module_0.8.1.html)
 9.1    | Statistics in practice: Reading and interpreting statistics in the wild
 9.2    | Statistics in practice: Reproducible statistical analysis
 
