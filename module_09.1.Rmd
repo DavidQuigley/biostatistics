@@ -1,0 +1,138 @@
+---
+title: "Module 9.1: Reproducible statistical analysis"
+author: "David Quigley"
+date: "December 3, 2015"
+output: 
+    html_document:
+        toc: true
+        css: swiss.css
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(comment = NA)
+knitr::opts_chunk$set( prompt=TRUE ) 
+
+knitr::knit_hooks$set(small.mar = function(before, options, envir) {
+    if (before) par(mar = c(2, 2, 1, 1))  # smaller margin on top and right
+})
+
+knitr::knit_hooks$set(med.mar = function(before, options, envir) {
+    if (before) par(mar = c(4, 4, 1, 1))  # smaller margin on top and right
+})
+
+```
+
+*This module introduces motivation for reproducible statistical practices, by comparison to best practices in experimental biology. It introduces R Markdown documents as a simple and elegant way to implement reproducible analysis.*
+
+How did you do that?
+========================================================
+
+The experimental notebook in molecular biology
+--------------------------------------------------------------------------------
+
+Students who train in molecular biology learn the central role of a **research notebook**. 
+Adequate record-keeping is crucial while experiments are performed, when experiments are written up for publication, and at subsequent points to inform the experimenter, his or her colleagues, and others what was done. UCSF policy requires a written notebook be kept available.
+
+Notebooks play an important role in establishing scientific **priority**, and are extremely important if there is any question about the **integrity** or **validity** of an investigation. The ideal notebook is an organized, annotated explanation of what reagents were used, how they were manipulated, what raw data were generated, and how these data were analyzed. Long after a student, post-doc, or staff member has left the lab, his or her notebooks lives on as their representative.
+
+Part of the reason we are so careful to document experimental procedures carefully is they generally involve tools unused in daily life, using expensive reagents and precious samples. Repeating an experiment is costly in time and money. When experimental biologists perform a statistical analysis, these habits are sometimes abandoned. It is frequently the case that data are recorded and analyzed series of haphazard Excel worksheets stored on someone's personal computer. 
+
+
+Best practices for reproducible statistical analysis
+================================================================================
+
+In this section I will make specific recommendations for overall biostatistical practice, which apply regardless of the method you choose to document your analysis.
+
+As data files change, version them by date
+--------------------------------------------------------------------------------
+
+Always include a date in the file name of any data file. File "last modified" dates can be inadvertently changed when moving files around or pulling backups. As experiments pile up, the data in a file accumulate over time. These changes can affect the results of the analysis. Dates are crucial for:
+
+* Refering to an exact cut of the data 
+* Forensic reconstruction of an analysis after the fact
+
+Write your analysis as though you will be audited
+--------------------------------------------------------------------------------
+
+You yourself are the most important auditor. **You yourself will most likely be the beneficary of careful record-keeping and clear protocols**, and you will most likely suffer any consequences of a lack of care. You will need to remember what you did six months ago to repeat the analysis with new samples, or to generate a figure for a grant. 
+
+There are also cases where honest and careful scientists will need to clearly demonstrate their protocols to a third party. Other scientists will send you queries about particular points in your papers, sometimes years after they are published. There is also the possiblity that your work could some day be the subject of a formal investigation, and in that case clear statistical methodology and well-documented records are as important as well-labeled western blot images or clearly filed survey results.
+
+Perform your entire analysis with a script or pipeline
+--------------------------------------------------------------------------------
+
+Any time data have to be manipulated before analysis (e.g. microarray normalization or outlier detection), write a script that performs this task rather than performing the manipulations by hand. If you simply make the manipulations by hand without careful documentation, you will eventually reach a point where you have a figure or table of results and no clear idea of exactly what you did to the raw data in order to produce that table.
+
+The ideal scenario is a script that reads the raw data files and produces figures and data for tables. This script becomes the reproduction: if there is any question of how a result was derived, being able to recreate it reliably from raw data by running a script is the best possible means to answer the question. Analysis scripts themselves have to be versioned with dates.
+
+
+Store records and analysis in a central repository
+--------------------------------------------------------------------------------
+
+Computers crash. Important data files should live on a central server that is backed up. Portable hard drives are cheap compared to research costs. Make regular snapshots of your data to a portable hard drive and put the drives in a safe place.
+
+Analytical scripts should be stored centrally as well. If more than one person will work on them, a version control system such as [Git](http://git-scm.com/) will allow people to collaborate without stepping on each other's toes. See the commercial site [GitHub](http://github.com) for more information on using Git to collaborate. 
+
+
+Integrate analysis with readable description using R Markdown
+================================================================================
+
+The ideal analysis will contain biostatistical manipulations integrated with explanatory material and biological interpretations.
+
+Writing your analysis in R Markdown makes it much easier to create a single document that both explains what was done and performs the analysis. Rather than writing a protocol document and then copying in analysis that was performed elsewhere, the R Markdown document is directly connected to the data and analysis. After writing the document, you compile it using R or R Studio, and the result is an HTML or PDF file. All of the written material in this course was produced in R Markdown; you can view it at [my github site](https://github.com/DavidQuigley/biostatistics).
+
+The most important parts of Markdown
+--------------------------------------------------------------------------------
+
+The crucial parts of Markdown are very simple and few. From within R Studio you can see a **R Markdown Quick Reference**, accessable from the Help menu. I have copied its style for this micro-primer. There is a [complete tutorial available at rstudio.com](http://rmarkdown.rstudio.com/). The statistician Karl Broman has written a [concise, more technically-oriented tutorial](http://kbroman.org/knitr_knutshell/pages/Rmarkdown.html).
+
+
+The most important tags are **headers**, **bold/italic**, **lists**, and **embedding R code**. R Markdown can produce very sophistcated documents that include tables, equations written in the LaTex language, and images. You an exert complete control over things like fonts using cascading style sheets. None of that is required for the most basic task of documenting what was done.
+
+***Headers***
+```
+This is my main section
+=======================
+
+This is a sub-section
+---------------------
+
+You can also indicate headers by preceeding the text with one or more # characters; the more # characters, the smaller the text:
+
+#This is my main section
+##This is a sub-section
+###This gets smaller still!
+```
+
+***Emphasis***: 
+```
+*italic*   
+**bold**
+
+Note: no spaces between the asterisks and words. The following will produce a bullet point followed by a plain asterisk: * italic_bad_example *
+```
+
+***Lists***
+```
+Bullet point lists:
+
+* Item 1
+* Item 2
+* Item 3
+
+Note: one space after the asterisk.
+
+Ordinal lists:
+
+1. Item 1
+2. Item 2
+3. Item 3
+```
+
+***R code***
+
+You can include R code in a R Markdown document by starting with three backticks (the single-quote mark to the left of the 1 key) followed by a space and then the letter *r* in curly brackets. Complete the R code section with three backticks on a line by themselves.
+
+<code>&#96;&#96;&#96;{r}<br>x=c(1,2,3,4)<br>y=mean(x)<br>&#96;&#96;&#96;</code>
+
+By default you will see both the R code and the results, if any. Plots are embedded in the document; you can control their height and width by additional parameters to the opening curly bracket statement.
