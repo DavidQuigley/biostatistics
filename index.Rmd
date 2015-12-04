@@ -9,7 +9,7 @@ output:
 ---
 
 Course Syllabus
--------------------
+====================
 
 Module | Description 
 ------ | ------- 
@@ -31,12 +31,12 @@ Module | Description
 9.1    | [Reproducible statistical analysis](module_0.9.1.html)
 
 Instructor
--------------------
+====================
 
 This course is being developed by [David Quigley](http://davidquigley.com), a member of the [UCSF Helen Diller Comprehensive Cancer Center](http://cancer.ucsf.edu) and the [UCSF Department of Epidemiology and Biostatistics](http://epibiostat.ucsf.edu). This work was supported by a grant from the UCSF Graduate division.
 
 Course overview
--------------------
+====================
 
 Statistical maturity is a core competency for researchers and health professionals, but formal education in statistical methods and practice varies widely among the graduate schools at UCSF. Although graduate students may opt to take a full introductory course such as Biostat 183, no statistical classwork is required of BMS, Informatics, PSPG, or Tetrad students. Students arrive on a continuum between a complete lack of formal training and having completed Masters level work in statistics. This course will provide a flexible, introductory set of modules that will allow biomedical students to design studies, perform essential analysis, and consume statistical data.
 
@@ -58,6 +58,6 @@ Pedagogical method
 Course material is organized into modules which consist of:
 
 * Recorded lectures
-* Written material produced as R Markdown documents that can be rendered as PDF or HTML, and loaded directly into R for worked examples
+* Written material produced as R Markdown documents that can be rendered as PDF or HTML, and loaded directly into R Studio for worked examples
 * Exercises and projects
 
