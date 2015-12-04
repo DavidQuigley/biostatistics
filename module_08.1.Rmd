@@ -1,7 +1,7 @@
 ---
 title: 'Module 8.1: Robust Statistics and outliers'
 author: "David Quigley"
-date: "November 26, 2015"
+date: "December 3, 2015"
 output: 
     html_document:
         toc: true
@@ -13,6 +13,8 @@ output:
     width: 25%;
 }
 </style>
+
+**Summary**
 
 *The range of values for real-valued data do not always match our expectations. Extremely high or low values, commonly though inexactly called outliers, can exert a disproportionate influence on statistics. This module describes how to identify these observations, and suggests strategies for deciding what (if anything) to do about them. I will talk about how outliers can affect some statistical tests more than others, and how a class of statistical tests called "non-parametric tests" are one approach for insulating your study against their effects.*
 
@@ -31,14 +33,14 @@ In some cases the cause of the extreme observation can be assigned with a high d
 
 In other cases, the extreme observations are **exactly what we're looking for**. Screening experiments, where the effect of many different interventions on a phenotype are simultaneously measured, often take this form: mostly negative results, with a few extreme positive findings. The real world is rarely as well-behaved as our models, and rejecting extreme values without very careful consideration will discard many true (if inconvenient) findings.
 
-In other cases, there is **no observed convincing reason** explaining why these extreme results occur. Although there is a tendency to remove extreme values from the observed data, this action should only be taken with careful consideration and complete documentation. **Selectively removing data *post hoc* brings with it a strong possibility of introducing** bias, particularly if an unobserved covariate is confounded with the propensity to develop extreme values. Real variables sampled from a large population will contain rare extreme values, and removing these values without good reason is inappropriate.
+In other cases, there is **no observed convincing reason** explaining why these extreme results occur. Although there is a tendency to remove extreme values from the observed data, this action should only be taken with careful consideration and complete documentation. **Selectively removing data *post hoc* brings with it a strong possibility of introducing bias**, particularly if an unobserved covariate is confounded with the propensity to develop extreme values. Real variables sampled from a large population will contain rare extreme values, and removing these values without good reason is inappropriate.
 
-The mouse that survived
---------------------------------------------------------------------------------
+EXAMPLE 1: The mouse that survived
+--------------------------------------------
 
-The point of the following example is to demonstrate the importance of considering the technical context of an experiment when confronted with an extreme observation.
+The following example demonstrates the importance of considering the technical execution of an experiment when confronted with an extreme observation.
 
-As an example, the Pons lab studies glioblastoma, a brain tumor. They are investigating whether adamantium inhibitors would prolong life in patients with glioblastoma. The group plans a pre-clinical study using a mouse model that expresses an inducible oncogenic form of the *ras* gene in brain tissue. Expression of this ongogene causes the development of glioblastoma with characteristics in common with the human disease. This model is used widely, with many groups showing that after the gene is activated the mice uniformly die from brain tumors after approximately 21 days. 
+As an example, the Pons lab studies the brain tumor glioblastoma. They are investigating whether adamantium inhibitors would prolong life in glioblastoma patients. The group plans a pre-clinical study using a mouse model that expresses an inducible oncogenic form of the *ras* gene in brain tissue. Expression of *ras* in the brain causes glioblastoma. This model is used widely, with many groups showing that after the gene is activated the mice uniformly die from brain tumors after approximately 21 days. 
 
 The group's hypothesis is that drug-treated mice will live significantly longer than 21 days; the null hypothesis is that the drug-treated mice will not live significantly longer than placebo-treated controls. The inhibitor must be administered three times a day orally, which is arduous for the post-doc running the experiment and requires a large amount of the hard-to-get drug, so the PI limits the size of this pilot study to 10 animals per arm. An alpha-level cut-off of 0.05 will be considered a significant effect justifying a larger study and further investigation. 
 
@@ -64,7 +66,7 @@ legend( 1,0.4, c("drug", "control"), col=c("cornflowerblue","black"), pch=19)
 
 These line plots show survival of the mice over time in each experimental arm; each drop in the height of the line represents an event, here the death of a mouse. The height of the drop corresponds to the number of animals still alive at that time in the experiment. The log rank test measures the likelihood that the two plots derive from the same population. 
 
-The P value for a log-rank test comparing the life-span post oncogene activation of the control mice, in black, to the drug-treated mice, in blue, is `r round(p.val, 3)`, failing to support the hypothesis that the drug extends life. However, note a data point that appears to defy our expectations: **one of the control animals was still alive at 40 days**, and an necropsy at that time showed it never developed a brain tumor. Given the 100% penetrance of the phenotype, the most likely biological explanation for a mouse surviving this experiment was failure to activate the oncogene. If the oncogene did not activate, then data from this mouse would be a technical error. Re-doing the analysis without the mouse that failed to develop a tumor produces the following result:
+The P value for a log-rank test comparing the life-span post oncogene activation of the control mice, in black, to the drug-treated mice, in blue, is `r round(p.val, 3)`. This fails to support the hypothesis that the drug extends life. However, there is a data point that appears to defy our expectations: **one of the control animals was still alive at 40 days**. A  necropsy of that animal showed *it never developed a brain tumor*. Given the 100% penetrance of the phenotype, the most likely  explanation for a mouse surviving this experiment was *failure to activate the oncogene*. If this is correct, the data from this mouse are a technical error. Re-doing the analysis without the mouse that failed to develop a tumor produces the following result:
 
 ```{r echo=FALSE, fig.height=4, fig.width=5}
 times=c(21,19,17,23,21,NA,23,19,20,23,  26,22,24,22,23,24,20,25,22,21)
@@ -91,11 +93,74 @@ As an aside, even without the inclusion of the mouse that did not develop a brai
 Extreme values and robust statistics
 ================================================================================
 
-The following example demonstrates how a single observation can radically alter the interpretation of an larger experiment. The point of the example is to 
+The following examples demonstrates how a single observation can radically alter the interpretation of an larger experiment. The point of the examples is to 
 
 * illustrate the existence of this kind of observation 
 * illustrate the importance of looking at your data
 * motivate robust alternatives to statistics that are vulnerable to extreme observations
+
+EXAMPLE 2
+--------------------------------------------
+
+We saw in Module 3.2 that the mean is sensitive to extreme values. In this example, let us say that the following data represent the number of population doublings seen in a population of primary mammary epithelial cells extracted from mammaplastic reduction surgery before the cells reach stasis and stop dividing. 
+
+```{r echo=FALSE, small.mar=TRUE, fig.height=3, fig.width=5}
+
+vals = rnorm(10, mean=10, sd=3)
+valskew = c(26, 38, 35, 49)
+ylocs =  jitter( rep(1,length(vals)), 3)
+par(mar=c(5,1,1,1))
+valskew = c(38,  49)
+plot( c(vals, valskew),  
+      c( ylocs, rep(1, length(valskew) ) ),
+      pch=19, axes=FALSE, xlab="population doublings", ylab="", xlim=c(0, 50), ylim=c(0.8, 1.2), col="#11111133" )
+box()
+axis(1, seq(0,50,10))
+mu = mean( c(vals, valskew) )
+lines( c(mu, mu), c(0.8, 1.2), lwd=2)
+med = median( c(vals, valskew) )
+lines( c(med, med), c(0.8, 1.2), lwd=2, lty=2, col="cornflowerblue")
+legend( 50, 1.2, c("mean", "median"), lty=c(1,2), lwd=2, box.col="white", xjust=1, col=c("black","cornflowerblue")  )
+
+```
+
+Most of the samples stop dividing around 10 population doublings. However, there are two extreme values of 38 and 49.
+
+Here the two extreme values at 38 and 49 drag the mean out to `r round(mean( c(vals, valskew)),2)`, while the median is  `r round(median( c(vals, valskew)),2)`, much closer to the center of the distribution. Although the mean is frequently used as a summary statistic and has important properties mathematically, it is always worth comparing the mean to the median to see how different they are.
+
+The Median Absolute Deviation
+--------------------------------------------
+
+The Standard Deviation describes variability of a sample using deviations from the mean as a guide. There is a corresponding statistic for the median called the **Median Absolute Deviation**. The Median Absolute Deviation (MAD) is a robust version of the Standard Deviation. The MAD is the median value of the absolute value of all differences between the sample median and individual observations:
+
+$\large{MAD = median( |X_i - median(X)| )}$
+
+```{r echo=FALSE, small.mar=TRUE,  fig.height=3, fig.width=5}
+par(mar=c(4,1,1,1))
+valskew = c(38,  49)
+plot( c(vals, valskew),  
+      c( ylocs, rep(1, length(valskew) ) ),
+      pch=19, axes=FALSE,  xlab="population doublings", ylab="", xlim=c(0, 50), ylim=c(0.8, 1.2), col="#11111133" )
+box()
+axis(1, seq(0,50,10))
+mu = mean( c(vals, valskew) )
+lines( c(mu, mu), c(0.85, 0.95), lwd=2)
+med = median( vals )
+lines( c(med, med), c(1.05, 1.15), lwd=2, lty=2, col="cornflowerblue")
+legend( 50, 1.2, c("mean", "median"), lty=c(1,2), lwd=2, box.col="white", xjust=1, col=c("black","cornflowerblue")  )
+
+sample.sd=sd( c(vals, valskew) )
+sample.mad=mad(c(vals, valskew) )
+lines( c(mu, mu+sample.sd), c(0.9,0.9), lwd=2,  col="black")
+lines( c(mu, mu-sample.sd), c(0.9,0.9), lwd=2,  col="black")
+lines( c(med, med+sample.mad), c(1.1,1.1), lwd=2, lty=2, col="cornflowerblue")
+lines( c(med, med-sample.mad), c(1.1,1.1), lwd=2, lty=2, col="cornflowerblue")
+text(mu+5, 0.88, "+/- 1 SD")
+text(med+7, 1.08, "+/- 1 MAD", col="cornflowerblue")
+
+```
+
+These plots show the median and mean (vertical lines) and +/- one MAD and SD (horizontal lines). You can see that the MAD is much smaller than the SD, and in this case most of the points are within 1 MAD of the median. If we wish to robustly characterize the behavior of the observations, the median and MAD would be an appropriate choice.
 
 ```{r echo=FALSE}
 aa=c(2.24,2.65,3.01,3.17,2.69,1.59,1.77,3.06,3.92,2.51,10.00)
@@ -110,19 +175,26 @@ p.10 = round( c10$p.value, 3)
 p.11 = round( c11$p.value, 3)
 ```
 
-In this example experiment, two real-valued variables were measured in 11 subjects labeled with the letters "a" through "k". The question of interest was was whether the paired variables were correlated with each other. In this example, we will assume that the experiments were performed correctly and there was no reason to think that any of the measurements was technically flawed.
+EXAMPLE 3
+--------------------------------------------
+
+In this example, two real-valued variables were measured in 11 subjects labeled with the letters "a" through "k". The question of interest was was whether the paired variables were correlated with each other. In this example, we will assume that the experiments were performed correctly and there was no reason to think that any of the measurements was technically flawed.
 
 ```{r echo=FALSE, small.mar=TRUE, fig.height=4, fig.width=6.5 }
 #aa = c(rnorm(10)+3, 10
 layout(matrix(1:2,1,2))
-par(mar=c(3,3,3,1))
+par(mar=c(3,3,1,1))
 plot(aa[1:10],bb[1:10], pch=19, col=cols[1:10], xlim=c(0,10), ylim=c(0,10), 
-     las=1, main=paste("rho =", cor.10,"P=",p.10), xlab="", ylab="", cex=1.25)
+     las=1, main="", xlab="", ylab="", cex=1.25)
+text(10, 2,paste("Rho =", round( cor.10, 2) ), adj=1, font=2)
+text(10, 1,paste("P =", round( p.10, 3) ), adj=1, font=2)
 text(aa[1:10], bb[1:10], 
      c('a','b','c','d','e','f','g','h','i','j'), col="white", cex=0.75)
 
 plot(aa,bb, pch=19, col=cols, xlim=c(0,10), ylim=c(0,10), las=1, 
-     main=paste("rho =", cor.11,"P=",p.11), xlab="", ylab="", cex=1.25)
+     main="", xlab="", ylab="", cex=1.25)
+text(10, 2,paste("Rho =", round( cor.11, 2) ), adj=1, font=2)
+text(10, 1,paste("P =", round( p.11, 3) ), adj=1, font=2)
 text(aa, bb, c('a','b','c','d','e','f','g','h','i','j','k'), col="white", cex=0.75)
 ```
 
@@ -131,9 +203,9 @@ The plot on the left, generated using observations *a* through *j*, shows two va
 What to do?
 -----------------
 
-Unlike the previous example, in this case there is no clear technical argument for dropping the extreme point from the analysis. This pathological case shows that a single outlier point can radically change the Pearson correlation, despite not representing the distribution as a whole. 
+Unlike the first example, in this case there is no clear technical argument for dropping the extreme point from the analysis. A single outlier point can radically change the Pearson correlation, despite not representing the distribution as a whole. 
 
-How can the addition point *k* completely reverse the correlation coefficient from `r cor.10` to `r cor.11`? Recall the definition of correlation:
+How can the addition of point *k* completely reverse the correlation coefficient from `r cor.10` to `r cor.11`? Recall the definition of correlation:
 
 $\large{ \rho = \frac{\textit{ covariance(x,y)} }{\sigma_x \sigma_y} }$
 
@@ -143,7 +215,7 @@ $\large{ \sigma_{X,Y} = \frac{1}{N-1}\sum_{1}^N( (x_i-\bar{x})(y_i-\bar{y}) ) }$
 
 The addition of point *k* shifts the values of $\bar{x}$ from `r round(mean(aa[1:10]),2)` to `r round(mean(aa),2)` and $\bar{y}$ from `r round( mean(bb[1:10]),2)` to `r round( mean(bb), 2)`. The covariance changes from 
 `r signif( sum( (aa[1:10]-mean(aa[1:10])) - (bb[1:10]-mean(bb[1:10])) ) / (10-1), 2)` to 
-`r signif( sum( (aa-mean(aa)) - (bb-mean(bb)) )/ (11-1), 2)`, moving from negative to positive. This accounts for the change in sign of the correlation coeffcient, from negative (inverse) to positive (direct) correlation.
+`r signif( sum( (aa-mean(aa)) - (bb-mean(bb)) )/ (11-1), 2)`, moving from negative to positive. This accounts for the change in sign of the correlation coefficient, from negative (inverse) to positive (direct) correlation.
 
 The change in signs is also clear from a linear model fit, as the line of best fit when including point *k* is nearly perpendicular to the line of best fit when *k* is excluded:
 
@@ -190,11 +262,11 @@ Detecting outliers visually and through statistics
 Look at the data
 --------------------------------------------------------------------------------
 
-A first step to detecting potential outliers is to look at summaries of the data, and the actual data themselves when this is feasable. This point is so fundamental it bears repeated in larger, bold letters:
+A first step to detecting potential outliers is to look at summaries of the data, and the actual data themselves when this is feasible. This point is so fundamental it bears repeated in larger, bold letters:
 
 **Always look at the data. Never perform a statistical analysis without looking at the data themselves.**
 
-We have already seen scatterplots of the data above. Other summary methods were described in Module 3. The histogram summarizes the overall distribution of a continuous variable by binning values and drawing bars that represent the percentage of the overall distribution that fall into each bin. The box plot (a.k.a. box and whiskers plot) summarizes a distribution using five points: the median, a box spanning the 25th and 75th percentiles interquartile range, and whiskers that extend up to +/- 1.5 times the interquartile range. We can start by making these plots for the Y values of the data plotted above:
+We have already seen scatter plots of the data above. Other summary methods were described in Module 3. The histogram summarizes the overall distribution of a continuous variable by binning values and drawing bars that represent the percentage of the overall distribution that fall into each bin. The box plot (a.k.a. box and whiskers plot) summarizes a distribution using five points: the median, a box spanning the 25th and 75th percentiles interquartile range, and whiskers that extend up to +/- 1.5 times the interquartile range. We can start by making these plots for the Y values of the data plotted above:
 
 ```{r echo=FALSE, fig.height=4, fig.width=7}
 layout(matrix(1:2,1,2))
@@ -233,7 +305,7 @@ where *N* is the number of observations and *k* is the number of explanatory var
 
 > plot( lm(bb~aa), which=4 )
 
-What should be done about this observation? In the absence of any strong prior information that the data are *fundamentally mistaken* due to a technical error, it would be inappropriate to remove the errant point, partiularly in a *post-hoc* analysis. However, the point is clearly problematic due to its excessive influence. One approach would be to **replace the Pearson correlation with an analysis that is robust to outliers**.
+What should be done about this observation? In the absence of any strong prior information that the data are *fundamentally mistaken* due to a technical error, it would be inappropriate to remove the errant point, particularly in a *post-hoc* analysis. However, the point is clearly problematic due to its excessive influence. One approach would be to **replace the Pearson correlation with an analysis that is robust to outliers**.
 
 Robust statistics using ranks instead of real values
 ================================================================================
@@ -249,7 +321,7 @@ Converting the values (3.3, 5.1, 9.0, 2.5) to their ranks would produce (2,3,4,1
 
 The correlation test using ranks is called the **Spearman rank correlation**. It is particularly useful when you are testing values that are likely to contain outliers.
 
-One disadvantage of converting to ranks is the **potential for a loss of statistical power** in cases where the assumptions of the pearson correlation are all met. However, this loss of power is often modest, and the potential benefit of reducing erroneous conclusions from extreme values that appear by chance is large.
+One disadvantage of converting to ranks is the **potential for a loss of statistical power** in cases where the assumptions of the Pearson correlation are all met. However, this loss of power is often modest, and the potential benefit of reducing erroneous conclusions from extreme values that appear by chance is large.
 
 > To perform a Spearman rank correlation in R measuring correlation between vectors X and Y, use cor.test(X, Y, method="spearman")
 
@@ -306,7 +378,7 @@ The point to take away from these plots:
 1. It is generally safe to use the Spearman rank correlation in place of the Pearson correlation.
 2. Pearson correlation will often have modestly higher power to detect a real difference, if the data are well-behaved
 
-If the data are not well0behaved, using Pearson correlation can result in a dramatic loss of power. On the left below I show 100 points with a positive correlation. On the right I modify the plot by changing a single point to a much higher value. Note the dramatic effect on the Pearson correlation and the negligible effect on the Spearman rank correlation:
+If the data are not well-behaved, using Pearson correlation can result in a dramatic loss of power. On the left below I show 100 points with a positive correlation. On the right I modify the plot by changing a single point to a much higher value. Note the dramatic effect on the Pearson correlation and the negligible effect on the Spearman rank correlation:
 
 
 ```{r echo=FALSE, warning=FALSE}
@@ -411,7 +483,7 @@ axis(2,-1:3, las=1)
 axis(1,at=c(1,2), labels=c("Y1", "Y2"), tick=FALSE)
 ```
 
-A t test of these values reports P = `r round( t.test(y1,y2)$p.value,3)`, while a Wilcoxon Rank test reports P = `r round( wilcox.test(y1, y2)$p.value, 3)`. If we add an outlier to Y1, the results change dramatically for a t test but less so for the Wilcoxon Rank test:
+A *t* test of these values reports P = `r round( t.test(y1,y2)$p.value,3)`, while a Wilcoxon Rank test reports P = `r round( wilcox.test(y1, y2)$p.value, 3)`. If we add an outlier to Y1, the results change dramatically for a t test but less so for the Wilcoxon Rank test:
 
 ```{r echo=FALSE, fig.height=4, fig.width=3}
 y[1] = 8
@@ -423,4 +495,4 @@ box()
 y1 = y[1:10]
 ```
 
-A t test of these values reports P = `r round( t.test(y1,y2)$p.value,3)`, while a Wilcoxon Rank test reports P = `r round( wilcox.test(y1, y2)$p.value, 3)`.
+A t test of these values reports P = `r round( t.test(y1,y2)$p.value,3)`, while a Wilcoxon Rank test reports P = `r round( wilcox.test(y1, y2)$p.value, 3)`. Once again, a robust test is an appropriate analytical choice in the face of outlier values.

@@ -1,7 +1,7 @@
 ---
 title: "UCSF Introduction to Biostatistics Online course"
 author: "David Quigley"
-date: "October 12, 2015"
+date: "December 4, 2015"
 output: 
     html_document:
         toc: true
@@ -27,7 +27,7 @@ Module | Description
 7.1    | [Counts and categories: The Binomial, Chi-squared and Fisher's Exact tests](module_07.1.html)
 7.2    | [Counts and categories: The Poisson distribution](module_07.2.html)
 7.3    | [Counts and categories: ANOVA](module_07.3.html)
-8.1    | [Robust statistics and outliers](module_0.8.1.html)
+8.1    | [Robust statistics and outliers](module_08.1.html)
 9.1    | [Reproducible statistical analysis](module_0.9.1.html)
 
 Instructor
