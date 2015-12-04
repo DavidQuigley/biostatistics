@@ -14,6 +14,15 @@ output:
 }
 </style>
 
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(comment = NA)
+knitr::opts_chunk$set( prompt=TRUE ) 
+
+knitr::knit_hooks$set(small.mar = function(before, options, envir) {
+    if (before) par(mar = c(2, 2, 1, 1))  # smaller margin on top and right
+})
+```
+
 **Summary**
 
 *The range of values for real-valued data do not always match our expectations. Extremely high or low values, commonly though inexactly called outliers, can exert a disproportionate influence on statistics. This module describes how to identify these observations, and suggests strategies for deciding what (if anything) to do about them. I will talk about how outliers can affect some statistical tests more than others, and how a class of statistical tests called "non-parametric tests" are one approach for insulating your study against their effects.*
@@ -174,15 +183,6 @@ cor.11 = round( c11$estimate, 2)
 p.10 = round( c10$p.value, 3)
 p.11 = round( c11$p.value, 3)
 
-X = c(vals, valskew)
-```
-
->R Code: Calculating the MAD
-
-You can calculate the MAD in R using the mad() function.
-
-```{r MAD, comment=""}
-mad(X)
 ```
 
 EXAMPLE 3
@@ -303,19 +303,15 @@ axis(2, seq(from=0, to=50, by=10), las=1)
 axis(1, at=1:11, labels=letters[1:11])
 ```
 
-There are several heuristics for values of Cook's Distance that indicate particularly influential values, including
+
+What should be done about this observation? There are several heuristics for values of Cook's Distance that indicate particularly influential values, including:
 
 * Cook's Distance > 1
 * Cook's Distance > 4/*N* 
 * Distance > 4/(*N*−*k*−1)
 
-where *N* is the number of observations and *k* is the number of explanatory variables. By any measure, point *k* has an enormous Cook's distance and is therefore disproportionately influential.
+where *N* is the number of observations and *k* is the number of explanatory variables. By any measure, point *k* has an enormous Cook's distance and is therefore disproportionately influential. In the absence of any strong prior information that the data are *fundamentally mistaken* due to a technical error, it would be inappropriate to remove the errant point, particularly in a *post-hoc* analysis. However, the point is clearly problematic due to its excessive influence. One approach would be to **replace the Pearson correlation with an analysis that is robust to outliers**.
 
-> To plot Cook's distance for a linear regression, pass a linear model to plot() with the "which" parameter set to 4
-
-> plot( lm(bb~aa), which=4 )
-
-What should be done about this observation? In the absence of any strong prior information that the data are *fundamentally mistaken* due to a technical error, it would be inappropriate to remove the errant point, particularly in a *post-hoc* analysis. However, the point is clearly problematic due to its excessive influence. One approach would be to **replace the Pearson correlation with an analysis that is robust to outliers**.
 
 Robust statistics using ranks instead of real values
 ================================================================================
@@ -327,29 +323,10 @@ Correlation, linear models, and the *t* test are highly susceptible to the influ
 
 Converting the values (3.3, 5.1, 9.0, 2.5) to their ranks would produce (2,3,4,1). There are different heuristics for dealing with ties; R assigns tied values to be the mean of the ranks they would have occupied if they were all contiguous, so the values (3.3, 2, 2, 9) are ranked (3.0, 1.5, 1.5, 4.0) because two values are tied for first place, taking first and second place between them, and the mean of (1,2) is 1.5.
 
->R code: Getting the rank of a vector of numbers
-
-To convert a vector of numbers to ranks in R use the rank() function
-
-```{r rank, comment=""}
-rank( c( 3.3, 5.1, 9.0, 2.5) )
-```
-
 The correlation test using ranks is called the **Spearman rank correlation**. It is particularly useful when you are testing values that are likely to contain outliers.
 
 One disadvantage of converting real values to ranks is the **potential for a loss of statistical power** in cases where the assumptions of the Pearson correlation are all met. However, this loss of power is often modest, and the potential benefit of reducing erroneous conclusions from extreme values that appear by chance is large.
 
->R code: Spearman rank correlation
-
-To perform a Spearman rank correlation in R measuring correlation between vectors X and Y, use cor.test(X, Y) but add the parameters method="spearman"
-
-```{r echo=FALSE}
-X=aa
-Y=bb
-```
-```{r spearman, comment=""}
-cor.test(X, Y, method="spearman")
-```
 
 For well-behaved data, ranks and raw values produce similar results
 --------------------------------------------------------------------------------
@@ -492,10 +469,10 @@ The primary assumption made by the Wilcoxon Rank Sum test is that the individual
 
 The Wilcoxon Rank Sum test statistic is called *U*. There is more than one way to calculate it for samples we'll call X and Y. One method examines all possible pairings of a value in X and a value in Y, reporting the number of pairs where the value in Y is not greater than the value in X.
 
-```{r echo=FALSE, fig.height=4, fig.width=3}
+```{r echo=FALSE, fig.height=3, fig.width=3}
 #y1 = rnorm(10)
 #y2 = rnorm(10)+0.5
-par(mar=c(4,3,3,1))
+par(mar=c(4,3,1,1))
 y = c(1.58,-0.33,-0.47,-0.55,0.54,-0.42,-1.13,-0.96,0.69,-0.73,2.28,0.41,1.05,
       1.14,3.47, 0.26,0.59,1.67,0.78,1.56)
 y1=y[1:10]
@@ -509,9 +486,9 @@ axis(1,at=c(1,2), labels=c("Y1", "Y2"), tick=FALSE)
 
 A *t* test of these values reports P = `r round( t.test(y1,y2)$p.value,3)`, while a Wilcoxon Rank test reports P = `r round( wilcox.test(y1, y2)$p.value, 3)`. If we add an outlier to Y1, the results change dramatically for a t test but less so for the Wilcoxon Rank test:
 
-```{r echo=FALSE, fig.height=4, fig.width=3}
+```{r echo=FALSE, fig.height=3, fig.width=3}
 y[1] = 8
-par(mar=c(4,3,3,1))
+par(mar=c(4,3,1,1))
 plot( x, y, las=1, pch=19, col="#0000ffaa", axes=FALSE, ylab="", xlab="")
 axis(2,-1:8, las=1)
 axis(1,at=c(1,2), labels=c("Y1", "Y2"), tick=FALSE)
@@ -521,7 +498,56 @@ y1 = y[1:10]
 
 A t test of these values reports P = `r round( t.test(y1,y2)$p.value,3)`, while a Wilcoxon Rank test reports P = `r round( wilcox.test(y1, y2)$p.value, 3)`. Once again, a robust test is an appropriate analytical choice in the face of outlier values.
 
->R code: Performing a Wilcoxon Rank Sum test
+R code examples
+=======================
+
+>Obtain the rank of a vector of numbers
+
+To convert a vector of numbers to ranks in R use the rank() function
+
+```{r rank, comment=""}
+rank( c( 3.3, 5.1, 9.0, 2.5) )
+```
+
+```{r echo=FALSE}
+X = c(vals, valskew)
+```
+
+>Calculating the MAD
+
+You can calculate the MAD in R using the mad() function.
+
+```{r MAD, comment=""}
+mad(X)
+```
+
+>Spearman rank correlation
+
+To perform a Spearman rank correlation in R measuring correlation between vectors X and Y, use cor.test(X, Y) but add the parameters method="spearman"
+
+```{r echo=FALSE}
+X=aa
+Y=bb
+```
+```{r spearman, comment=""}
+cor.test(X, Y, method="spearman")
+```
+
+
+>Plot Cook's distance for a linear regression
+
+Fit a linear model and pass the linear model to plot() with the "which" parameter set to 4
+
+```{r echo=FALSE}
+Y = bb
+X = aa
+```
+```{r, fig.height=3, fig.width=4, small.mar=TRUE}
+plot( lm(Y~X), which=4 )
+```
+
+
+>Performing a Wilcoxon Rank Sum test
 
 To perform a Wilcoxon Rank Sum test in R measuring between vectors X and Y, use wilcox.test( X, Y )
 
