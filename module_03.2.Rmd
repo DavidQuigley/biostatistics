@@ -53,10 +53,17 @@ MCV = c( 59.5,49.0,48.7,50.1,49.9,54.5,57.0,63.2,47.5,65.1,63.5,61.3,77.3,50.2,5
 ```
 
 
+Introduction
+========================================
 
-**This module fundamental tools used to summarize the behavior of a variable, including the mean, median, pecentiles, box and whiskers plots (box plots), variance, and the standard deviation.**
 
---------------------------------------------------------------------------------
+**This module explains:**
+
+* How to summarize a single random real-valued variable
+    + mean and median
+    + percentiles
+    + Box and whiskers plots
+    + Variance and the standard deviation
 
 
 
@@ -79,7 +86,7 @@ There are several ways of calculating central tendency, but the mean is the quan
 In mathematical notation, the greek letter sigma (Σ) means "sum over"; this notation can be read, "the mean, which has the symbol μ (mu), is equal to the sum of all N of the values *v*, divided by N".
 
 ```{r echo=FALSE, small.mar=TRUE, fig.height=2, fig.width=3}
-par(mar=c(3,1,1,1))
+par(mar=c(2,1,1,1))
 vals = rnorm(10, mean=10, sd=3)
 valskew=c()
 ylocs =  jitter( rep(1,length(vals)), 3)
@@ -94,20 +101,27 @@ legend( 25, 1.2, c("mean"), lty=c(1), lwd=2, box.col="white" )
 
 ```
 
-**Observations, mean at solid line**
+Here I have plotted a set of 10 values along the X axis. Their mean is `r round( mean(vals), 2)`, indicated by a solid vertical line.
 
 Central tendency: the median
 -------------------------------
 
 The median is calculated by ordering all of the observations and reporting the value in the middle of the list. If there is an even number of observations, the median is the mean of those two observations.
 
+Calculating the median of 9 observations, we sort the values and report the 5th highest value:
+```{r}
+observations = c(2,4,7,2,6,9,7,3,1)
+observations = sort( observations )
+observations[ 5 ] 
+median(observations)
+```
+
 
 
 When the mean and median diverge
 --------------------------------------------------------
 
-Using only one number to stand in for the whole dataset can be misleading. If observations tend to be equally likely to be larger or smaller than the mean, then the mean will be useful. However, there are many possible distributions of observations where the mean can be highly misleading.
-
+Sometimes the mean gives a good estimate of the expected value of a set of observations. If observations tend to be equally likely to be larger or smaller than the mean, then the mean will be useful. However, there are many possible distributions of observations where the mean can be highly misleading.
 
 ```{r echo=FALSE, small.mar=TRUE, fig.height=2, fig.width=3}
 par(mar=c(3,1,1,1))
@@ -119,8 +133,8 @@ axis(1, seq(0,50,10))
 mu = mean( c(vals, valskew) )
 lines( c(mu, mu), c(0.8, 1.2), lwd=2)
 med = median( vals )
-lines( c(med, med), c(0.8, 1.2), lwd=2, lty=2)
-legend( 25, 1.24, c("mean", "median"), lty=c(1,2), lwd=2, box.col="white" )
+lines( c(med, med), c(0.8, 1.2), lwd=2, lty=2, col="cornflowerblue")
+legend( 25, 1.24, c("mean", "median"), lty=c(1,2), lwd=2, box.col="white", col=c("black","cornflowerblue") )
 
 
 valskew = c(26, 38, 35, 49)
@@ -132,14 +146,14 @@ axis(1, seq(0,50,10))
 mu = mean( c(vals, valskew) )
 lines( c(mu, mu), c(0.8, 1.2), lwd=2)
 med = median( vals )
-lines( c(med, med), c(0.8, 1.2), lwd=2, lty=2)
-legend( 25, 1.24, c("mean", "median"), lty=c(1,2), lwd=2, box.col="white" )
+lines( c(med, med), c(0.8, 1.2), lwd=2, lty=2, col="cornflowerblue")
+legend( 25, 1.24, c("mean", "median"), lty=c(1,2), lwd=2, box.col="white", col=c("black","cornflowerblue") )
 
 ```
 
 On the left side, data where the mean and median give very similar results. On the right side, a few extreme values push the mean up nearly 10 units compared to the median. When the mean is larger than the median, the distribution is called a **heavy-tailed distribution** that displays **skew**. Skewed distributions are not equally likely to have points on either side of the mean; in this case the skew is to the right.
 
-The median is stable in the face of a small number of extreme values, since it is determined by the value of the middle of the distribution rather than being calculated from all of the observations together. This stability is often highly desirable, and will be discussed further in the **Robust Statistics module**. The mean is still very useful, however, because it has mathematical properties that we will describe when we introduce the normal distribution.
+The median is stable in the face of a small number of extreme values, since it is determined by the value of the middle of the distribution rather than being calculated using the sum of all of the observations together. This stability is often highly desirable, and will be discussed further in the **Robust Statistics module**. The mean is still very useful, however, because it has mathematical properties that we will describe when we introduce the normal distribution.
 
 
 Range and percentiles
@@ -169,26 +183,24 @@ The R function to make box and whiskers plots is *boxplot()*.
 ```{r, left.mar=TRUE, fig.height=3, fig.width=3, echo=FALSE}
 vv = rnorm( 100, mean=5)
 par(mar=c(2,3,1,1))
-hist(vv, las=1, xlim=c(0,10), main="Histogram" )
+hist(vv, las=1, xlim=c(0,10), main="Histogram")
 box()
 boxplot( vv, las=1, ylim=c(0, 10), boxwex=0.5, main="Box and whiskers" )
 ```
 
 This box plot shows a distribution with close to equal distribution around the mean value.
 
-```{r, left.mar=TRUE, fig.height=3, fig.width=3, echo=FALSE}
+```{r, left.mar=TRUE, fig.height=3, fig.width=3.5, echo=FALSE}
 vv2 = c( rnorm( 100, mean=5), rnorm( 10, mean=9), 12,12,14,15 )
 par(mar=c(2,3,1,1))
-hist(vv2, las=1, xlim=c(0,20), main="Histogram, slight right skew")
+hist(vv2, las=1, xlim=c(0,20), main="Histogram, right skew")
 box()
 boxplot( vv2, las=1, ylim=c(0, 20), boxwex=0.5, main="Box and whiskers" )
 ```
 
-**Heavy-tailed data**
-
 This plot shows a different distribution showing some skew to larger values; the median has not changed much, but the more extreme values are plotted as individual points in the box and whiskers plot.
 
-```{r, left.mar=TRUE, fig.height=3, fig.width=3, echo=FALSE}
+```{r, left.mar=TRUE, fig.height=3, fig.width=3.5, echo=FALSE}
 vv2 = vv2[vv2>4.5]
 vv2 = c(vv2, 7,8,8,9,9,10,11)
 par(mar=c(2,3,1,1))
@@ -197,7 +209,7 @@ box()
 boxplot( vv2, las=1, ylim=c(0, 20), boxwex=0.5, main="Box and whiskers, right-skew" )
 ```
 
-This plot shows the same data as in the previous distribution, but with all values less than 4.5 removed and more values above the median. The median has increased slightly, but note that the median is now almost identical to the 25th percentile, and the 10th percentile whisker is very short compared to the 90th percentile whisker. This indicates compresssion in the distribution.
+This plot shows the same data as in the previous distribution, but with all values less than 4.5 removed and more values above the median. The median has increased slightly, but note that the median is now almost identical to the 25th percentile, and the lower whisker is very short compared to the upper whisker. This indicates compresssion in the distribution.
 
 
 Summarizing data: variance and standard deviation
@@ -207,6 +219,23 @@ The mean provides a single point estmate the middle value of the data. The varia
 
 $\large{ \textit{variance} = \sigma^2 = \frac{ \sum\limits_{i=1}^N{ (v_n - \mu)^2 }} {N} }$
 
+```{r echo=FALSE, fig.height=3, fig.width=8}
+layout(matrix(1:3,1,3))
+par(mar=c(3,3,1,2))
+X = rnorm(100, 0, 0.25)
+plot( X, pch=19, cex=0.5, las=1, ylim=c(-3,3) )
+text( 100, -2.7, paste("mean:", round( mean(X), 2), sep=" " ), adj=1, font=2 )
+text( 100, -3, paste("variance:", round( var(X), 2), sep=" " ), adj=1, font=2 )
+X = rnorm(100, 0, 0.75)
+plot( X, pch=19, cex=0.5, las=1, ylim=c(-3,3) )
+text( 100, -2.7, paste("mean:", round( mean(X), 2), sep=" " ), adj=1, font=2 )
+text( 100, -3, paste("variance:", round( var(X), 2), sep=" " ), adj=1, font=2 )
+X = rnorm(100, 0, 1)
+plot( X, pch=19, cex=0.5, las=1, ylim=c(-3,3) )
+text( 100, -2.7, paste("mean:", round( mean(X), 2), sep=" " ), adj=1, font=2 )
+text( 100, -3, paste("variance:", round( var(X), 2), sep=" " ), adj=1, font=2 )
+```
+
 Note that because we sum over the square of the differences, as opposed to simply using a positive distance such as the absolute value, a point's influence over the variance increases dramatically as the distance from the mean increases. As a result, even if most observations are relatively close to the mean, it takes only one value that is quite distant from the mean to make the variance very large.
 
 The variance is mathematically important, but since we square the individual deviations from the mean in order to calculate the variance, the variance itself is not in the same units as the underlying measurements. That is, if your measure is in inches, the variance will be in inches-squared. This is often inconvenient, so we usually take the square root of the variance to match up the units measuring dispersion with the units measuring mean. The square root of the variance is called the standard deviation.
@@ -214,3 +243,36 @@ The variance is mathematically important, but since we square the individual dev
 $\large{ \textit{standard deviation} = \sigma = \sqrt{ \textit{variance} } }$
 
 The mean and standard deviation together do a good job of describing the central tendency and spread of many data sets that are generated by natural processes. They are particularly useful when the data tend to cluster near the mean and fall off in frequency in either direction in a bell-shaped distribution called the *normal distribution*. 
+
+
+R code examples
+=======================
+
+> boxplot
+
+Box plots can be created with the boxplot() function
+
+```{r echo=FALSE}
+X = rnorm(100, 0, 0.25)
+```
+```{r, fig.height=3, fig.width=2, small.mar=TRUE}
+boxplot(X)
+```
+
+Useful parameters:
+
+* Scaling factor for box width: *boxwex* (number)
+
+```{r, fig.height=3, fig.width=2, small.mar=TRUE}
+boxplot(X, boxwex=0.3)
+```
+
+If you have two vectors, one of values and one of categories (e.g. mouse strain), you can plot one box and whiskers plot for each category using the tilde notation:
+
+```{r, fig.height=3, fig.width=2, small.mar=TRUE}
+values = c(8,10,4,6,1,7,2,5,3,9,
+           6,9,5,7,4,10,11,13,8,12)
+category = factor( c("A","A","A","A","A","A","A","A","A","A",
+                      "B","B","B","B","B","B","B","B","B","B") )
+boxplot(values~category)
+```
