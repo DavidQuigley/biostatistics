@@ -22,7 +22,15 @@ knitr::knit_hooks$set(med.mar = function(before, options, envir) {
 
 ```
 
-*This module shows methods for evaluating distributions of counts of the occurrences of categorical variables. First, it introduces the Binomial distribution, which can be used to characterize categorical variables with two possible values. It then introduces tests based on the chi-squared distribution, a method that generates approximations to the P value for categorical tests of one variable with two or more values, or two variable tests using contingency tables. Finally, Fisher's exact test, an exact method applicable to two-by-two contingency tables, is introduced.*
+Introduction
+========================================
+
+**This module explains:**
+
+* Methods for evaluating distributions of counts of the occurrences of categorical variables.
+* The Binomial distribution, for tests where categories take two possible variables
+* Contingency table tests: the chi-squared test
+* Contingency table tests: Fisher's exact test
 
 The Binomial distribution and Bionomial tests
 ===============================================================

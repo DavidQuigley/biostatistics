@@ -1,7 +1,7 @@
 ---
 title: "Module 4.1: The normal distribution"
 author: "David Quigley"
-date: "September 25, 2015"
+date: "December 4, 2015"
 output: 
     html_document:
         toc: true
@@ -9,8 +9,15 @@ output:
 ---
 
 
-*In this module, I will introduce the concept of statistical distributions. I focus on the standard normal distribution and show how q-q plots can be used to evaluate whether a distribution is normal. I introduce the Central Limit Theorem and the Law of Large Numbers*
+Introduction
+========================================
 
+**This module explains:**
+
+* The concept of a statistical distribution
+* The standard normal distribution
+* Evaluating the fit of a distribution with q-q plots
+* The Central Limit theorem and Law of Large Numbers
 
 What is a statistical distribution?
 ======================================================
@@ -43,7 +50,7 @@ for(i in 1:length(vals)){
 lines(c(0,10), c(0.1, 0.1), lwd=3)
 ```
 
-The plot on the left is a distribution; although we sometimes refer to a distribution as a "curve", there is no rule that says a distribution cannot be a straight line. If you were to sum up the total area under the line, plotted in blue on the right side, you would find it equals exactly one. This distribution has a uniform value for Y at every X; it is therefore called the **uniform distribution**. Note that if we extended the plot to the right past 10 or to the left past 0, the area under the curve would exceed one and the curve could no longer be a distribution. Some distributions therefore will have **bounds**, values that they cannot exceed. 
+The plot on the left is a distribution; although we sometimes refer to a distribution as a "curve", there is no rule that says a distribution cannot be a straight line. If you were to sum up the total area under the line, plotted in blue on the right side, you would find it equals exactly one. This distribution has the same value for Y at every X; it is therefore called the **uniform distribution**. Note that if we extended the plot to the right past 10 or to the left past 0, the area under the curve would exceed one and the curve could no longer be a distribution. Some distributions therefore will have **bounds**, values that they cannot exceed. 
 
 The fact that distributions are used to reason about the *frequency* of events is the explanation for why their area must sum to one: the total area under the distribution is the *sum of all possible of frequency values*. Frequency values range between zero (the event never happens) and a maximum of one (or 100%), meaning the event always occurs.
 
@@ -74,9 +81,7 @@ lines( c( mean(vals), mean(vals) ), c(0, 22), col="cornflowerblue", lwd=3)
 text( mean(vals)+0.5, 21, "Mean")
 ```
 
-If we trace along the top of this frequency plot, we see the rough outline of a bell-shaped curve. 
-
-As we obtain larger and larger samples of biological data, the frequency plot of the sample value distribution will tend towards a particular distribution.
+If we trace along the top of this frequency plot, we see the rough outline of a bell-shaped curve. As we obtain larger and larger samples of biological data in this example, the frequency plot of the sample value distribution will tend towards a particular distribution.
 
 ```{r echo=FALSE, fig.height=4, fig.width=9}
 layout(matrix(1:3,1,3))
@@ -97,7 +102,7 @@ Although real data will never be identical to a particular distribution, the fre
 
 The standard normal distribution has a special and unique role as a kind of ideal histogram. The word 'standard' is derived from the fact that **the distribution has been scaled on the horizontal axis so that one unit on the horizontal axis corresponds to one standard deviation**. The standardization is important because it allows us to compare two or more samples with values on different scales to the standard normal curve; if values from sample one are exactly twice the size of values from sample two, they will have the same standardized distribution. 
 
-Not all distributions are symmetrical around zero, but this one is; that means that its mean is zero. You can see that the Y value drops quickly to the X axis; although it never touches the X axis, it gets asymptotically close and is very, very close already when X equals -4 or 4.  
+Not all distributions are symmetrical around zero, but this one is. As a consequence its mean is zero. You can see that the Y value drops quickly to be very near the X axis. Although the curve never touches the X axis, it gets asymptotically close and is very, very close already when X equals -4 or 4.  
 
 ```{r echo=FALSE}
 vals = seq(from=-5,to=5, by=0.01)
@@ -116,15 +121,15 @@ points( vals, dnorm(vals), type="l", lwd=3 )
 Inferring the probability of an observation from a distribution
 --------------------------------------------------------
 
-The formula that defines the standard normal distribution, which is not something you need to memorize, is rather complicated:
+The formula that defines the curve of the standard normal distribution, which is not something you need to memorize, is rather complicated:
 
 $\large{y = \frac{1}{\sqrt{2\pi}} e^{\frac{-x^2}{2}}}$
 
-where *e* is the special mathematical constant that starts 2.71828, and $\pi$ is the special mathematical constant that starts out 3.141593. Since this formula is difficult to work with by hand, in the past it was common to use look-up tables to obtain the height of the standard normal curve at a given value of X. Now it is easier to use statistical packages such as R to calculate the area under this curve between two points. However, there are a few key values that are important to know:
+where *e* is the special mathematical constant that starts 2.71828, and $\pi$ is the special mathematical constant that starts out 3.141593. Since this formula is difficult to work with by hand, in the past it was common to use look-up tables to obtain the height of the standard normal curve at a given value of X. Now it is easier to use statistical packages such as R to calculate the area under this curve between two points. However, there are a few key values about the area under the standard normal distribution that are important to know:
 
-* Between -1 and 1: lies about 0.68, or 68%.
-* Between -2 and 2: lies about 0.95, or 95%.
-* Between -3 and 3: lies about 0.997, or 99.7%.
+* Between -1 and 1: area is about 0.68, or 68%.
+* Between -2 and 2: area is about 0.95, or 95%.
+* Between -3 and 3: area about 0.997, or 99.7%.
 
 ```{r echo=FALSE, fig.height=4, fig.width=9}
 layout(matrix(1:3,1,3))
@@ -164,10 +169,10 @@ points( vals, dnorm(vals), xlab="standard units", ylab="density", xaxs="i",yaxs=
 
 These bounds have important implications for how we interpret the likelihood of seeing data; for samples that are normally distributed, or close a normal distribution, 95% of the data will fall within two standard deviations of the mean value.
 
+If we were to randomly generate 100 values using this distribution, our expectation is that 95 of the 100 would fall between -2 and 2. Since the process is random, the number might be 93 or 98. Seeing a single 3 in 100 random picks would not be shocking, since a little under 1 of 100 randomly drawn values would be greater than or equal to 3. Seeing four values greater than or equal to 3 would be surprising indeed. 
 
 
-
-Are my data normal?
+Are my data normally distributed?
 ======================================================
 
 We would sometimes like to determine how closely a sample follows a given distribution. A particular case of this problem is determining whether our data are normally distributed. One way to answer that question is to make a *quantile-quantile* plot, also called a *q-q plot*. Recall that a quantile is the percentage of values in a set that are smaller than the given value. To obtain quantiles at 0, 25%, 50%, 75%, and 100% in R one can use the *quantile()* function. One can also calculate the quantile for any given value by hand:

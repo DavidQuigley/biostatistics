@@ -1,7 +1,7 @@
 ---
 title: "Module 7.3: Counts and Categories: ANOVA"
 author: "David Quigley"
-date: "October 28, 2015"
+date: "December 4, 2015"
 output: 
     html_document:
         toc: true
@@ -27,7 +27,12 @@ knitr::knit_hooks$set(bottom.mar = function(before, options, envir) {
 })
 ```
 
-**This module defines ANOVA, showing how it is a more general form of the t test which we have already described.**
+Introduction
+========================================
+
+**This module:**
+
+* Defines ANOVA, showing how it is a more general form of the t test which we have already described
 
 ANOVA: a more general t test
 ======================================================================

@@ -8,7 +8,16 @@ output:
         css: swiss.css
 ---
 
-*In this module, I will describe some elementary probability calculations that will allow us to understand what happens to the interpretation of P values when we perform many tests. We will describe two complementary approaches for adjusting for multiple tests: the Family-wise Error Rate and the False Discovery Rate.*
+Introduction
+========================================
+
+**This module explains:**
+
+* Elementary calculations with probability
+* How to interpret the P value when many tests are performed
+* Approaches to multiple test correction
+    + Controlling the Family-wise Error Rate
+    + Controlling the False Discovery Rate
 
 
 Elementary calculations with probability

@@ -22,7 +22,11 @@ knitr::knit_hooks$set(med.mar = function(before, options, envir) {
 
 ```
 
-*This module introduces motivation for reproducible statistical practices, by comparison to best practices in experimental biology. It introduces R Markdown documents as a simple and elegant way to implement reproducible analysis.*
+**This module:**
+
+* introduces motivation for reproducible statistical practices
+* introduces R Markdown documents as a simple and elegant way to implement reproducible analysis
+* Explains the elements of R Markdown syntax
 
 How did you do that?
 ========================================================

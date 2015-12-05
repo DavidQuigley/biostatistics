@@ -27,7 +27,12 @@ knitr::knit_hooks$set(bottom.mar = function(before, options, envir) {
 })
 ```
 
-**This module explains how the Poisson distribution can be used to model discrete, rare events.**
+Introduction
+========================================
+
+**This module explains:**
+
+* How the Poisson distribution can be used to model discrete, rare events
 
 Counts of rare events: the Poisson distribution
 --------------------------------------------------------------------------------

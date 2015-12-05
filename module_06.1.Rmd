@@ -21,7 +21,18 @@ knitr::knit_hooks$set(med.mar = function(before, options, envir) {
 })
 
 ```
-*This module introduces correlation as a measure of the association between two variables. It shows how correlation is derived from covariance, how to calculate a P value for a correlation, and how to derive confidence intervals for correlation. It describes the limits of correlation.*
+
+Introduction
+========================================
+
+**This module explains:**
+
+* Correlation as a measure of association between two real-valued variables
+* How correlation is derived from covariance
+* How to calculate a P value for a correlation
+* How to derive confidence intervals for a correlation
+* Limits of correlation 
+    
 
 Correlation 
 ========================================================

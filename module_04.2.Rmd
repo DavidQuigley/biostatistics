@@ -1,7 +1,7 @@
 ---
 title: "Module 4.2: Student's t distribution"
 author: "David Quigley"
-date: "September 25, 2015"
+date: "December 4, 2015"
 output: 
     html_document:
         toc: true
@@ -9,14 +9,22 @@ output:
 ---
 
 
-**In this module, I introduce the t distribution.**
+Introduction
+========================================
+
+**This module explains:**
+
+* The t distribution (Student's t)
 
 Student's t distribution
 ================================================================================
 
-The fact that as the number of observations increase, their values will often tend towards a normal frequency distribution allows statisticians to make important inferences about statistical properties. However, in practice, scientists often are constrained to use small sample sizes. Depending on experimental costs, expenses, or the availability of subject populations, it is not uncommon to operate on small sample sizes. The *t* distribution is very useful in these cases. The *t* distribution is sometimes named Student's *t* distribution after the pseudonym of the statistician William Sealy Gosset, who developed it while working at the Guiness Brewery.
+The fact that as the number of observations increase, the distribution values will often tend towards a normal frequency distribution allows statisticians to make important inferences about statistical properties. However, in practice, due to experimental costs or the availability of subject populations, **scientists often are constrained to use small sample sizes**. The *t* distribution is very useful in these cases. The *t* distribution is sometimes named Student's *t* distribution after the pseudonym of the statistician William Sealy Gosset, who developed it while working at the Guiness Brewery.
 
-The t distribution describes the frequency distribution of small numbers of samples chosen from a normal distribution. Like the normal distribution, the function that defines its probability density is complex and understanding it is not required to make use of the *t* distribution.
+The t distribution describes the **frequency distribution of small numbers of samples chosen from a normal distribution**. Like the normal distribution, the function that defines its probability density is complex and understanding it is not required to make use of the *t* distribution.
+
+Defining the t statistic
+---------------------------
 
 Recall that for *n* samples, the sample mean is defined:
 
@@ -36,7 +44,7 @@ So *t* will increase as
 2) *s* (the standard deviation, $\sqrt(variance)$) decreases
 3) the difference between $\bar{x}$ and $\mu$ decreases
 
-Note that this equation defines the *t* statistic for a particular observation; the *t* distribution describes the frequency with which one would observe all possible *t* statistics for a given number of degrees of freedom. The distribution of the *t* statistic is symmetric around zero. It is shaped like a standard normal distribution, but its tails do not get close to zero quite as quickly as a standard normal curve; in statistical jargon, it has "fatter tails". The shape of the *t* distribution is influenced by on the number of degrees of freedom. The degrees of freedom for a *t* statistic is equal to the number of samples minus one. As the number of degrees of freedom increases, the *t* distribution becomes more simlar to a normal distribution:
+Note that this equation defines the *t* statistic for a particular observation; the *t* distribution describes the **frequency with which one would observe all possible *t* statistics for a given number of degrees of freedom** . The distribution of the *t* statistic is symmetric around zero. It is shaped like a standard normal distribution, but its tails do not get close to zero quite as quickly as a standard normal curve; in statistical jargon, it has "fatter tails". The shape of the *t* distribution is influenced by on the number of degrees of freedom. The degrees of freedom for a *t* statistic is equal to the number of samples minus one. As the number of degrees of freedom increases, the *t* distribution becomes more simlar to a normal distribution:
 
 ```{r echo=FALSE, fig.height=4, fig.width=8}
 vals = seq(from=-7,to=7, by=0.01)
@@ -62,4 +70,14 @@ legend( 900,0.35, c("t DF=1","t DF=3","t DF=6","t DF=20", "normal"), col=c("blac
 
 The formula describing the *t* distribution is rather complicated. In the past to derive a specific value for the distribution, given a value for *t* and the number of degrees of freedom, one would have used a table of pre-computed values. Nowadays we can use a statistical package such as R to do this. 
 
-> R code to derive the *t* distribution value for a given degrees of freedom: dt(t_value, df=degrees)
+R code examples
+=======================
+
+> The t distribution value for a given number of degrees of freedom
+
+```{r}
+t_value = 3
+degrees_of_freedom=5
+dt(t_value, df=degrees_of_freedom)
+
+```

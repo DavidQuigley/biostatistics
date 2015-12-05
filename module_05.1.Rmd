@@ -8,10 +8,15 @@ output:
         css: swiss.css
 ---
 
+Introduction
+========================================
 
-*In this module, I will briefly introduce the history of scientific thinking about whether we can prove a hypothesis about the natural world to be correct. Popper's contention that positive proof of a hypothesis cannot be obtained, and the central role of falsifiability, will motivate the P value.*
+**This module explains:**
 
-
+* history of scientific thinking about whether we can prove a hypothesis about the natural world to be correct. 
+* Karl Popper's contention that positive proof of a hypothesis cannot be obtained
+* The central role of falsifiability
+* Motivation for the P value
 
 The scientific method and proof
 =================================================
@@ -28,7 +33,6 @@ The first, fundamental reason for considering this issue is that thinking carefu
 The second, practical reason for thinking about proof is that grappling with this issue is the only way to understand what a *P* value is. Many experimental scientists work with *P* values and the hypothesis testing framework, and many of those scientists don’t have a clear understanding of what a *P* value actually is. They know it’s good when *P* values are low, and that they give some information about whether a result would be seen by chance. The idea behind the *P* value, and therefore behind much of a biomedical researcher’s relationship to quantitative measures of an experiment, remains somewhat counter-intuitive. It takes practice before it becomes second nature.
 
 One formulation for the general process of the scientific method is that we make specific observations and then generalize these observations into models and even into laws. Some philosophers, such as David Hume, had a fundamental concern with this. We can think about their concern using a simple example. If we visit a lake crowded with birds day after day and only ever observe white swans, we may be tempted to make the induction that all swans are white. 
-
 
 ![swan](images/white_swan.png)
 ![swan](images/white_swan.png)

@@ -2,25 +2,225 @@
 title: 'Module 5.2: The t test: deriving P values from statistics'
 author: "David Quigley"
 date: "November 4, 2015"
-output: html_document
+output: 
+    html_document:
+        toc: true
+        css: swiss.css
+
 ---
 
+```{r echo=FALSE}
+quick.t.plot = function( X, Y ){
+    plot( c( rep(1, length(X)), rep(2, length(Y)) ),
+         c( X, Y),
+      xlim=c(0.5,2.5), ylim=c(0,10), pch=19, ylab="", xlab="", axes=FALSE)
+    axis(1, at=c(1,2), labels=c("group 1", "group 2"), tick=FALSE)
+    axis(2, at=c(0, 2,4,6,8,10), las=1)
+}
+```
 
-The t distribution and the t test
+Introduction
+========================================
+
+**This module explains:**
+
+* the t distribution
+* t tests to compare two samples
+    + unpaired t tests
+    + paired t tests
+
+Student's t distribution
+================================================================================
+
+The fact that as the number of observations increase, the distribution values will often tend towards a normal frequency distribution allows statisticians to make important inferences about statistical properties. However, in practice, due to experimental costs or the availability of subject populations, **scientists often are constrained to use small sample sizes**. The *t* distribution is very useful in these cases. The *t* distribution is sometimes named Student's *t* distribution after the pseudonym of the statistician William Sealy Gosset, who developed it while working at the Guiness Brewery.
+
+The t distribution describes the **frequency distribution of small numbers of samples chosen from a normal distribution**. Like the normal distribution, the function that defines its probability density is complex and understanding it is not required to make use of the *t* distribution.
+
+Defining the t statistic
+---------------------------
+
+Recall that for *n* samples, the sample mean is defined:
+
+$\bar{x} = \frac{x_1 + ... + x_n}{n}$ 
+
+and the sample variance is defined:
+
+$s^2 = \frac{ \sum_{i=1}^n(x_i-\bar{x})^2 }{n-1}$. 
+
+The *t* value for an individual sample of size *n* from of a population with mean $\mu$ is given by:
+
+$\large{t = \frac{\bar{x}-\mu}{ \frac{s}{\sqrt{n} } }}$
+
+So *t* will increase as 
+
+1) *n* increases
+2) *s* (the standard deviation, $\sqrt(variance)$) decreases
+3) the difference between $\bar{x}$ and $\mu$ decreases
+
+Note that this equation defines the *t* statistic for a particular observation; the *t* distribution describes the **frequency with which one would observe all possible *t* statistics for a given number of degrees of freedom** . The distribution of the *t* statistic is symmetric around zero. It is shaped like a standard normal distribution, but its tails do not get close to zero quite as quickly as a standard normal curve; in statistical jargon, it has "fatter tails". The shape of the *t* distribution is influenced by on the number of degrees of freedom. The degrees of freedom for a *t* statistic is equal to the number of samples minus one. As the number of degrees of freedom increases, the *t* distribution becomes more simlar to a normal distribution:
+
+```{r echo=FALSE, fig.height=4, fig.width=8}
+vals = seq(from=-7,to=7, by=0.01)
+layout(matrix(1:2,1,2))
+par(mar=c(4,4,1,1))
+plot(dt( vals, df=1 ), type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, 
+     xlab="t statistic", ylab="density", main="t and standard normal distribution", ylim=c(0,.4) )
+points( dnorm( vals ), type="l", lwd=3, col="gray" )
+legend( 900,0.35, c("t DF=1", "normal"), col=c("black", "gray"), pch=19)
+axis(2, seq(from=0, to=0.4, by=0.1), las=1)
+axis(1, at=( length(vals) / 14 * 0:14) , labels=seq(from=-7, to=7, by=1), las=1)
+
+plot(dt( vals, df=1 ), type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, 
+     xlab="t statistic", ylab="density", main="t and standard normal distribution", ylim=c(0,.4) )
+axis(2, seq(from=0, to=0.4, by=0.1), las=1)
+axis(1, at=( length(vals) / 14 * 0:14) , labels=seq(from=-7, to=7, by=1), las=1)
+points( dt( vals, df=3 ), type="l", lwd=3, col="cornflowerblue" )
+points( dt( vals, df=6 ), type="l", lwd=3, col="gold" )
+points( dt( vals, df=20 ), type="l", lwd=3, col="darkgreen" )
+points( dnorm( vals ), type="l", lwd=3, col="gray" )
+legend( 900,0.35, c("t DF=1","t DF=3","t DF=6","t DF=20", "normal"), col=c("black", "cornflowerblue", "gold", "darkgreen", "gray"), pch=19)
+```
+
+The formula describing the *t* distribution is rather complicated. In the past to derive a specific value for the distribution, given a value for *t* and the number of degrees of freedom, one would have used a table of pre-computed values. Nowadays we can use a statistical package such as R to do this. 
+
+
+The t test
 ===============================================================
 
-We frequently wish to test whether two samples of modest size are likely to have come from distinct populations. For example:
+We frequently wish to test whether two samples are likely to have come from distinct populations. For example:
 
 * Do mice of the C57BL/6 strain run on a wheel more hours per night than FVB/N mice?
 * Patients in a clinical trial were randomized to receive drug or a placebo. Do subjects receiving the drug have a lower blood pressure than when they started?
 * Did tenured scientists whose PhD was supervised by a member of the National Academy of Science receive their first RO1 at a younger age than those who were not supervised by a NAS member?
 
-The *t* statistic is a ratio: roughly speaking, it measures the difference in means of two samples, divided by sample variance, normalized by the number of samples. Stated more formally, *t* for two samples is the difference in sample means divided by the sum of squared standard deviations, with each group's standard deviation normalized by the number of samples in that group:
+The simplest way to evaluate the statistical strength of evidence for this form of question is a *t* test.  If we have exactly two groups defined by a categorical variable, then the *t* test is often appropriate. The null hypothesis of the *t* test is that both samples are random samples from the same population. The **alternative hypothesis** is that there are two distinct populations. The *t* test produces a *t* statistic; that is, a statistic that has a *t* distribution. The farther the *t* statistic is from zero, the less likely it is that the two samples came from the same original distribution.
+
+The *t* statistic is a ratio: roughly speaking, it measures the difference in means of two samples, divided by sample variance, normalized by the number of samples. Stated more formally, *t* for two samples is the difference in sample means divided by the sum of squared standard deviations, with each group's standard deviation normalized by the number of samples in that group.
 
 $\large{t = \frac{ \bar{Y_1} - \bar{Y_2}} { \sqrt{ \frac{s_1^2}{N_1} + \frac{s_2^2}{N_2} } } }$
 
-Recall that $\bar{Y_1}$ is the mean of group Y_1 and $s_1^2$ is the variance of group 1. 
+Recall that $\bar{Y_1}$ is the mean of group $Y_1$ and $s_1^2$ is the variance of group 1. As the difference in means gets smaller, the *t* statistic will get closer to zero. Since the *N* values are the denominator of a denominator, larger N values will tend to *increase* the magnitude of the *t* statistic by decreasing the variance term in the denominator. This makes sense intuitively: the more samples we have, the more certain we can be of our statistic.
 
-The null hypothesis of the *t* test is that both samples are random samples from the same population. The farther the *t* statistic is from zero, the less likely it is that the two samples came from the same original distribution. If we have exactly two groups defined by a categorical variable, then the *t* test is often appropriate. 
+The formulation of the *t* statistic shown above is appropriate if the variance of the two groups may differ. This test is also called "Welsh's *t* test". 
 
-> To perform a *t* test in R, use the t.test() function
+```{r echo=FALSE, fig.height=4, fig.width=3}
+X = c(7.9,6.3,5.0,6.7,9.7,6.0,6.8,6.5,5.8,5.9,7.0,7.5,5.6,5.7,6.1,8.1,5.7,4.9,5.5,6.2)
+Y = c(5.8,4.2,2.9,4.3,8.1,3.7,4.7,4.4,3.7,3.7,5.1,5.4,3.4,3.7,3.9,6.3,3.7,2.9,3.5,4.1)
+par(mar=c(3,3,1,1))
+quick.t.plot(X,Y)
+text(2,0.5, paste("P =", signif( t.test(X,Y)$p.value, 3)), adj=1) 
+group_1 = X
+group_2 = Y
+ts = t.test( group_1, group_2 )
+```
+
+Here I show two samples where *N* for both groups is 20. The *t* test returns the following results:
+```{r}
+t.test( group_1, group_2 )
+```
+
+The t statistic is `r round( ts$statistic, 3)`, which produces a P value of `r signif( ts$p.value, 3)` when tested on a *t* distribution with `r round(ts$parameter,2)` degrees of freedom. The number of degrees of freedom is not a round number. There are 40 independent values, so knowing 39 values you can infer the 40th value from the population mean. However, because of allowance for unequal variance, the number of degrees of freedom is calculated by an equation called the Welsh-Satterthwaite equation:
+
+$\large{df = \frac{ ( \frac{s^2_1}{N_1} + \frac{s^2_2}{N_2} )^2 }{ \frac{ (\frac{s^2_1}{N_1})^2 }{(N_1-1)} + \frac{ (\frac{s^2_2}{N_2})^2 }{(N_2-1)} }}$
+
+
+If both samples are assumed to have the same variance, a slightly different equation is used to calculate the *t* statistic:
+
+$\large{t = \frac{ \bar{Y_1} - \bar{Y_2}} {  S_{X_1X_2} \times \sqrt{ \frac{1}{N_1} + \frac{1}{N_2}} } }$
+
+This equation uses the pooled variance of both samples; the number of degrees of freedom is $N_1 - 1$ + $N_2 - 1$.
+
+If we ask R to assume the variances are equal, this changes the the number of degrees of freedom and results in a slightly lower *P* value.
+
+```{r}
+t.test( group_1, group_2, var.equal=TRUE )
+```
+
+Paired data
+-------------------
+
+The *t* test assumes that individual data points in the samples are statistically independent. This is not always the case. Some examples:
+
+* Number of lymphocytes in a breast tumor sample *vs.* adjacent normal tissue from the same woman
+* Blood pressure of the same individual before *vs.* after drug administration
+* Number of hours mice spend running on a wheel at day *vs.* at night
+
+In each of these cases, one of the values will be linked to the other because the same individual is being sampled twice. In statistical parlance this is a "repeated measure." If data were derived from a samples where values in group 1 are linked to a corresponding value in group 2, then it is important to perform a **paired *t* test** rather than an unpaired *t* test. The paired *t* test links each value in group 1 with a corresponding value in group 2. This means that the *t* statistic depends on the pairing. Here I plot the same points with two different pairings; note the P values for each test.
+
+```{r echo=FALSE, fig.height=3, fig.width=7}
+layout(matrix(1:2,1,2))
+par(mar=c(3,3,1,1))
+X = c(7.9,6.3,5.0,6.7,9.7,6.0,6.8,6.5,5.8,5.9,7.0,7.5,5.6,5.7,6.1,8.1,5.7,4.9,5.5,6.2)
+Y = c(5.8,4.2,2.9,4.3,8.1,3.7,4.7,4.4,3.7,3.7,5.1,5.4,3.4,3.7,3.9,6.3,3.7,2.9,3.5,4.1)
+quick.t.plot(X,Y)
+for( i in 1:length(X)){
+    lines(c( 1,2), c(X[i], Y[i] ) )
+}
+text(2,0.5, paste("P =", signif( t.test(X,Y, paired=TRUE)$p.value, 3)), adj=1) 
+
+idx = sample(1:20)
+quick.t.plot(X,Y[idx])
+for( i in 1:length(X)){
+    lines(c( 1,2), c(X[i], Y[idx][i] ) )
+}
+text(2,0.5, paste("P =", signif( t.test(X,Y[idx], paired=TRUE)$p.value, 3)), adj=1) 
+
+```
+
+For a paired *t* test, one calculates the differences between the two groups *D*. Normally the paired *t* statistic is calculated as
+
+$\large{t = \frac{ \bar{D}}{ \frac{s_D}{\sqrt(N)} } }$
+
+with N-1 degrees of freedom. If you wish to test whether the paired differences are significantly different from some other value than zero, the test statistic is calculated using that value *V* as 
+
+$\large{t = \frac{ \bar{D} - V}{ \frac{s_D}{\sqrt(N)} } }$
+
+
+
+
+R code examples
+=======================
+
+> The t distribution value for a given number of degrees of freedom
+
+```{r}
+t_value = 3
+degrees_of_freedom=5
+dt(t_value, df=degrees_of_freedom)
+
+```
+
+> The t test
+
+I'll show some t tests of the following data:
+
+```{r fig.width=3, fig.height=4, echo=FALSE}
+group_1 = c(3,6,7,2,1,4,4.5, 6)
+group_2 = c(5,4,12,6,7,6,8,9)
+par(mar=c(3,3,1,1))
+quick.t.plot(group_1, group_2)
+```
+
+```{r}
+group_1 = c(3,6,7,2,1,4,4.5, 6)
+group_2 = c(5,4,12,6,7,6,8,9)
+t.test(group_1, group_2)
+```
+
+It is usually correct to perform a two-sided *t* test; that is, to test the alternative hypothesis that group 2 is either larger *or* smaller than group 1. If you have a very well-motivated reason, you can test a one-sided hypothesis using the *alternative* parameter, passing in either "less" or "greater". Note that the "less" refers to the first group:
+
+```{r}
+group_1 = c(3,6,7,2,1,4,4.5, 6)
+group_2 = c(5,4,12,6,7,6,8,9)
+t.test(group_1, group_2, alternative="less")
+```
+
+Note that the p-value reported by the *t.test()* function has dropped because only one side of the t-distribution is being considered in the "as extreme or more extreme" calculation. 
+
+To test paired data, set the *paired* parameter to true. This requires that you have the same number of samples in each group:
+
+```{r}
+group_1 = c(3, 6, 7, 2, 1, 4, 4.5, 6)
+group_2 = c(5, 4, 12,6, 7, 6, 8, 9)
+t.test(group_1, group_2, paired=TRUE)
+```

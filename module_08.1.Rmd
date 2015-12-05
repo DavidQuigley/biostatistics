@@ -23,10 +23,15 @@ knitr::knit_hooks$set(small.mar = function(before, options, envir) {
 })
 ```
 
-**Summary**
+Introduction
+========================================
 
-*The range of values for real-valued data do not always match our expectations. Extremely high or low values, commonly though inexactly called outliers, can exert a disproportionate influence on statistics. This module describes how to identify these observations, and suggests strategies for deciding what (if anything) to do about them. I will talk about how outliers can affect some statistical tests more than others, and how a class of statistical tests called "non-parametric tests" are one approach for insulating your study against their effects.*
+**This module:**
 
+* describes how to identify extreme observations that exert a disproportionate influence on statistics
+* Suggests strategies for deciding what (if anything) to do about them
+* Shows examples of statistical tests that are vulnerable to outliers
+* Shows how robust statistical tests can protect against the influence of unwanted outliers
 
 Unexpected data: the mouse that lived too long
 ======================================================
