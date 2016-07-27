@@ -1,0 +1,149 @@
+---
+title: 'Module 4.3: Adjusting P values when there are many tests'
+author: "David Quigley"
+output:
+  html_document:
+    css: swiss.css
+    toc: yes
+  word_document:
+    toc: yes
+---
+
+Introduction
+========================================
+
+**This module explains:**
+
+* Why multiple test correction exists
+* Approaches to multiple test correction
+    + Controlling the Family-wise Error Rate
+    + Controlling the False Discovery Rate
+
+
+Explaining the problem of multiple tests
+===============================================================
+
+Is a genetic variant associated with risk?
+--------------------------------------------------------------------------------
+
+The risk of developing breast cancer is partly hereditary. All people carry a variety of unherited genetic variants that influence risk. To test whether a specific genetic locus is associated with risk, one can perform a case-control study by genotyping DNA from blood from people who developed breast cancer (cases) and matched controls who are thought to be disease-free. One can then calculate a P value for the test of association between the frequency of that variant and risk of being a case.
+
+Using the Neyman-Pearson decision framework, one might choose to reject the null hypothesis that a variant under consideration confers no risk of being a case at a alpha-level of 0.05.
+
+However, each person has many thousands of variants that could, in principle, be associated with risk. What happens to the interpretation of the Neyman-Pearson hypothesis testing framework if we decide to test more than one variant?
+
+What are the chances of a false discovery?
+--------------------------------------------------------------------------------
+
+Let us assume that investigators test 100 loci in candidate genes for association with risk of breast cancer. The alpha cut-off for a single test is specified to be 0.05. After the experiment, they find one variant of the 100 meets the critical value alpha cut-off with *P* = 0.005.
+
+Should investigators reject null hypothesis of no association?
+
+
+Recall that when fipping a fair coin:
+
+$\large{ \textit{ P(heads) } = \frac{1}{2} = 0.5 = 50 \% }$
+
+In 10 flips, *P*(9 heads or 10 heads) = 0.0107.
+
+**The intuition behind multiple test correction:**
+
+If we test a fair coin enough times, we’re sure to see extreme results that make it look biased.
+
+If we perform more than one test, we need to adjust the threshold for what is considered unlikely to be seen by chance to be more conservative.
+
+What would happen if we repeated the coin flip experiment many times?
+
+Running this test 100 times in a row **with a fair coin**, the calculations we just performed would lead us to expect to flip nine or ten heads one time. However, and this is a very important point, it takes a much smaller number of repetitions than to greatly exceed the alpha level cut-off.
+
+Given a fair coin, if
+
+$P(\textit{9 heads or 10 heads}) = 0.0107$, 
+
+then 
+
+$P( \textit{neither 9 heads nor 10 heads} )$
+
+$= 1 - P( \textit{ 9 or 10 heads})) = 0.989$ 
+
+Given a fair coin and one set of 10 flips, we will fail to reject the null hypothesis 98.8% of the time.
+
+Using the multiplication rule for independent events, the probability not seeing 9 or 10 heads, and therefore coming to the conclusion that the coins are all fair, in two separate trials is:
+
+$= (1-0.0107)^2$
+$= 97.8 \%$
+
+As the number of trials increases, the chances that at least one trial will turn up 9 or 10 heads becomes much higher. 
+
+![](images/module_04_3_multiple_trials.png)
+
+As the number of trials increases, the chances of incorrectly rejecting the null hypothesis increases:
+
+```{r echo=FALSE}
+layout(matrix(1,1,1))
+par(mar=c(4,4,1,1))
+p_mul = rep(0, 100)
+p_mul[1] = 1-sum(dbinom(9:10, 10, 0.5))
+
+for(i in 2:100 ){
+    p_mul[i] = p_mul[i-1]*p_mul[1]
+}
+plot(p_mul, col="cornflowerblue", lwd=1, las=1, ylim=c(0,1), pch=19,
+     cex.axis=1.5, xlab="number of trials", ylab="probability of incorrect rejection")
+```
+
+**Figure 1: Probability of falsely rejecting null hypothesis**
+
+At 65 trials:
+
+$= (1-0.0107)^{65}$
+$= 49.7 \%$
+
+This means that in 65 trials of a fair coin, we would expect to see at least nine heads more often than not. In 100 trials we would expect to see at least nine heads 66% of the time.
+
+
+
+Controlling the family-wise Error Rate
+========================================
+
+One approach is to constrain the overall likelihood of ever incorrectly rejecting the null hypothesis. This is done by lowering the alpha level in proportion to the number of tests that are performed. All of the tests that are performed are collectively called the family of tests, so these methods control the “Family-wise error rate”. The most widely known method is the Bonferroni correction, which simply divides the alpha level cut-off by the number of tests performed. This means a Bonferroni correction of an 0.05 alpha-level cut-off for 100 tests would be:
+
+$= \frac{0.05}{100}$
+$= 0.0005$
+
+The Bonferroni correction is considered very conservative; you are unlikely to be criticized for insufficient stringency if you use it. However, it makes the statistical assumption that all tests are independent, like a set of coin flips. This assumption may not be appropriate, and you run the risk of low statistical power. Another approach with increased power, at the cost of making more erroneous calls of significance, is to control the false discovery rate.
+
+Using Bonferroni, the breast cancer investigators should not have rejected the null hypothesis for their finding; an adjusted alpha threshold of 0.05 / 100 = 0.0005 would have been selected.
+
+Controlling the False Discovery Rate
+==========================================
+
+What if the cost of missing a discovery is higher than the cost of a false discovery?
+
+We can accept the following bargain: Allow a larger number of correct decisions by accepting more incorrect hypothesis decisions.
+
+This requires a principled way to estimate the error rate.
+
+A False Discovery means performing a hypothesis test and concluding that the evidence favors rejecting the null hypothesis when the true state of reality is the null should not have been rejected. The False Discovery Rate (abbreviated FDR) is the proportion of False Discoveries divided by the total number of tests. The idea behind the False Discovery Rate correction is that we may choose to accept the cost of a modest number of incorrect hypothesis test decisions in order to gain power that will let us make a much larger number of correct decisions. Applying a 5% FDR, if we performed 500 tests and identified 100 tests below the alpha-level cut-off, we would expect five of them to be false discoveries and 95 of them to be true discoveries. Using the same data and applying a method that controls the Family-wise Error Rate, we might identify 10 tests below the alpha-level cut-off, and expect a 5% chance that a single one of those 10 tests was a false discovery. 
+
+The practical reason for choosing between these two approaches is driven by the relative costs of making type one and type two errors. In some applications, such as clinical trials, we generally wish to err on the side of being conservative because the stakes are high and the cost of replication is enormous. In other applications, such as a preliminary genetic screen testing an uncertain hypothesis in the laboratory, where we expect to identify a relatively large number of true positives, the cost of making a few erroneous calls is low compared to the cost of missing an important new piece of biology, and all results will be subjected to extensive follow-up in any case.
+
+
+A common method of controlling the False Discovery Rate is to use a method published by Benjamini and Hochberg:
+
+To control at FDR q for m tests
+
+1)	rank the P values from lowest to highest
+2)	find the highest index k such that 
+	$P_k \leq \frac{k} { m \times q}$
+
+
+Summary
+===========
+
+* When performing multiple tests in a hypothesis testing framework, adjustment of the alpha level is required
+* Controlling the Family-Wise Error Rate:
+    + maintain original alpha probability by lowering the alpha cut-off
+* Controlling the False Discovery Rate
+    + controls the expected number of false decisions
+

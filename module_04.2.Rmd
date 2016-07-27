@@ -1,83 +1,94 @@
 ---
-title: "Module 4.2: Student's t distribution"
+title: 'Module 4.2: Making decisions with P values'
 author: "David Quigley"
-date: "December 4, 2015"
-output: 
-    html_document:
-        toc: true
-        css: swiss.css
+output:
+  word_document:
+    toc: yes
+  html_document:
+    css: swiss.css
+    toc: yes
 ---
-
 
 Introduction
 ========================================
 
 **This module explains:**
 
-* The t distribution (Student's t)
+* The Neyman-Pearson hypothesis testing framework
+* Statistical Power
+* Critiques and limitations of the *P* value
 
-Student's t distribution
+
+Making decisions with *P* values: hypothesis testing
+===============================================================
+
+The Neyman-Pearson hypothesis testing framework
+--------------------------------------------------------------------------------
+
+After Ronald Fisher developed the *P* value, A subsequent use of *P* values was popularized by Neyman and Pearson, who developed a hypothesis testing decision-making framework. This framework, which was very widely adopted, uses *P* values to make a decision. This is the key idea to hold onto when contrasting Fisher's approach with the Neyman-Pearson method: the Neyman-Pearson method is designed to **reach a decision about statistical significance** according to constraints set up before the experiment begins, while Fisher's approach allows for interpretation of the experiment to be driven by the data that are collected.
+
+An essential feature of Neyman-Pearson is that it explicitly requires a second hypothesis, termed the Alternative hypothesis, in contrast to the Null hypothesis. The goal of the exercise is to decide between the Null and Alternative hypothesis. To make this decision,
+a particular critical value is set before the experiment is performed. This probability threshold, which has the technical name of *alpha*, is the cut-off point for making a decision. If the *P* value of the experiment is below the *alpha*-level cut-off, the decision is made to reject the null hypothesis and instead support the alternative. The most familiar *alpha* level is 0.05, but any value can be chosen. 
+
+In the Neyman-Pearson model, chosing to reject the null hypothesis when *P* is less than *alpha* should have the long-run property of incorrectly rejecting the null with frequency *alpha*. In Neyman and Pearson's way of thinking, one doesn't distinguish between different *P* values that are below the critical threshold. Unlike Fisher's point of view, the Neyman-Pearson method doesn't attempt to gather information from the exact value of *P*. It is only concerned with whether *P* lies above or below the critical value.
+
+Deciding on an *alpha* level for decision-making has several useful implications. 
+
+1. There is clarity about what to do with the results of a study. This is particularly important in very large, expensive experiments such as clinical trials, where the parties performing the experiment may have a vested financial interest in the results. In this framework, given an alpha level of 0.05, a result where (P* = 0.048 has very different implications from *P* = 0.052. Not everyone thinks this is a good property; Fisher and Neyman and Pearson were famously at odds about whose approach was superior.
+
+2. There is a formal procedure for determining the probability of having enough information to make a successful decision. We will describe this soon under the heading of "Statistical power calculations".
+
+Two types of decision errors
+--------------------------------------------------------------------------------
+
+The first mistake is to reject the hypothesis of no effect, that is the null hypothesis, when in fact the truth of the matter is the intervention had no effect. This error, technically referred to as a **Type One** error by Neyman and Pearson, can be caricatured of as, “I shouldn’t have published that result”. The second sort of error comes from incorrectly failing to reject the null hypothesis; that is, to misinterpret evidence in favor of a real effect.  This error is technically referred to as a **Type Two** error, and can caricatured as, “I missed the result and could have published it.” The probability of making a Type Two error is technically referred to as *beta*.
+
+Statistical power calculations
+--------------------------------------------------------------------------------
+
+It is possible to plan how frequently one is willing to make two distinct types of mistakes, given various assumptions about the data. There is a trade-off between the likelihood of making a type one and type two error; with greater statistical stringency we reduce the chances of type one and increase the chances of type two. Since *beta* is the probability of failing to reject the null hypothesis when we should have done so, and the total probability must sum to one, the probability of *correctly* ruling against the null hypothesis is *1 - beta*. This value is also called the **statistical power of the experiment**. Given a statistical model, *alpha* and *beta* levels, and an expected effect size, one can plan how many individual subjects to include in the study. 
+
+This gives us the means to answer an important practical question, “how many independent samples must I include in my study to have an 80% power to detect an effect of given size, rejecting the null hypothesis at a 5% alpha level?” The specific power and *alpha* values could be other numbers, but these are customary.
+
+Power calculations are not restricted to determining a sample size. Although more complex calculations taking into account additional attributes of the experiment can make things quite complex, there are five elements that can vary in a simple power calculation:  power, *N* (sample size), *alpha*, effect size, and population variability. One can specify four of these variables and solve for the fifth one, for example asking, "what will be the power if N = 30, effect = 1 standard deviation, variance = 5, and alpha = 0.5? 
+
+If two variables are unknown-- if, for example, the size of the effect one expects is not known with great accuracy, and one would like to model a variety of effect sizes-- one can specify three of the values and solve for a range of the other two. This answers the question, what is the relationship between the remaining two variables? 
+
+Implementing power calculations is beyond the scope of this course, but there are tools available in R and online that assist in performing the calculations. It is a very good idea to consult with an experienced statistician when planning the power for an experiment.
+
+Critiques of the *P* value
 ================================================================================
 
-The fact that as the number of observations increase, the distribution values will often tend towards a normal frequency distribution allows statisticians to make important inferences about statistical properties. However, in practice, due to experimental costs or the availability of subject populations, **scientists often are constrained to use small sample sizes**. The *t* distribution is very useful in these cases. The *t* distribution is sometimes named Student's *t* distribution after the pseudonym of the statistician William Sealy Gosset, who developed it while working at the Guiness Brewery.
+The *P* value and the Neyman-Pearson hypothesis testing framework are powerful and valuable tools for inductive reasoning about the natural world. They are also widely misunderstood and misused tools. Although *P* values are sometimes treated as a proxy for the credibility of an experiment, or the importance of a result, they cannot in good practice stand in for these things. 
 
-The t distribution describes the **frequency distribution of small numbers of samples chosen from a normal distribution**. Like the normal distribution, the function that defines its probability density is complex and understanding it is not required to make use of the *t* distribution.
+*P* values are not effect sizes
+-------------------------------
 
-Defining the t statistic
----------------------------
+We are generally interested in the size of an effect. If a new drug extends patient life, how long is the average increase in life? An increase of one percent is unlikely to be clinically meaningful. However, in some contexts small effect sizes are interesting and important. One example is when considering effects at the level of a large population. A one percent lifetime increase in risk of developing liver cancer seems relatively small for an individual, but at the population level it translates to a huge number of affected individuals.
 
-Recall that for *n* samples, the sample mean is defined:
+By increasing the sample size, one can drive the *P* value arbitrarily low, even when the effect size is tiny. It is likewise the case that even in the presence of a truly strong effect, very small sample sizes will produce higher *P* values. 
 
-$\bar{x} = \frac{x_1 + ... + x_n}{n}$ 
+Imagine two experiments: an experiment with 12 subjects that reports a large effect size, and an experiment with 1,200 subjects that reports a tiny effect size. Both might report *P* = 0.03, but the information one can obtain from these two reports and the credibility of that information will be quite different.
 
-and the sample variance is defined:
+*P* values do not capture the variance of the estimate
+------------------------------------------------
 
-$s^2 = \frac{ \sum_{i=1}^n(x_i-\bar{x})^2 }{n-1}$. 
+A *P* value is a for a single point estimate of a statistic. However, when reporting a statistic, we must acknowledge that this point estimate is subject to experimental variation. Quantifying the amount of variation in the estimate, which will be discussed in [Module 5.2: Quantifying the confidence of an estimate](module_05.2.html), is essential. 
 
-The *t* value for an individual sample of size *n* from of a population with mean $\mu$ is given by:
 
-$\large{t = \frac{\bar{x}-\mu}{ \frac{s}{\sqrt{n} } }}$
+The *P* value does not tell us how likely it is that alternative hypothesis is true
+--------------------------------------------------------------------------------
 
-So *t* will increase as 
+As I discussed above, the *P* value assumes the null hypothesis is true. However, many people would prefer to get the answer to a different question: whether the alternative hypothesis is true. 
 
-1) *n* increases
-2) *s* (the standard deviation, $\sqrt(variance)$) decreases
-3) the difference between $\bar{x}$ and $\mu$ decreases
+Summary
+=============
 
-Note that this equation defines the *t* statistic for a particular observation; the *t* distribution describes the **frequency with which one would observe all possible *t* statistics for a given number of degrees of freedom** . The distribution of the *t* statistic is symmetric around zero. It is shaped like a standard normal distribution, but its tails do not get close to zero quite as quickly as a standard normal curve; in statistical jargon, it has "fatter tails". The shape of the *t* distribution is influenced by on the number of degrees of freedom. The degrees of freedom for a *t* statistic is equal to the number of samples minus one. As the number of degrees of freedom increases, the *t* distribution becomes more simlar to a normal distribution:
+* The Neyman-Pearson framework arrives at a decision from a pre-specified experimental design
+* Neyman-Pearson allows one to
+    + pre-specificy a level for alpha and beta
+    + reason about the statistical power of a experimental design
+    + control the long-term probability of correct decisions
+* P values do not express the effect size
+* P values should not be reported without expressing the estimated effect size and confidence intervals for the estimate
 
-```{r echo=FALSE, fig.height=4, fig.width=8}
-vals = seq(from=-7,to=7, by=0.01)
-layout(matrix(1:2,1,2))
-par(mar=c(4,4,1,1))
-plot(dt( vals, df=1 ), type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, 
-     xlab="t statistic", ylab="density", main="t and standard normal distribution", ylim=c(0,.4) )
-points( dnorm( vals ), type="l", lwd=3, col="gray" )
-legend( 900,0.35, c("t DF=1", "normal"), col=c("black", "gray"), pch=19)
-axis(2, seq(from=0, to=0.4, by=0.1), las=1)
-axis(1, at=( length(vals) / 14 * 0:14) , labels=seq(from=-7, to=7, by=1), las=1)
-
-plot(dt( vals, df=1 ), type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, 
-     xlab="t statistic", ylab="density", main="t and standard normal distribution", ylim=c(0,.4) )
-axis(2, seq(from=0, to=0.4, by=0.1), las=1)
-axis(1, at=( length(vals) / 14 * 0:14) , labels=seq(from=-7, to=7, by=1), las=1)
-points( dt( vals, df=3 ), type="l", lwd=3, col="cornflowerblue" )
-points( dt( vals, df=6 ), type="l", lwd=3, col="gold" )
-points( dt( vals, df=20 ), type="l", lwd=3, col="darkgreen" )
-points( dnorm( vals ), type="l", lwd=3, col="gray" )
-legend( 900,0.35, c("t DF=1","t DF=3","t DF=6","t DF=20", "normal"), col=c("black", "cornflowerblue", "gold", "darkgreen", "gray"), pch=19)
-```
-
-The formula describing the *t* distribution is rather complicated. In the past to derive a specific value for the distribution, given a value for *t* and the number of degrees of freedom, one would have used a table of pre-computed values. Nowadays we can use a statistical package such as R to do this. 
-
-R code examples
-=======================
-
-> The t distribution value for a given number of degrees of freedom
-
-```{r}
-t_value = 3
-degrees_of_freedom=5
-dt(t_value, df=degrees_of_freedom)
-
-```

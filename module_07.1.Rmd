@@ -1,11 +1,12 @@
 ---
-title: "Module 7.1: Counts and categories: The Binomial, Chi-squared and Fisher's Exact tests"
+title: 'Module 7.1: The Binomial, Chi-squared and Fisher''s Exact tests'
 author: "David Quigley"
-date: "October 24, 2015"
-output: 
-    html_document:
-        toc: true
-        css: swiss.css
+output:
+  html_document:
+    css: swiss.css
+    toc: yes
+  word_document:
+    toc: yes
 ---
 
 ```{r global_options, include=FALSE}
@@ -57,6 +58,8 @@ axis(1, at=c( x[1], x[10], x[20], x[30], x[40] ), labels=c(0, 10, 20, 30, 40) )
 box()
 ```
 
+**Figure 1: a binomial distribution**
+
 Note that we can enumerate all of the possible outcomes of a binomial trial: we observe a finite number of trials, each of which has one of two possible results. The distribution of possible outcomes is therefore a discrete distribution (with steps between possible outcomes), rather than a continuous distribution like the normal distribution. Although the number of possible outcomes becomes large very quickly, for pratical purposes of computation this is rarely a problem, even when the number of trials exceeds one million.
 
 As the number of successes gets farther from 20, the number of coin flips that could produce that event dwindles, making that result less likely by sheer chance. This is the basis for deriving a statistical judgement about whether the coin is far or not: we can calculate the frequency with which we would observe 17 heads in 100 flips of a fair coin and judge accordingly the evidence against a null hypothesis of a fair coin. In the case of 17 heads in 100 flips, $P = 1.3\times10^{-11}$, strong evidence that the coin is unlikely to be fair.
@@ -72,6 +75,8 @@ barplot(dbinom( 1:40, 40, 0.2), add=TRUE, col="#00ff0033")
 barplot(dbinom( 1:40, 40, 0.7), add=TRUE, col="#0000ff33")
 legend( 35, 0.2, c("P=0.2","P=0.5", "P=0.7"), col=c("#00ff00","#ff0000", "#0000ff"), pch=19)
 ```
+
+**Figure 2: three different binomial distributions**
 
 The probability of some number *x* successful outcomes in *n* trials is determined by the product of the probability of success in any individual trial and the number of different ways that one could order all of the outcomes to make at least *x* successes. This is written as:
 
@@ -119,7 +124,7 @@ P_onetail + P_othertail
 What if I my variable can take more than two values?
 ------------------------------------------------------------------------
 
-Many categorical variables can take more than two values. As a simple example, given a roll of a six-sided die, is each of the six possible outcomes equally likely? If the die were weighted to produce an excess of one outcome over the other five results, the distribution would not be uniform. If I had a hypothesis about which number was rigged, I could test that number with a *p*=.167, but what if I didn't know *a priori* which number might be rigged? There is a more general version of the binomial test called the multinomial test, but we won't cover it in these lessons. The number of calculations required begins to become excessive. The preferred method for this situation would be the **Chi-squared test** or **Fisher's Exact test**, which will be described next.
+Many categorical variables can take more than two values. As a simple example, given a roll of a six-sided die, is each of the six possible outcomes equally likely? If the die were weighted to produce an excess of one outcome over the other five results, the distribution would not be uniform. If I had a hypothesis about which number was rigged, I could test that number with a *p*=.167, but what if I didn't know *a priori* which number might be rigged? There is a more general version of the binomial test called the multinomial test, but we won't cover it in these lessons. The number of calculations required begins to become excessive. 
 
 
 The Chi-Squared test
@@ -160,7 +165,8 @@ $\chi^2_k = \sum_{i=1}^kX_i^2$
 
 The shape of the chi-squared distribution varies depending on the number of degrees of freedom.
 
-```{r echo=FALSE}
+```{r echo=FALSE, fig.height=5, fig.width=8}
+par(mar=c(3,3,1,1))
 nn=length( seq(from=0,to=30, by=0.01) )
 plot(dchisq( seq(from=0,to=30, by=0.01), df=2), pch=19, ylim=c(0,0.5), xlim=c(0,nn),
      type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, xlab="chi-squared statistic", ylab="density",
@@ -175,10 +181,12 @@ points(dchisq( seq(from=0,to=30, by=0.01), df=15), type="l", lwd=3, col="pink" )
 legend( 2500, 0.24, c("DF=2", "DF=4", "DF=9", "DF=12", "DF=15"), col=c("black", "cornflowerblue", "orange", "gold", "pink"), pch=19)
 ```
 
+**Figure 3: chi-squared distributions with different degrees of freedom**
+
 As the number of degrees of freedom increases, the shape of the chi-squared distribution changes and becomes a closer approximation to a normal distribution:
 
-```{r echo=FALSE}
-layout(matrix(1:3,1,3))
+```{r echo=FALSE, fig.width=4, fig.height=4}
+par(mar=c(3,4,1,1))
 nn=length( seq(from=0,to=30, by=0.01) )
 plot(dchisq( seq(from=0,to=30, by=0.01), df=10), pch=19, ylim=c(0,0.1), xlim=c(0,nn),
      type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, xlab="chi-squared statistic", ylab="density",
@@ -188,7 +196,10 @@ axis(1, at=(nn /6 * 0:6) , labels=seq(from=0, to=30, by=5), las=1)
 box()
 points(dnorm( seq(from=0,to=30, by=0.01), mean=8, sd=4.47), type="l", lwd=3, col="cornflowerblue" )
 legend( 1150, 0.09, c("chi-sq DF=10", "normal(8,4.47)"), col=c("black", "cornflowerblue"), pch=19)
+```
 
+```{r echo=FALSE, fig.width=4, fig.height=4}
+par(mar=c(3,4,1,1))
 nn=length( seq(from=0,to=60, by=0.01) )
 plot(dchisq( seq(from=0,to=60, by=0.01), df=30), pch=19, ylim=c(0,0.1), xlim=c(0,nn),
      type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, xlab="chi-squared statistic", ylab="density",
@@ -198,7 +209,10 @@ axis(1, at=(nn / 6 * 0:6) , labels=seq(from=0, to=60, by=10), las=1)
 box()
 points(dnorm( seq(from=0,to=60, by=0.01), mean=28, sd=7.74), type="l", lwd=3, col="cornflowerblue" )
 legend( 1800, 0.09, c("chi-sq DF=30", "normal(28,7.74)"), col=c("black", "cornflowerblue"), pch=19)
+```
 
+````{r echo=FALSE, fig.width=4, fig.height=4}
+par(mar=c(3,4,1,1))
 nn=length( seq(from=0,to=100, by=0.01) )
 plot(dchisq( seq(from=0,to=100, by=0.01), df=60), pch=19, ylim=c(0,0.1), xlim=c(0,nn),
      type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, xlab="chi-squared statistic", ylab="density",
@@ -210,6 +224,9 @@ points(dnorm( seq(from=0,to=100, by=0.01), mean=58, sd=10.95445), type="l", lwd=
 legend( 2600, 0.09, c("chi-sq DF=60", "normal(58,10.95)"), col=c("black", "cornflowerblue"), pch=19)
 
 ```
+
+**Figure 4: chi-squared distributions begin to approximate the normal curve**
+
 
 Calculating the chi-squared statistic: one variable
 ------------------------------------------------------------------------
@@ -288,21 +305,7 @@ Calculating a P value for the chi-squared statistic
 
 As noted above, the shape of the chi-squared distribution varies depending on the number of degrees of freedom. For two-by-two contingency tables this value will be 1, but many other possible values exist. For a one-variable test with five categories, there would be four degrees of freedom.
 
-```{r echo=FALSE}
-nn=length( seq(from=0,to=30, by=0.01) )
-plot(dchisq( seq(from=0,to=30, by=0.01), df=3), pch=19, ylim=c(0,0.25), xlim=c(0,nn),
-     type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, xlab="chi-squared statistic", ylab="density",
-     main="Chi-squared distributions")
-axis(2, c(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3), las=1)
-axis(1, at=(nn /6 * 0:6) , labels=seq(from=0, to=30, by=5), las=1)
-box()
-points(dchisq( seq(from=0,to=30, by=0.01), df=5), type="l", lwd=3, col="cornflowerblue" )
-points(dchisq( seq(from=0,to=30, by=0.01), df=7), type="l", lwd=3, col="orange" )
-points(dchisq( seq(from=0,to=30, by=0.01), df=9), type="l", lwd=3, col="gold" )
-legend( 2500, 0.24, c("DF=3", "DF=5", "DF=7", "DF=9"), col=c("black", "cornflowerblue", "orange", "gold"), pch=19)
-```
-
-The primary intuition to take from this plot is that for a given value of the chi-squared statistic, the larger the number of degrees of freedom (the larger the number of categories), the more frequently we would expect to see this result by chance. For a chi-squared statistic of 9:
+The primary intuition is that for a given value of the chi-squared statistic, the larger the number of degrees of freedom (the larger the number of categories), the more frequently we would expect to see this result by chance. For a chi-squared statistic of 9:
 
 ```{r echo=FALSE, results='asis'}
 dens = rep(0,4)

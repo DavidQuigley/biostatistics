@@ -1,45 +1,38 @@
 ---
-title: "Module 3.3: Distributions, normal and otherwise"
+title: 'Module 3.3: Histograms and variance'
 author: "David Quigley"
-date: "September 25, 2015"
-output: 
-    html_document:
-        toc: true
-        css: swiss.css
+output: pdf_document
 ---
 
-
-```{r global_options, include=FALSE}
-knitr::opts_chunk$set(comment = NA)
-knitr::opts_chunk$set( prompt=TRUE ) 
-
-knitr::knit_hooks$set(small.mar = function(before, options, envir) {
-    if (before) par(mar = c(2, 2, 1, 1))  # smaller margin on top and right
-})
-knitr::knit_hooks$set(left.mar = function(before, options, envir) {
-    if (before) par(mar = c(2, 4, 1, 1))  # smaller margin on top and right
-})
-knitr::knit_hooks$set(med.mar = function(before, options, envir) {
-    if (before) par(mar = c(4, 4, 1, 1))  # smaller margin on top and right
-})
-knitr::knit_hooks$set(bottom.mar = function(before, options, envir) {
-    if (before) par(mar = c(3, 2, 1, 1))  # smaller margin on top and right
-})
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-```{r echo=FALSE}
-height = c(7,8,7,9.5)
-weight = c(4,3.2, 3.7, 5.4)
-myTable=data.frame(height, weight)
-rownames(myTable)=c('Flopsy','Mopsy','Cottontail','Peter')
+Introduction
+========================================
+
+**This module explains:**
+
+* An introduction to exploratory data analysis
+    + histograms
+    + variance
+    + standard deviation
+
+
+Summarizing data: histograms
+================================================================================
+
+Histograms summarize continuous data
+----------------------------------------------------------------
+
+Once we start gathering a lot of data, it becomes unwieldy and uninformative to look at individual values, either as two-dimensional plots or as a barplot. Here is a set of 1000 observations:
+
+```{r, fig.height=4, fig.width=8, left.mar=TRUE, echo=FALSE }
+par(mar=c(3,3,3,1))
 
 my_observations = rnorm(1000, mean=50, sd=10)
 my_bivariate = c( rnorm(1000, mean=50, sd=5), rnorm(1000, mean=65, sd=5) )
-pap_no = c( 9,17,9,0,15,12,7,0,0,0,13,10,0,0,0,8,1,7,4,
-  7,2,12,1,4,0,35,6,9,0,0,12,16,16,0,6,3,0,4,
-  0,0,0,0,3,2,1,7,5,23,2,3,3,5,0,3,5,17,1,
-  1,4,21,0,0,2,14,5,2,0,3,6,2,1)
 
 MCV = c( 59.5,49.0,48.7,50.1,49.9,54.5,57.0,63.2,47.5,65.1,63.5,61.3,77.3,50.2,50.9,66.4,62.1,49.7,58.2,60.0,54.8,45.3,48.8,61.2,47.8,53.4,60.1,61.4,
 57.9,61.2,62.1,64.6,61.3,45.8,65.9,47.6,59.4,63.5,52.2,51.8,75.9,51.3,60.6,55.7,69.3,50.5,57.7,54.6,67.7,60.5,54.4,58.6,73.6,60.0,53.2,49.6,
@@ -50,11 +43,113 @@ MCV = c( 59.5,49.0,48.7,50.1,49.9,54.5,57.0,63.2,47.5,65.1,63.5,61.3,77.3,50.2,5
 47.7,55.0,58.6,55.2,47.2,46.5,58.2,56.7,58.9,57.3,54.2,54.6,54.9,55.7,54.7,56.1,55.3,51.1,48.3,46.2,51.6,54.7,49.9,54.0,55.8,49.6,46.2,58.4,
 52.4,44.7,47.8,59.2,57.3,49.6,45.9,44.3,57.0,44.4,47.8,49.4,50.7,56.0,47.6,52.8,46.0,47.6,51.4,55.4,45.5,46.2,47.1,51.3,52.4,49.4,48.0,46.2)
 
+plot(my_observations,  pch=19, ylab="", xlab="",
+     ylim=c(0,100), axes=FALSE, main="", col="#0000ffcc")
+box()
+axis(2, seq(from=0, to=100, by=10), las=1)
+```
+
+**Figure 1: Observation 1, of 1000 values**
+
+We can see some trends right away: the data tend to lie between 30 and 70, and no value is larger than 90 nor smaller than 10. It's not clear where the most common value is. It would be convenient to summarize these data in a simpler format that preserves the important information while reducing clutter.
+
+A **histogram** is a helpful method to summarize our data and look for trends. The simplest form of histogram is constructed by dividing the possible values of the observed data into bins, and then counting how many observations fall into each bin. The histogram barplot then shows the count of values in each bin, rather than the raw data itself:
+
+
+```{r, fig.height=2.5, fig.width=4, med.mar=TRUE, echo=FALSE}
+par(mar=c(3,3,3,1))
+h=hist(my_observations, las=1, xlab="", 
+        col="lightgray", main="frequency histogram")
+```
+
+**Figure 2: histogram of Observation 1**
+
+```{r echo=FALSE}
+freq_break_begin=h$breaks[which(h$counts==max(h$counts))][1]
+freq_break_end=h$breaks[which(h$counts==max(h$counts))[1]+1]
+```
+
+This histogram is divided into bins of size `r h$breaks[2]-h$breaks[1]`. The bin that spans the range `r freq_break_begin` to `r freq_break_end` has `r max(h$counts)` observations, the most frequent range. We can see that the frequency of values larger or smaller than this range trails off steadily in either direction. 
+
+Density plots
+-----------------------
+
+An alternate way to display a histogram is a called a *density plot*. In a density plot, the area covered by the histogram bars is constrained to sum to 1. Note that area is the product of bar height and bar width, so short wide bars can cover as much area as tall narrow bars.
+
+```{r, fig.height=2.5, fig.width=4, med.mar=TRUE, echo=FALSE}
+par(mar=c(3,3,3,1))
+h=hist(my_observations, las=1, xlab="", freq=FALSE, ylim=c(0,0.05),
+       col="lightgray", main="density histogram")
+```
+
+**Figure 3: density plot of Observation 1**
+
+**The sum of the areas of bars in a density plot will always add up to 1**. Plotting the same data with fewer bars will produce a histogram with wider bars, maintaining the total area sum of 1.
+
+```{r, fig.height=2.5, fig.width=4, med.mar=TRUE, echo=FALSE}
+par(mar=c(3,3,3,1))
+h=hist(my_observations, las=1, xlab="", freq=FALSE, ylim=c(0,0.05),
+       col="lightgray", main="", breaks=5)
+```
+
+**Figure 4: density plot of Observation 1 with wider bars**
+
+Observing a summary of all of the values on a density plot allows us to make some observations about how frequently observations take a given value. This gives information about the **distribution** of values that we observed. We will explore distributions in more detail in [Module 4](module_04.1.html).
+
+How many peaks?
+----------------
+
+Some processes generate a distribution with a single most-frequent value. Others processes will create more than one peak. Understanding the shape of the histogram can give clues about the underlying process that created the data.
+
+Histograms can make it clear whether there is a single peak of most frequent values, or more than one such peak. However, careful study of the data may be required to make this clear. A new dataset of 2000 observations makes this point:
+
+```{r, fig.height=5, fig.width=8, left.mar=TRUE, echo=FALSE, left.mar=TRUE }
+par(mar=c(3,3,1,1))
+plot(sample(my_bivariate),  pch=19, ylab="", xlab="",
+     ylim=c(0,100), axes=FALSE, main="", col="#0000ffcc", cex=0.5)
+box()
+axis(2, seq(from=0, to=100, by=10), las=1)
+```
+
+**Figure 5: scatter plot of observation two**
+
+```{r, fig.height=2.5, fig.width=4, med.mar=TRUE, echo=FALSE, left.mar=TRUE }
+par(mar=c(3,3,1,1))
+h=hist(my_bivariate, las=1, xlab="", main="", 
+       ylim=c(0,400), col="lightgray" )
+```
+
+**Figure 6: histogram of observation two**
+
+In this second observation, a histogram makes it clear that there are two peaks in the frequencies, one around 50 and one around 65. The shape of the distribution suggests something about the process that generated the data. Statisticians refer to the most frequent value in a data set as the *mode* of the distribution, and a distribution of observations with two peaks is called a *bimodal distribtion*.
+
+**Bimodal distributions in mouse blood**
+
+In 2013, the Balmain lab performed a Complete Blood Count (CBC) analysis on whole blood taken from `r length(MCV)` healthy eight week old mice. The CBC panel is a standard measure of macroscopic blood phenotypes such as the relative frequency of red blood cells in the total population. The Mean Corpuscular Volume is an estimate of the average red blood cell size, measured in fL.
+
+Plotting the measured values using a histogram gives information about the distribution of values. Here I present two different histograms from the same data, one with fewer bars and another with more bars:
+
+```{r}
+plot( sort(MCV), xlab="Mouse number", ylab="MCV" )
+```
+
+**Figure 7: Mean Corpuscular Volume (MCV) data**
+
+```{r}
+summary(MCV)
 ```
 
 
+```{r, fig.height=2.5, fig.width=7, left.mar=TRUE, echo=FALSE, left.mar=TRUE }
+layout(matrix(1:2,1,2))
+par(mar=c(3,3,1,1))
+hist(MCV, breaks=5, main="MCV, wider bins", col="lightgray", xlim=c(40,80), ylim=c(0,80), las=1 )
+hist(MCV, breaks=20, main="MCV, narrower bins", col="lightgray", xlim=c(40,80), ylim=c(0,40), las=1 )
+```
 
-**This module defines what is meant by a statistical variable. It introduces the fundamental tools used to describe the behavior of a variable, including the mean, standard deviation, histograms, and normal distribution.**
+**Figure 8: histogram of Mean Corpuscular Volume (MCV) data**
+
+In the plot on the left, each bar represents a wider bin of data. This plot suggests there is a single peak of frequency around 45 fL. The plot on the right shows the same data plotted using smaller bins, and suggests that there may actually be two distinct peaks of MCV levels in this population, one around 45 fL and one around 55 fL. The mice in this study were a genetically heterogeneous mix of two parental strains, and it turns out that control of MCV levels was strongly associated with the individual mouse's genotype at one locus in the genome.
 
 
 
@@ -66,53 +161,130 @@ The mean provides a single point estmate the middle value of the data. The varia
 
 $\large{ \textit{variance} = \sigma^2 = \frac{ \sum\limits_{i=1}^N{ (v_n - \mu)^2 }} {N} }$
 
+```{r echo=FALSE, fig.height=3, fig.width=8}
+layout(matrix(1:3,1,3))
+par(mar=c(3,3,1,2))
+X = rnorm(50, 0, 0.25)
+X = c(X, (-1*X) )
+plot( X, pch=19, cex=0.5, las=1, ylim=c(-3,3) )
+text( 100, -2.7, paste("mean:", round( mean(X), 2), sep=" " ), adj=1, font=2 )
+text( 100, -3, paste("variance:", round( var(X), 2), sep=" " ), adj=1, font=2 )
+#X = rnorm(100, 0, 0.75)
+X2 = X * 2
+plot( X2, pch=19, cex=0.5, las=1, ylim=c(-3,3) )
+text( 100, -2.7, paste("mean:", round( mean(X2), 2), sep=" " ), adj=1, font=2 )
+text( 100, -3, paste("variance:", round( var(X2), 2), sep=" " ), adj=1, font=2 )
+#X = rnorm(100, 0, 1)
+X3 = X * 3
+plot( X3, pch=19, cex=0.5, las=1, ylim=c(-3,3) )
+text( 100, -2.7, paste("mean:", round( mean(X3), 2), sep=" " ), adj=1, font=2 )
+text( 100, -3, paste("variance:", round( var(X3), 2), sep=" " ), adj=1, font=2 )
+```
+
+**Figure 9: Three data sets with the same mean, increasing variance**
+
+
 Note that because we sum over the square of the differences, as opposed to simply using a positive distance such as the absolute value, a point's influence over the variance increases dramatically as the distance from the mean increases. As a result, even if most observations are relatively close to the mean, it takes only one value that is quite distant from the mean to make the variance very large.
+
+Sample variance
+--------------------
+
+In analysis of real observations, we as usually working with a sample rather than the entire population. The formula for the variance needs to be modified slightly when we calculate the sample variance:
+
+$\large{ \textit{sample variance} = s^2 = \frac{ \sum\limits_{i=1}^N{ (v_n - \mu)^2 }} {N-1} }$
+
+
+The difference is that the denominator is now *N-1* instead of *N*. 
 
 The variance is mathematically important, but since we square the individual deviations from the mean in order to calculate the variance, the variance itself is not in the same units as the underlying measurements. That is, if your measure is in inches, the variance will be in inches-squared. This is often inconvenient, so we usually take the square root of the variance to match up the units measuring dispersion with the units measuring mean. The square root of the variance is called the standard deviation.
 
 $\large{ \textit{standard deviation} = \sigma = \sqrt{ \textit{variance} } }$
 
-The mean and standard deviation together do a good job of describing the central tendency and spread of many data sets that are generated by natural processes. They are particularly useful when the data tend to cluster near the mean and fall off in frequency in either direction in a bell-shaped distribution called the *normal distribution*. 
+Depending on whether the variance is greater than 1 or less than 1, the variance will be less than or greater than the standard deviation.
 
-The normal distribution
-======================================================================
+```{r echo=FALSE}
+layout(matrix(1:3,1,3, byrow=TRUE))
+par(mar=c(3,3,1,2))
+plot( X3, pch=19, cex=0.5, las=1, ylim=c(-3,3) )
+text( 100, -2.4, paste("mean:", round( mean(X3), 2), sep=" " ), adj=1, font=2 )
+text( 100, -2.7, paste("variance:", round( var(X3), 2), sep=" " ), adj=1, font=2 )
+text( 100, -3, paste("sd:", round( sd(X3), 2), sep=" " ), adj=1, font=2 )
+abline(0, 0)
+abline( var(X3), 0, col="cornflowerblue", lwd=2 )
+abline( -1*var(X3), 0, col="cornflowerblue", lwd=2 )
+abline( sd(X3), 0, col="gold", lwd=2 )
+abline( -1*sd(X3), 0, col="gold", lwd=2 )
 
-For centuries observers of the natural world have known that natural phenomena that act as random variables, such as the height of pine trees in a forest, tend to follow a bell-shaped distribution. Most subjects have values near the center of the distribution. More extreme values are progressively rarer, with frequencies that drop off to near-zero values quickly. This distribution was formalized as the so-called Normal distribution
+X4 = X*4
+plot( X4, pch=19, cex=0.5, las=1, ylim=c(-3,3) )
+text( 100, -2.4, paste("mean:", round( mean(X4), 2), sep=" " ), adj=1, font=2 )
+text( 100, -2.7, paste("variance:", round( var(X4), 2), sep=" " ), adj=1, font=2 )
+text( 100, -3, paste("sd:", round( sd(X4), 2), sep=" " ), adj=1, font=2 )
+abline(0, 0)
+abline( var(X4), 0, col="cornflowerblue", lwd=2 )
+abline( -1*var(X4), 0, col="cornflowerblue", lwd=2 )
+abline( sd(X4), 0, col="gold" , lwd=2 )
+abline( -1*sd(X4), 0, col="gold", lwd=2 )
 
-The normal distribution plays a fundamental role in biostatistics, and we will spend some time exploring its uses.
 
-Features of the normal distribution
-------------------------------------------------
+X6 = X*6
+plot( X6, pch=19, cex=0.5, las=1, ylim=c(-4,4) )
+text( 100, -3.4, paste("mean:", round( mean(X6), 2), sep=" " ), adj=1, font=2 )
+text( 100, -3.7, paste("variance:", round( var(X6), 2), sep=" " ), adj=1, font=2 )
+text( 100, -4, paste("sd:", round( sd(X6), 2), sep=" " ), adj=1, font=2 )
+abline(0, 0)
+abline( var(X6), 0, col="cornflowerblue", lwd=2 )
+abline( -1*var(X6), 0, col="cornflowerblue", lwd=2 )
+abline( sd(X6), 0, col="gold", lwd=2 )
+abline( -1*sd(X6), 0, col="gold", lwd=2 )
 
-A Normal distribution has several features:
 
-* It is always positive; away from the middle it gets very close to zero, but never crosses zero.
-* The area under the curve is always equal to one
-* The curve is symmetric around the midpoint
-
-The X axis for a Normal curve is measured in standard units. 
-
-```{r echo=FALSE, fig.width=4, fig.height=3}
-par(mar=c(4,4,2,1))
-x = seq(-4,4,length=1000)
-y = dnorm(x,mean=0, sd=1)
-plot(x,y, type="l", lwd=1, ylab="Density", xlab="Standard units", main="standard normal curve")
 ```
 
-The mean of this distribution is zero, and the standard deviation is one.
+**Figure 10: Variance vs. the Standard Deviation**
 
-The standard normal distribution 
-------------------------------------------------
-
-* describing a curve using the mean and variance
-* Obtaining z-scores from the mean and standard deviation
-
-reasoning about the rarity of events using the z score
-------------------------------------------------
+The mean and standard deviation together do a good job of describing the central tendency and spread of many data sets that are generated by natural processes. They are particularly useful when the data tend to cluster near the mean and fall off in frequency in either direction in a bell-shaped distribution called the *normal distribution*. 
 
 
+Summary
+============
 
-Error bars
+* Histograms summarize the overall frequency distribution of a data set
+* Varying the histogram bin width may reveal things about the data
+* Variance: mean sum of squared differences from the mean
+    + sample variance has correction in denominator
+* Standard deviation: square root of the variance
+* Mean and standard deviation are useful to summarize the central tendency and spread of the data
 
-When do I use the SD? When do I use the SEM?
+
+R code examples
+=======================
+
+Plotting Histograms
+--------------------------------------------------------------------------------
+
+Histograms can be plotted with the hist() function. By default a frequency histogram is plotted:
+
+```{r fig.height=3, fig.width=5}
+hist(my_observations)
+```
+
+Several useful parameters:
+
+* Main title: *main* (words in quotes)
+* plot a density histogram: *freq=FALSE*
+* bin color: *col* (color name or RBG code in quotes)
+* X label: *xlab* (words in quotes)
+* Y label: *ylab* (words in quotes)
+* number of bins: *breaks* (number)
+
+```{r fig.height=3, fig.width=5}
+hist(my_observations, 
+     main="My observations", 
+     freq=FALSE, 
+     col="cornflowerblue", 
+     xlab="days until relapse",
+     ylab="density",
+     breaks=20) 
+```
 

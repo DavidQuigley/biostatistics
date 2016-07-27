@@ -1,11 +1,14 @@
 ---
-title: "Module 3.2: Using the mean and variance to summarize data"
+title: 'Module 3.2: Exploratory Data Analysis'
 author: "David Quigley"
-date: "September 25, 2015"
-output: 
-    html_document:
-        toc: true
-        css: swiss.css
+output:
+  pdf_document:
+    toc: yes
+  html_document:
+    css: swiss.css
+    toc: yes
+  word_document:
+    toc: yes
 ---
 
 
@@ -41,64 +44,126 @@ pap_no = c( 9,17,9,0,15,12,7,0,0,0,13,10,0,0,0,8,1,7,4,
   0,0,0,0,3,2,1,7,5,23,2,3,3,5,0,3,5,17,1,
   1,4,21,0,0,2,14,5,2,0,3,6,2,1)
 
-MCV = c( 59.5,49.0,48.7,50.1,49.9,54.5,57.0,63.2,47.5,65.1,63.5,61.3,77.3,50.2,50.9,66.4,62.1,49.7,58.2,60.0,54.8,45.3,48.8,61.2,47.8,53.4,60.1,61.4,
-57.9,61.2,62.1,64.6,61.3,45.8,65.9,47.6,59.4,63.5,52.2,51.8,75.9,51.3,60.6,55.7,69.3,50.5,57.7,54.6,67.7,60.5,54.4,58.6,73.6,60.0,53.2,49.6,
-56.4,62.0,48.9,52.9,50.1,56.3,56.6,64.3,59.3,57.3,57.2,48.1,46.6,45.2,48.7,60.6,48.0,47.5,52.7,49.7,56.4,51.2,46.1,43.8,51.7,47.4,59.0,54.1,
-47.9,43.6,47.6,53.7,45.2,48.7,49.7,46.6,51.2,46.1,50.6,54.2,47.4,52.7,51.7,50.6,49.5,55.1,51.9,59.6,46.3,51.0,48.3,50.2,56.5,56.3,46.5,45.8,
-55.3,47.0,49.8,47.6,56.9,55.4,52.9,58.1,58.2,56.0,57.0,48.6,55.4,58.3,57.2,58.6,55.0,65.5,60.7,45.5,44.1,47.2,50.4,46.7,55.1,52.5,53.1,55.2,
-52.3,50.5,48.9,45.2,53.3,48.4,55.0,55.4,49.2,43.6,52.2,51.6,49.0,51.0,60.4,45.7,55.0,50.5,46.8,46.4,46.5,54.4,46.1,48.4,56.1,55.2,56.8,58.1,
-47.7,55.0,58.6,55.2,47.2,46.5,58.2,56.7,58.9,57.3,54.2,54.6,54.9,55.7,54.7,56.1,55.3,51.1,48.3,46.2,51.6,54.7,49.9,54.0,55.8,49.6,46.2,58.4,
-52.4,44.7,47.8,59.2,57.3,49.6,45.9,44.3,57.0,44.4,47.8,49.4,50.7,56.0,47.6,52.8,46.0,47.6,51.4,55.4,45.5,46.2,47.1,51.3,52.4,49.4,48.0,46.2)
-
 ```
 
+[Return to the table of contents](index.html)
+
+********************************************************************************
 
 Introduction
 ========================================
 
 **This module explains:**
 
-* How to summarize a single random real-valued variable
-    + mean and median
-    + percentiles
-    + Box and whiskers plots
-    + Variance and the standard deviation
+* The definition of exploratory data analysis
+    + scatter plots and bar plots
+    + the mean and median
+
+
+Look at the data first
+================================================
+
+The human eye is one of the most important tools in statistical analysis. Statistical analysis is partly a mathematical exercise, but there is far more intuition and creativity involved than may be first apparent. An analyst's first job when looking at new data is to get a feel for the overall data set. Always look at the data you are trying to interpret in order to 
+
+* identify trends
+* find extreme values
+* generate hypothesis
+* check assumptions
+* identify unexpected bias
+
+
+There are practical reasons to explore the data this way. 
+
+Impossible data
+-----------------
+
+If your assay is supposed to generate continuous readings between 0 and 30, and one subject has a value of 3000, that is something you want to catch right away. 
+
+Patterns of missing data
+-------------------------
+
+If data were collected from several sources, and one source is frequently missing, this is an hint that a bias may affect your analysis
+
+Scatter plots and Bar plots
+------------------------------------
+
+Why are some people more susceptible to tumor formation than others? One contributing factor is natural variations in our germline DNA that influence the constitutive activity of genes. The Balmain lab at UCSF studied a mouse model of natural human populations by creating a genetically heterogeneous population of mice and then inducing tumors through chemical carcinogenesis. Each animal develops a variable number of small benign tumors; some are completely resistant, while others are highly susceptible. We will use these data to demonstrate some aspects of exploratory data analysis.
+
+The first question is, what was seen? The data point under consideration is the number of small benign tumors counted at twenty weeks into the experiment. Once choice would be to make an unsorted scatter plot of the data, with mouse number on the X axis and the number of benign tumors on the Y axis.
+
+```{r, fig.height=4, fig.width=5, echo=FALSE}
+par(mar=c(5,5,1,1))
+plot( pap_no, pch=19, ylab="tumor number", xlab="mouse number", main="", las=1)
+```
+
+**Figure 1: scatter plot of benign tumor number**
+
+From this view of the data we can see there are mice with zero tumors, a lot of mice with fewer than 10 tumors, and at least one animal with a much larger number of tumors than all of the others.
+
+Plotting these data in sorted order makes it easier to discern trends.
+
+```{r, fig.height=4, fig.width=5, echo=FALSE}
+par(mar=c(5,5,1,1))
+plot( sort(pap_no), pch=19, ylab="tumor number", xlab="", main="", las=1)
+```
+
+**Figure 2: sorted scatter plot of benign tumor number**
+
+Figure two makes it easy to see there are about 20 mice with no tumors and most animals have fewer than 5 tumors.
+
+Patterns of batch effects
+-----------------------
+
+If data were collected from several sources, and the values of the data are systematically associated with the data site, then you may need to address the problem of **batch effects**. 
+
+**Figure 1** shows 200 data points were collected from two sites. The same experimental protocols were meant to be used in each site.
+
+```{r echo=FALSE}
+layout(matrix(1:2,1,2))
+par(mar=c(3,3,1,1))
+v1 = rnorm(100, -1, 1)
+v2 = rnorm(100, 1, 1)
+xs = jitter( rep(1, 200))
+plot( xs, c(v1, v2), pch=19, axes=FALSE, ylim=c(-4,4), xlab="", ylab="" )
+axis(2, seq(from=-4, to=4, by=1), las=1 )
+box()
+
+plot( xs, c(v1, v2), pch=19, axes=FALSE, ylim=c(-4,4), xlab="", ylab="",
+      col=c(rep("black", 100), rep("cornflowerblue", 100) ))
+axis(2, seq(from=-4, to=4, by=1), las=1 )
+box()
+
+```
+
+**Figure 3: batch effects**
+
+On the left side of **Figure 3** I have plotted the raw data. On the right side, I plotted the same figure, but colored each value according to whether it was generated at site one (black) or site two (blue). This exploratory analysis clearly indicates that site two values are systematically biased to be higher than site one values.
+
 
 Summarizing data: mean and median
 ======================================================
 
-The most succinct summary of a set of continuous observed data uses a single number to represent all of the observations. A formal way to refer to this is the "central tendency" of the data. Informally, we often describe this value as the average value. There are several ways to calculate an average, but the most frequently used values are the **mean** and the **median**. We will see that these values are important and useful but not generally sufficient on their own.
+The most succinct summary continuous data uses a single number to represent all of the observations. A formal way to refer to this is the "central tendency" of the data. Informally, we often describe this value as the average value. There are several ways to calculate an average, but the most frequently used values are the **mean** and the **median**. We will see that these values are important and useful but not generally sufficient on their own.
 
 Central tendency: the mean
 -------------------------------
 
-There are several ways of calculating central tendency, but the mean is the quantity most people are talking about when they informally refer to, "the average". The mean is the sum of all measurements, divided by the number of measurements.
-
+There are several ways of calculating central tendency, but the mean is the quantity most people are talking about when they informally refer to "the average". The mean is the sum of all measurements, divided by the number of measurements.
 
 **$\large{ \textit{mean} = \mu = \frac{ \sum\limits_{i=1}^N{v} }{N} }$**
 
-**Notation for the mean of N values**
-
-
-In mathematical notation, the greek letter sigma (Σ) means "sum over"; this notation can be read, "the mean, which has the symbol μ (mu), is equal to the sum of all N of the values *v*, divided by N".
-
-```{r echo=FALSE, small.mar=TRUE, fig.height=2, fig.width=3}
-par(mar=c(2,1,1,1))
-vals = rnorm(10, mean=10, sd=3)
-valskew=c()
-ylocs =  jitter( rep(1,length(vals)), 3)
-plot( c(vals, valskew),  
-      c( ylocs, rep(1, length(valskew) ) ),
-      pch=19, axes=FALSE, xlab="", ylab="", xlim=c(0, 50), ylim=c(0.8, 1.2), col="#11111133" )
-box()
-axis(1, seq(0,50,10))
-mu = mean( c(vals, valskew) )
-lines( c(mu, mu), c(0.8, 1.2), lwd=2)
-legend( 25, 1.2, c("mean"), lty=c(1), lwd=2, box.col="white" )
-
+```{r}
+observations = c(2,4,7,2,6,9,7,3,1)
+observations_sum = sum( observations )
+observations_N = length(observations)
+observations_sum / observations_N
+mean(observations)
 ```
 
-Here I have plotted a set of 10 values along the X axis. Their mean is `r round( mean(vals), 2)`, indicated by a solid vertical line.
+**Notation for the mean of N values**
+
+In mathematical notation, the greek letter sigma means "sum over"; this notation can be read, "the mean, which has the symbol mu, is equal to the sum of all N of the values *v*, divided by N".
+
 
 Central tendency: the median
 -------------------------------
@@ -114,43 +179,50 @@ median(observations)
 ```
 
 
-
 When the mean and median diverge
 --------------------------------------------------------
 
 Sometimes the mean gives a good estimate of the expected value of a set of observations. If observations tend to be equally likely to be larger or smaller than the mean, then the mean will be useful. However, there are many possible distributions of observations where the mean can be highly misleading.
 
-```{r echo=FALSE, small.mar=TRUE, fig.height=2, fig.width=3}
-par(mar=c(3,1,1,1))
-plot( c(vals, valskew),  
-      c( ylocs, rep(1, length(valskew) ) ),
-      pch=19, axes=FALSE, xlab="", ylab="", xlim=c(0, 50), ylim=c(0.8, 1.2), col="#11111133" )
-box()
-axis(1, seq(0,50,10))
-mu = mean( c(vals, valskew) )
-lines( c(mu, mu), c(0.8, 1.2), lwd=2)
-med = median( vals )
-lines( c(med, med), c(0.8, 1.2), lwd=2, lty=2, col="cornflowerblue")
-legend( 25, 1.24, c("mean", "median"), lty=c(1,2), lwd=2, box.col="white", col=c("black","cornflowerblue") )
-
-
+```{r echo=FALSE, small.mar=TRUE, fig.height=4, fig.width=5}
+par(mar=c(2,1,1,1))
+vals = rnorm(10, mean=10, sd=3)
+valskew=c()
+ylocs =  jitter( rep(1,length(vals)), 3)
 valskew = c(26, 38, 35, 49)
 plot( c(vals, valskew),  
-      c( ylocs, rep(1, length(valskew) ) ),
-      pch=19, axes=FALSE, xlab="", ylab="", xlim=c(0, 50), ylim=c(0.8, 1.2), col="#11111133" )
+  c( ylocs, rep(1, length(valskew) ) ),
+  pch=19, axes=FALSE, xlab="", ylab="", xlim=c(0, 50), ylim=c(0.8, 1.2), col="black" )
 box()
 axis(1, seq(0,50,10))
 mu = mean( c(vals, valskew) )
 lines( c(mu, mu), c(0.8, 1.2), lwd=2)
 med = median( vals )
 lines( c(med, med), c(0.8, 1.2), lwd=2, lty=2, col="cornflowerblue")
-legend( 25, 1.24, c("mean", "median"), lty=c(1,2), lwd=2, box.col="white", col=c("black","cornflowerblue") )
+legend( 25, 1.2, c("mean", "median"), lty=c(1,2), cex=1.5, lwd=2, box.col="white", col=c("black","cornflowerblue") )
 
 ```
 
-On the left side, data where the mean and median give very similar results. On the right side, a few extreme values push the mean up nearly 10 units compared to the median. When the mean is larger than the median, the distribution is called a **heavy-tailed distribution** that displays **skew**. Skewed distributions are not equally likely to have points on either side of the mean; in this case the skew is to the right.
+**Figure 4: mean vs. median**
 
-The median is stable in the face of a small number of extreme values, since it is determined by the value of the middle of the distribution rather than being calculated using the sum of all of the observations together. This stability is often highly desirable, and will be discussed further in the **Robust Statistics module**. The mean is still very useful, however, because it has mathematical properties that we will describe when we introduce the normal distribution.
+In **Figure 4**, a few extreme values push the mean up nearly 10 units compared to the median. When the mean is larger than the median, the distribution is called a **heavy-tailed distribution** that displays **skew**. Skewed distributions are not equally likely to have points on either side of the mean.
+
+The median is stable in the face of a small number of extreme values, since it is determined by the value of the middle of the distribution rather than being calculated using the sum of all of the observations together. This stability is often highly desirable, and will be discussed further in [Module 8.1: Robust Statistics and outliers](module_08.1.html). 
+
+If we compare the median and mean in the benign tumor data, we can see there is skew in this data set as well.
+
+```{r, fig.height=4, fig.width=5, echo=FALSE}
+par(mar=c(5,5,1,1))
+plot( sort(pap_no), pch=19, ylab="tumor number", xlab="mouse number", main="", las=1)
+abline(mean(pap_no), 0 )
+abline(median(pap_no),0 )
+text( 60, mean(pap_no)+1, "mean", cex=1.5)
+text( 60, median(pap_no)+1, "median", cex=1.5)
+```
+
+**Figure 5: mean vs. median in benign tumor data**
+
+If extreme values exert inappropriate influence, the median is helpful because it will reduce the influence of these extreme values on the estimate of central tendency. If, however, the extreme values are genuine, using the median reduces the accuracy of our estimate and therefore can reduce statistical power. The median is often a safe choice for summarizing central tendency and the loss in accuracy is often modest compared to the potential benefits.
 
 
 Range and percentiles
@@ -158,20 +230,26 @@ Range and percentiles
 
 Range is simply the highest and lowest value in the distribution. 
 
-Percentiles are values such that a given percentage of the observations are as small or smaller than that value. Five percent of the values in a distribution will be lower than or equal to the fifth percentile value; half of the values in a distributionw will be at or below the fiftieth percentile, and 90% of the values will be lower than or equal to the 90th percentile. The median value is, by definition, the 50th percentile.
+Percentiles are values such that a given percentage of the observations are as small or smaller than that value. Five percent of the values in a distribution will be lower than or equal to the fifth percentile value; half of the values in a distribution will be at or below the fiftieth percentile, and 90% of the values will be at or lower than the 90^th^ percentile. The median value is, by definition, the 50^th^ percentile.
 
 Dividing the observations into four pieces by percentile yields quartiles, the 25^th^, 50^th^, and 75^th^ percentiles.
 
+The R function *summary()*, when applied to a vector, reports the minimum, maximum, median, mean, and 25^th, and 75^th^ percentiles:
 
+```{r}
+summary(1:100)
+```
 
-Box and whiskers plots
+Box and whiskers plots (box plots)
 ----------------------------------
 
 The box and whiskers plot is a summary plot that communicates five things at once:
 
 1. the median (middle line)
-2. 25th and 75th quartiles (box top and bottom)
-3. the +/- 1.5 times the interquartile range (whiskers)
+2. 25^th^  and 75^th^  quartiles (box top and bottom)
+3. +/- 1.5 times the interquartile range (whiskers)
+
+The interquartile range is the distance between the 75^th^ and 25^th^ quartiles.
 
 Individual points that fall out of this range are plotted as points. 
 
@@ -180,72 +258,115 @@ The R function to make box and whiskers plots is *boxplot()*.
 ```{r, left.mar=TRUE, fig.height=3, fig.width=3, echo=FALSE}
 vv = rnorm( 100, mean=5)
 par(mar=c(2,3,1,1))
-hist(vv, las=1, xlim=c(0,10), main="Histogram")
-box()
 boxplot( vv, las=1, ylim=c(0, 10), boxwex=0.5, main="Box and whiskers" )
 ```
 
-This box plot shows a distribution with close to equal distribution around the mean value.
+**Figure 6: box and whiskers plot**
+
+**Figure 6** shows values that are close to equally distributed around the median value.
 
 ```{r, left.mar=TRUE, fig.height=3, fig.width=3.5, echo=FALSE}
 vv2 = c( rnorm( 100, mean=5), rnorm( 10, mean=9), 12,12,14,15 )
 par(mar=c(2,3,1,1))
-hist(vv2, las=1, xlim=c(0,20), main="Histogram, right skew")
-box()
 boxplot( vv2, las=1, ylim=c(0, 20), boxwex=0.5, main="Box and whiskers" )
-```
+```  
 
-This plot shows a different distribution showing some skew to larger values; the median has not changed much, but the more extreme values are plotted as individual points in the box and whiskers plot.
+**Figure 7: box and whiskers plot showing right skew**
 
-```{r, left.mar=TRUE, fig.height=3, fig.width=3.5, echo=FALSE}
-vv2 = vv2[vv2>4.5]
-vv2 = c(vv2, 7,8,8,9,9,10,11)
-par(mar=c(2,3,1,1))
-hist(vv2, las=1, xlim=c(0,20), main="Histogram right-skew", breaks=10)
-box()
-boxplot( vv2, las=1, ylim=c(0, 20), boxwex=0.5, main="Box and whiskers, right-skew" )
-```
-
-This plot shows the same data as in the previous distribution, but with all values less than 4.5 removed and more values above the median. The median has increased slightly, but note that the median is now almost identical to the 25th percentile, and the lower whisker is very short compared to the upper whisker. This indicates compresssion in the distribution.
-
-
-Summarizing data: variance and standard deviation
-======================================================================
-
-The mean provides a single point estmate the middle value of the data. The variance summarizes the amount of spread, or dispersion, around the mean of the observations. To calculate the variance we sum the average difference between each individual measurement and the mean, and then divide by the number of measurements. If a distribution is more spread out, then these deviations will be larger on average and the variance will in turn be higher. Since observations could be larger than or smaller than the mean, we compute the square the differences.
-
-$\large{ \textit{variance} = \sigma^2 = \frac{ \sum\limits_{i=1}^N{ (v_n - \mu)^2 }} {N} }$
-
-```{r echo=FALSE, fig.height=3, fig.width=8}
-layout(matrix(1:3,1,3))
-par(mar=c(3,3,1,2))
-X = rnorm(100, 0, 0.25)
-plot( X, pch=19, cex=0.5, las=1, ylim=c(-3,3) )
-text( 100, -2.7, paste("mean:", round( mean(X), 2), sep=" " ), adj=1, font=2 )
-text( 100, -3, paste("variance:", round( var(X), 2), sep=" " ), adj=1, font=2 )
-X = rnorm(100, 0, 0.75)
-plot( X, pch=19, cex=0.5, las=1, ylim=c(-3,3) )
-text( 100, -2.7, paste("mean:", round( mean(X), 2), sep=" " ), adj=1, font=2 )
-text( 100, -3, paste("variance:", round( var(X), 2), sep=" " ), adj=1, font=2 )
-X = rnorm(100, 0, 1)
-plot( X, pch=19, cex=0.5, las=1, ylim=c(-3,3) )
-text( 100, -2.7, paste("mean:", round( mean(X), 2), sep=" " ), adj=1, font=2 )
-text( 100, -3, paste("variance:", round( var(X), 2), sep=" " ), adj=1, font=2 )
-```
-
-Note that because we sum over the square of the differences, as opposed to simply using a positive distance such as the absolute value, a point's influence over the variance increases dramatically as the distance from the mean increases. As a result, even if most observations are relatively close to the mean, it takes only one value that is quite distant from the mean to make the variance very large.
-
-The variance is mathematically important, but since we square the individual deviations from the mean in order to calculate the variance, the variance itself is not in the same units as the underlying measurements. That is, if your measure is in inches, the variance will be in inches-squared. This is often inconvenient, so we usually take the square root of the variance to match up the units measuring dispersion with the units measuring mean. The square root of the variance is called the standard deviation.
-
-$\large{ \textit{standard deviation} = \sigma = \sqrt{ \textit{variance} } }$
-
-The mean and standard deviation together do a good job of describing the central tendency and spread of many data sets that are generated by natural processes. They are particularly useful when the data tend to cluster near the mean and fall off in frequency in either direction in a bell-shaped distribution called the *normal distribution*. 
+**Figure 7** shows a different set of values showing some skew to larger values; the median has not changed much, but the more extreme values are plotted as individual points in the box and whiskers plot.
 
 
 R code examples
 =======================
 
-> boxplot
+Scatter plot a vector of data
+--------------------------------------------------------------------------------
+
+The simplest plot of a single vector of size *N* assigns increasing values 1..*N* for the X axis and plots the vector on the Y axis:
+
+```{r fig.height=3, fig.width=3, small.mar=TRUE}
+data=c(1,3,5,2,7)
+plot( data )
+```
+
+This plot can be modified in many ways. Some basic parameters:
+
+* Figure header: *main* (words in quotes)
+* X label: *xlab* (words in quotes)
+* Y label: *ylab* (words in quotes)
+* Point style: pch (various numbers or characters. Some useful ones are 1, 2, 3, 19, and '.' (the period). If you don't pass a value, the value is set to 1 automatically. If you pass a single value, all points have the same point style. Alternately, you can pass a vector of values and set a point styles for each point individually, which is useful if you want to differentiate different kinds of measurements
+* Point color: col (word in quotes or RGB code in quotes)
+* Axis tick orientation: las=1 for numbers parallel to the bottom of the page
+
+```{r fig.height=3, fig.width=3, med.mar=TRUE}
+data=c(1,3,5,2,7)
+plot( data, 
+      pch=19, 
+      col="red", 
+      main="Example header", 
+      xlab="X label", 
+      ylab="Y label",
+      las=1)
+```
+
+**Two-dimensional scatter plots**
+
+```{r fig.height=3, fig.width=3, med.mar=TRUE}
+data_x=c(1,3,5,2,7)
+data_y=c(24,25, 19, 44, 12)
+plot( data_x, data_y, 
+      pch=19, 
+      col="red", 
+      main="Example header", 
+      xlab="X label", 
+      ylab="Y label",
+      las=1)
+```
+
+A full tutorial on making plots is beyond the scope of this module. Many people find the *ggplot2* package to be very helpful in eliminating many of the technical details of making good-looking plots.
+
+
+Plotting Bar Plots
+--------------------------------------------------------------------------------
+
+Pass a vector of numbers to the bar plot in the order in which the values should be plotted
+
+```{r fig.height=3, fig.width=5, small.mar=TRUE}
+barplot( c(1,3,5,2,7 ) )
+```
+
+Useful parameters:
+
+* labels: names.arg (vector of words in quotes)
+* Figure header: *main* (words in quotes)
+* X label: *xlab* (words in quotes)
+* Y label: *ylab* (words in quotes)
+* Bar color: *col* (word in quotes or RGB code in quotes)
+* Add second bar plot on top of existing plot: *add*=TRUE
+
+```{r fig.height=3, fig.width=5, small.mar=TRUE}
+barplot( c(1,3,5,2,7 ), 
+         col="black", 
+         names.arg=c("one", "two", "three", "four", "five") )
+```
+
+Barplots can be layered on top of each other by plotting a second bar plot with 
+the *add* parameter set to *TRUE*:
+
+```{r fig.height=3, fig.width=5, small.mar=TRUE}
+barplot( c(1,3,5,2,7 ), 
+         col="black", 
+         names.arg=c("one", "two", "three", "four", "five") )
+barplot( c(0,2,4,1,5 ), 
+         col="cornflowerblue", 
+         add=TRUE )
+```
+
+
+
+
+Boxplot (Box and whiskers plot)
+--------------------------------------------------------------------------------
 
 Box plots can be created with the boxplot() function
 

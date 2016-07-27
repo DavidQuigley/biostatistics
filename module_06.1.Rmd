@@ -1,11 +1,12 @@
 ---
-title: "Module 6.1: Comparisons between two continuous variables: correlation"
+title: 'Module 6.1: Comparisons between two continuous variables: correlation'
 author: "David Quigley"
-date: "October 17, 2015"
-output: 
-    html_document:
-        toc: true
-        css: swiss.css
+output:
+  html_document:
+    css: swiss.css
+    toc: yes
+  word_document:
+    toc: yes
 ---
 
 ```{r global_options, include=FALSE}
@@ -37,9 +38,9 @@ Introduction
 Correlation 
 ========================================================
 
-![xkcd](images/xkcd.png)
+![](images/xkcd.png)
 
-*(XKCD, https://xkcd.com/552)*
+XKCD, https://xkcd.com/552
 
 The long fat mouse and the short thin mouse
 --------------------------------------------
@@ -52,20 +53,29 @@ Suppose I gave you a list of 20 numbers and told you they were the lengths of 20
 weights=c(23.31,28.43,24.51,31.14,21.60,19.90,27.91,23.10,23.38,18.27,18.02,
           14.87,35.46,20.52,28.60,23.35,20.65,29.16,15.20,32.70)
 lengths=c(166,197,189,192,178,167,181,189,191,173,173,172,193,190,193,185,172,195,148,199)
+par(mar=c(4,4,3,1))
 plot(sort( lengths ), xlab="mouse number", ylab="length (mm)", pch=19, las=1)
 ```
+
+**Figure 1: scatter plot of mouse length**
 
 If you assumed that longer mice were heavier than shorter mice, you might guess their weights should be ranked by their lengths. If you did this, you would make some mistakes but do pretty well overall.
 
 ```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=5}
+par(mar=c(1,3,3,1))
 barplot( rank(weights)[ order(rank(lengths))], main="Weight rank order from lengths", las=1 )
 ```
+
+**Figure 2: weight in grams**
 
 Looking at some actual data, from an experiment using eight-week-old mice, it is clear that the longer a mouse was at eight weeks of age, the heavier it was likely to be. However, the relationship is not perfect.
 
 ```{r echo=FALSE, med.mar=TRUE, fig.height=3, fig.width=3}
+par(mar=c(4,4,1,1))
 plot(weights, lengths, xlab="Weight (grams)", ylab="length (mm)", pch=19, las=1)
 ```
+
+**Figure 3: scatter plot of weight in grams by length in mm**
 
 The relationship between height and weight holds for humans as well, although there are many individuals who would violate our assumptions, such as very short and heavy men, or tall slim women. *Height and weight are correlated*; we could also say *there is an association between height and weight*. Correlation is a mathematical measure of the relationship between two continuous variables. Correlelation is appealingly simple, but correlation carries limitations and paradoxes that can trap the unwary. 
 
@@ -88,6 +98,9 @@ aa = c(1,2,4,5,6,9)
 bb = c(1.6,3,2,9,5.5,13)
 mu.aa = mean(aa)
 mu.bb = mean(bb)
+
+plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue" )
+
 plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main="X - E[X]")
 lines(c(mu.aa, mu.aa), c(0, 100), col="gray", lty=2)
 for(i in 1:length(aa) ){
@@ -99,10 +112,9 @@ lines( c(0, 500), c(mu.bb, mu.bb), col="gray", lty=2)
 for(i in 1:length(bb) ){
     lines( c(aa[i], aa[i]),  c(bb[i], mu.bb),lty=1, col="gray")
 }
-
 ```
 
-*distance from each point to the mean of points on the X and Y axis (drawn as a gray line)*
+**Figure 4: distance from each point to the mean of points on the X and Y axis (drawn as a gray line)**
 
 We usually wish to calculate the sample covariance. To calculate sample covariance, we divide the overall sum of products by N-1 rather than dividing by N. 
 
@@ -112,6 +124,7 @@ $\large{ \sigma_{X,Y} = \frac{1}{N-1}\sum_{1}^N( (x_i-\bar{x})(y_i-\bar{y}) ) }$
 plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("covariance = ",cov(aa,bb),sep=""))
 ```
 
+**Figure 5: scatter plot X by Y**
 
 ```{r echo=FALSE}
 print( data.frame( X_minus_meanX=round( aa-mu.aa, 2), 
@@ -135,6 +148,8 @@ One disadvantage of the covariance is it is dependent on the magnitude of indivi
 plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("covariance =",cov(aa,bb),sep=" "))
 plot(aa*10,bb*10,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("covariance =",cov(aa*10,bb*10),sep=" ") )
 ```
+
+**Figure 6: covariance is affected by scaling**
 
 Note that the values on the right bear the identical relationship to each other as the values on the left, but the values on the right are all larger than those on the left by a factor of 10. **Covariance is not standardized to a consistent range** between -1 and 1; it can be infinitely high or low. This makes it hard to compare two covariance measurements.
 
@@ -169,7 +184,7 @@ plot(1:20, rep(10,20), pch=19, col="cornflowerblue", xlab="X", ylab="Y", axes=FA
 box()
 ```
 
-*correlation between two variables*
+**Figure 7: correlation between two variables**
 
 Using the definition of sample covariance from above, and the definition of the sample standard deviation defined in module 3.2, the correlation coefficient is equal to:
 
@@ -187,6 +202,8 @@ plot(aa,bb,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("r
 plot(aa*10,bb*10,las=1,xlab="X", ylab="Y", pch=19, col="cornflowerblue", main=paste("rho =", round( cor.test(aa*10,bb*10)$estimate, 2),sep=" ") )
 ```
 
+**Figure 8: correlation is scale-invariant**
+
 > Pearson's correlation coefficent can be calculated in R with the *cor()* function.
 
 ```{r}
@@ -202,11 +219,11 @@ Assessing the statistical strength of correlation
 calculating a P value for Pearson's correlation
 --------------------------------------------------------
 
-We can assess the statistical strength of a correlation using the null hypothesis testing framework introduced in module 4.1. The simplest and most natural null hypothesis for correlation is that correlation equals zero. This hypothesis is a polite fiction. In any non-trivial data set, it is almost impossible for correlation to be equal to precicisely zero. However, this fiction is still very useful, because it allows for a principled answer to the question of how likely it would be to see a particular correlation value by chance.
+We can assess the statistical strength of a correlation using the null hypothesis testing framework introduced earlier. The simplest and most natural null hypothesis for correlation is that correlation equals zero. This hypothesis is a polite fiction. In any non-trivial data set, it is almost impossible for correlation to be equal to precicisely zero. However, this fiction is still very useful, because it allows for a principled answer to the question of how likely it would be to see a particular correlation value by chance.
 
 We are often interested in more than one continuous variable at a time. In some cases this is incidental: an experiment designed to measure the effect of nutritional supplements on mouse litter sizes may also capture information about the weight of each mouse. In some cases experiments are explicitly designed to measure the association between two variables
 
-Calculate a t statistic from the rho value:
+To calculate a P value from rho, we will calculate a t statistic from the rho value:
 
 $\large{t = r\sqrt{\frac{n-2}{1-r^2}}}$
 
@@ -217,7 +234,7 @@ example.t = as.numeric( example.rho * sqrt( (length(aa)-2)/(1-example.rho^2)) )
 In the case of our example above, with rho = `r round( example.rho, 3)`, the t statistic is `r round( example.t, 3)` with a corresponding P value of 
 `r round( 2*( 1-pt(example.t, df=4) ), 3)`
 
-```{r echo=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=4}
 
 bnd = 5
 plot( seq(from=-bnd, to=bnd, by=0.01),  dt(seq(from=-bnd, to=bnd, by=0.01), df=length(aa)-2), 
@@ -228,7 +245,9 @@ for(i in seq(from=example.t, to=bnd, by=0.01)){
 }
 ```
 
-Recall that the P value corresponds to the area under the corresponding distribution that is as far or farther from zero than our test statstic. In the plot above, this is indicated by the shaded area of the t distribution. Both the positive and negative sides of the distribution are shared because a two-tailed test is used; we are testing the possibility that our t statistic could be either larger than zero, or less than zero.
+**Figure 9: t distribution**
+
+Recall that the *P* value corresponds to the area under the corresponding distribution that is as far or farther from zero than our test statstic. In the plot above, this is indicated by the shaded area of the t distribution. Both the positive and negative sides of the distribution are shared because a two-tailed test is used; we are testing the possibility that our *t* statistic could be either larger than zero, or less than zero.
 
 Correlation testing in R
 -----------------------------------
@@ -247,32 +266,7 @@ After reminding us that a Pearson's product-moment correlation is being calculat
 
 R then reports a 95% confidence interval for rho, and finally reports the sample estimate for rho itself (0.8783637). To understand where the confidence interval comes from, we need to learn how to transform rho into a value that is normally distributed.
 
-Obtaining confidence intervals for Pearson's product-moment correlation
----------------------------------------------------------------------------------------------
 
-Convert correlation coefficients to Z scores
-
-$\large{ z = \frac{1}{2}ln(\frac{1+r}{1-r} ) }$
-
-$\large{ se = \frac{1}{\sqrt{N-3}} }$
-
-A Z score for the difference in these two values can be calculated with: 
-
-$\large{ \textit{Z test} = \frac{Z_1 - Z_2}{ SE_{ZD} } }$
-
-Recall that the null hypothesis is that correlation equals zero. For the example shown above:
-
-$\large{ \rho = 0.88 }$
-
-$\large{ z_{H1} = \frac{1}{2}ln(\frac{1+0.88}{1-0.88} ) = }$
-
-$\large{ z_{H0} = \frac{1}{2}ln(\frac{1+0.0}{1-0.0} ) = 0}$
-
-$\large{ se = \frac{1}{\sqrt{6-3}} } = 0.577$
-
-$\large{ Z_{score} = \frac{1.293 - 0}{0.577} = 2.240}$
-
-What percentage of a standard normal distribution lies between 2.24 and positive infinity, and between -2.24 and negative infinity?
 
 Limitations of Correlation 
 ================================================================================
@@ -280,7 +274,7 @@ Limitations of Correlation
 Linear relationships only, please
 ------------------------------------------------------------
 
-Correlation can only detect linear relationships between variables. Pratically speaking, this means the relationship between the variables can be described by a function where the parameters are constants or multiplied by coefficients. When plotted, linear relationships will form a straight line.
+Correlation can only detect linear relationships between variables. Pratically speaking, this means the relationship between the variables can be described by a function where the parameters are constants or multiplied by coefficients, but not raised to an exponential power. When plotted, linear relationships will form a straight line.
 
 Examples of non-linear relationships that correlation cannot capture adequately:
 
@@ -305,12 +299,16 @@ box()
 
 ```
 
+**Figure 10: non-linear relationships**
+
 In some cases, correlation can capture part of the relationship between two variables, but only part of that relationship. This plot is an exponential function $\large{Y=2^X}$, so the Y and X coordinates are perfectly correlated if one knows the distribution. However, the correlation coefficient is only 0.51:
 
 ```{r echo=FALSE, small.mar=TRUE, fig.width=3, fig.height=3}
 plot( 2^ seq(from=0, to=30, by=0.001), pch=19, cex=0.25, axes=FALSE, xlab="", ylab="", main="rho = 0.51")
 box()
 ```
+
+**Figure 11: non-linear relationship: exponential curve**
 
 Correlation is highly susceptible to outliers
 ---------------------------------------------------
@@ -333,6 +331,8 @@ plot(aa[1:10],bb[1:10], pch=19, col=cols[1:10], xlim=c(0,10), ylim=c(0,10), las=
 plot(aa,bb, pch=19, col=cols, xlim=c(0,10), ylim=c(0,10), las=1, main=paste("rho =", cor.11,"P=",p.11))
 
 ```
+
+**Figure 12: data with or without a single outlier point**
 
 Very different data can produce equivalent mean, variance, and correlation values in pathological circumstances. The following demonstration, called Anscombe's quartet after statistician Francis Anscombe, shows the importance of looking at the data.
 
@@ -359,4 +359,15 @@ plot(four_x, four_y, pch=19, col="cornflowerblue", xlab="", ylab="", las=1)
 abline(lm(four_y~four_x))
 ```
 
+**Figure 13: Anscombe's quartet showing the limitation of correlation**
+
 These four plots all show pairs of data with the same mean (X=9, Y=7.5); the same sample variance (X=11, Y=4.122); the same same Pearson's correlation coefficient (0.816); and the same linear regression coefficients (Y = 3 + 0.5X).
+
+Summary
+==============
+
+* Correlation measures the association between two real-valued variables
+* Correlation is quantified using Pearson's correlation coefficient
+* The *t* distribution is used to derive a *P* value from a correlation
+* Correlation is most accurate for linear relationships and is of limited or no use when relationships are non-linear
+* Pearson correlation is susceptible to outliers

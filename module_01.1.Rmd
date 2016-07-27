@@ -1,10 +1,12 @@
 ---
-title: "Module 1.1: Introduction to biostatistics"
+title: 'Module 1.1: Course introduction and overview'
 author: "David Quigley"
-output: 
-    html_document:
-        toc: true
-        css: swiss.css
+output:
+  html_document:
+    css: swiss.css
+    toc: yes
+  word_document:
+    toc: yes
 ---
 
 [Return to the table of contents](index.html)
@@ -125,14 +127,14 @@ Exploratory Data Analysis
 
 Biostatistics offers tools to describe the overall properties of our sample. The different kinds of data that we can gather and techniques for summarizing them using numbers and pictures are introduced in [Module 3.1: Data types](module_03.1.html) and [Module 3.2: Exploratory Data Analysis: scatter plots and histograms](module_03.2.html). These techniques include numbers such as the average (statisticians usually say "the mean", as there are several measurements that can be called the "average") and pictures such as a histogram.
 
-In addition to summarizing the primary characteristics of our observed data, a key property of the data is how much variability they possess. Variability has many possible sources: some of it derives from biology, some from experimental inaccuracies or error, and some from random chance occurrences. [Module 3.3: Summarizing data: central tendency and variation](module_03.3.html) introduces formal measures of variance. 
+In addition to summarizing the primary characteristics of our observed data, a key property of the data is how much variability they possess. Variability has many possible sources: some of it derives from biology, some from experimental inaccuracies or error, and some from random chance occurrences. [Module 3.3: Histograms and variance](module_03.3.html) introduces formal measures of variance. 
 
 Probability and hypothesis testing
 --------------------------------------------------------------------------------
 
-Probability quantifies the likelihood that an event will occur. In [Module 4.1: Probability and Hypothesis testing](module_04.1.html) I describe the elements of how we can use the mathematics of probability to reason about simple random events like coin flips and dice. This section culminates in an intuitive explanation the *P* value. 
+Probability quantifies the likelihood that an event will occur. In [Module 4.1: Probability and the P value](module_04.1.html) I describe the elements of how we can use the mathematics of probability to reason about simple random events like coin flips and dice. This section culminates in an intuitive explanation the *P* value. 
 
-Measurements and responses to interventions are a mixture of deterministic predictable effects and random chance. Testing even individuals that seem identical, in rigorously controlled conditions, such as genetically identical cells in a plastic dish in a laboratory, will produce different responses to the same stimulus. Through repeated testing of the system, we attempt to identify consistent models that explain what we observe and predict responses to new interventions. Because living systems are so variable in their individual manifestations and in their response to perturbations, informal models are necessary but insufficient for scientific reasoning. The data we collect in a study must be subjected to some form of formal testing to establish the likelihood that, if our model were incorrect, the data would still appear to be the same. In [Module 4.2: Making decisions with P values](module_04.2.html) I introduce the hypothesis testing framework that is widely used in biomedical science. I also explain some critiques and limitations of the *P* value. [Module 4.3: Adjusting P values when there are many tests](module_04.3.html) explains the intuition behind multiple test correction, and introduces control of the Family-wise Error Rate and False Discovery Rate as means to cope with multiple tests. The hypothesis testing framework is critical for determining [Module 4.4: Power Calculations](module_04.4.html), required to answer questions about study design and interpretation.
+Measurements and responses to interventions are a mixture of deterministic predictable effects and random chance. Testing even individuals that seem identical, in rigorously controlled conditions, such as genetically identical cells in a plastic dish in a laboratory, will produce different responses to the same stimulus. Through repeated testing of the system, we attempt to identify consistent models that explain what we observe and predict responses to new interventions. Because living systems are so variable in their individual manifestations and in their response to perturbations, informal models are necessary but insufficient for scientific reasoning. The data we collect in a study must be subjected to some form of formal testing to establish the likelihood that, if our model were incorrect, the data would still appear to be the same. In [Module 4.2: Making decisions with P values](module_04.2.html) I introduce the hypothesis testing framework that is widely used in biomedical science. I also explain some critiques and limitations of the *P* value. [Module 4.3: Adjusting P values when there are many tests](module_04.3.html) explains the intuition behind multiple test correction, and introduces control of the Family-wise Error Rate and False Discovery Rate as means to cope with multiple tests. The hypothesis testing framework is critical to perform power calculationsrequired to answer questions about study design and interpretation.
 
 Building models and using data for decisions 
 --------------------------------------------------------------------------------
@@ -167,14 +169,14 @@ Counts and categories
 --------------------------------------------------------------------------------
 
 Data that deals with the frequency of events takes the form of counts. Special tests introduced in 
-[Module 7.1: Counts and categories: The Binomial, Chi-squared and Fisher's Exact tests](module_07.1.html), 
-[Module 7.2: Counts and categories: The Poisson distribution](module_07.2.html), and
-[Module 7.3: Counts and categories: ANOVA](module_07.3.html) are useful for understanding the properties of data from counts.
+[Module 7.1: The Binomial, Chi-squared and Fisher's Exact tests](module_07.1.html), 
+[Module 7.2: The Poisson distribution](module_07.2.html), and
+[Module 7.3: ANOVA](module_07.3.html) are useful for understanding the properties of data from counts.
 
 Robust and reproducible statistics
 --------------------------------------------------------------------------------
 
-Sometimes, unusual extreme observations or technical errors can skew the results of a study. Techniques for identifying these extreme observations, called *outliers*, as well as robust methods that can mitigate their influence, are introduced in [Module 8.1](module_08.1.html)
+Sometimes, unusual extreme observations or technical errors can skew the results of a study. Techniques for identifying these extreme observations, called *outliers*, as well as robust methods that can mitigate their influence, are introduced in [Module 8.1: Robust statistics and Outliers](module_08.1.html)
 
 Students who train in molecular biology learn the central role of a **research notebook**. 
 Adequate record-keeping is crucial while experiments are performed, when experiments are written up for publication, and at subsequent points to inform the experimenter, his or her colleagues, and others what was done. UCSF policy requires a written notebook be kept available. The same is true for statistical analysis. Tools and methods introduced in [Module 9.1: Reproducible statistical analysis](module_09.1.html) make it easier than ever to perform reproducible analysis.

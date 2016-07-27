@@ -1,112 +1,626 @@
 ---
-title: "Module 4.1: Hypothesis testing: what's a P value?"
+title: 'Module 5.1: Statistical distributions, uniform and normal'
 author: "David Quigley"
-date: "September 25, 2015"
-output: 
-    html_document:
-        toc: true
-        css: swiss.css
+output:
+  html_document:
+    css: swiss.css
+    toc: yes
+  word_document:
+    toc: yes
 ---
+
+[Return to the table of contents](index.html)
+
+********************************************************************************
+
 
 Introduction
 ========================================
 
 **This module explains:**
 
-* history of scientific thinking about whether we can prove a hypothesis about the natural world to be correct. 
-* Karl Popper's contention that positive proof of a hypothesis cannot be obtained
-* The central role of falsifiability
-* Motivation for the P value
-
-The scientific method and proof
-=================================================
-
-A practical reason to study the philosophy of science
-------------------------------------------------------
-
-What does it mean to prove a biological hypothesis to be true? Is experimental research that investigating the natural world similar in a strong sense to what mathematicians do when they explore the bounds of mathematics? 
-
-Thinking about what it means to prove a fact, and whether it is even possible to establish a claim about the natural world to be true, is a problem that philosophers have been struggling with for centuries. That might seem rather far removed from the day to day concerns of a molecular biologist or clinical researcher, but there are good reasons to spend some time with these ideas. 
-
-The first, fundamental reason for considering this issue is that thinking carefully about what it means to prove a fact to be true, and considering that it might not be possible to do so, has deep implications for how we think about what we are doing day to day. It affects how we talk and think about study designs, and how we interpret results. 
-
-The second, practical reason for thinking about proof is that grappling with this issue is the only way to understand what a *P* value is. Many experimental scientists work with *P* values and the hypothesis testing framework, and many of those scientists don’t have a clear understanding of what a *P* value actually is. They know it’s good when *P* values are low, and that they give some information about whether a result would be seen by chance. The idea behind the *P* value, and therefore behind much of a biomedical researcher’s relationship to quantitative measures of an experiment, remains somewhat counter-intuitive. It takes practice before it becomes second nature.
-
-One formulation for the general process of the scientific method is that we make specific observations and then generalize these observations into models and even into laws. Some philosophers, such as David Hume, had a fundamental concern with this. We can think about their concern using a simple example. If we visit a lake crowded with birds day after day and only ever observe white swans, we may be tempted to make the induction that all swans are white. 
-
-![swan](images/white_swan.png)
-![swan](images/white_swan.png)
-![swan](images/white_swan.png)
-
-What, is our assurance that there is no such creature as a black swan? Unlike mathematics, where one can define axioms and create a completely consistent world from those axioms, natural phenomena are not created by our hands. Since the color of swans is determined by our experience in nature and not an internally consistent logical system derived from axioms, how could we ever formally prove a fact to be true about the world? It takes only a single black swan to invalidate the hypothesis, and there may always be a black swan hiding around the corner. 
-
-![swan](images/white_swan.png)
-![swan](images/black_swan.png)
-![swan](images/white_swan.png)
-
-Can we prove a hypothesis to be false?
-------------------------------------------------------
-
-![Karl](images/200px-Karl_Popper.jpg)
-
-Karl was a philosopher of science who grappled with this problem. One of his best-known tenets is that in order to qualify as a scientific inquiry, **"it must be possible for an empirical scientific system to be refuted by experience"** (*The Logic of Scientific Discovery*). By this formulation, a statement that cannot be proved false- a statement that is not falsifiable--  is not a scientific statement. Popper argued that we cannot prove a hypothesis about the natural world to be true in a deep, formal sense. The existence of a single black swan disproves the idea that all swans are white. This idea-- that we can prove a hypothesis to be false, but not to be true-- is important because it is a powerful formulation of what we are doing as scientists. 
-
-It is also how the null hypothesis statistical testing works. One reason this is counter-intuitive is that we generally don’t think of ourselves as providing evidence that things to be false.
-
-As a practical example, we might hypothesize in the laboratory that treating cells in culture with olaparib, a drug that inhibits activity of the protein PARP, would selectively kill cells that cannot make the protein BRCA1. As a test, we treat those cells with olaparib and with a control that contains no PARP inhibitor. We then measure the effect on cells treated with either drug or control and make a judgement about the accuracy of our hypothesis. 
-
-From a statistical and formal point of view, after stating our hypothesis that the intervention of olaparib will cause an effect, we then test a different hypothesis: **that there is no such effect**. We say, “if this model were false, then I would expect treating the cells with drug to have no effect. I’ll test the hypothesis that treatment has no effect. If I see an effect, my hypothesis is not supported.” This may seem like a strange way to go about things, but it is a natural consequence of the idea that we cannot positively prove the presence of an effect. In the jargon of statistics, **the hypothesis that no effect is present is called the null hypothesis**.
-
-Note that strong evidence that olaparib kills BRCA1-null cells *does not disprove* the null hypothesis, in a formal sense. It does have show that it is *very unlikely to be true*.
-
-Measurements of events that take place in the natural world are not identical, due to real biological variation and the imperfections in our instruments. The effect of our drug treatment is therefore a variable, and a very practical use of statistics is to answer the question, what is the strength of evidence against our negative or null hypothesis? The *P* value is one way to answer that question.
+* How statistical distributions are used
+    + summarize the observations
+    + evaluate the probability of new values
+* The normal distribution as an idealized histogram
+* A demonstration why normal curves are a reasonable choice in many situations
 
 
+Using statistical distributions to model the world
+======================================================
 
-The P value
-==================
+Why model data with a mathematical function?
 
-The P value is defined as follows: P is **the probability of observing an effect as large or larger than observed, if the null hypothesis were true**. We can break this definition into several pieces and understand them one by one.
+* **summarize** the observations
+* **predict** the frequency of future observations
+* **evaluate** the probability of seeing extreme values
 
-* **The probability of observing...**
-    + P is a probability. I will briefly describe the mechanics of probability, because along with its informal meaning probability has a specific formal meaning and we can do arithmetic with probabilities.
+Mathematical functions describe a relationship between variables
+----------------------------------------------------------------
 
-* **...an effect as large or larger than observed...**
-    + P depends on both effect size and sample size.
+A statistical distribution is a mathematical function. Mathematical functions precisely define a one-to-one relationship between a set of input variables and an output variable. $y = x^2$ is an example of a function. It is often useful to plot the values of a function, as its shape can tell us something about how the function behaves for different values of X:
 
-* **if the null hypothesis were true?**
-    + P tests the assumption that the null hypothesis is true. It does not test the assumption that the alternate hypothesis is true. This goes back to Popper and the black swan problem.
+```{r echo=FALSE, fig.height=3, fig.width=3}
+library(grDevices)
+vals = seq(from=-3,to=3, by=0.01)
+par(mar=c(4,5,2,1))
+plot( vals, vals^2, xlab="X", ylab=expression(X^2), xaxs="i",yaxs="i",las=1, type="l", lwd=3, main= expression( plain("Y=")*X^2) )
+```
 
-In testing properties of the natural world we often measure something with a continuous effect size: patient lifespan, the deviation from expected frequency of a trait among fruit flies, the growth rate of a cell. Our experimental results must therefore be tested using a model that produces a statistic that reflects the difference in this effect size and the consistency of the difference. We then need a way to ask, what is “the probability of observing an effect as large or larger than observed if the null hypothesis were true?” This is, not coincidentally, the definition of a P value. 
+**Figure 1: plot of Y = X^2**
+
+This function is well-defined: for all values of X, there is exactly one value of Y that can be obtained by squaring the value of X. 
+
+Distributions are a function with constraints
+------------------------------------------------------------------------
+
+Recall that a density histogram is a picture that shows what percentage of a sample is contained in each bin. A distribution is a function whose graph works like a density histogram with infinitely small bins. Because distributions are like density histograms, they have certain restrictions. Distributions are well-defined functions that have additional constraints: 
+
+1. the area between the distribution's Y value and the zero line of the Y axis must sum to exactly one
+2. all values must be greater than or equal to zero
+
+The fact that distributions are used to reason about the *frequency* of events is the explanation for why their area must sum to one: the total area under the distribution is the *sum of all possible of frequency values*. Frequency values range between zero (the event never happens) and a maximum of one (or 100%), meaning the event always occurs.
+
+The function $y = x^2$ is not a distribution, because the area under $y = x^2$ is infinite.
+
+This module introduces two distributions:
+
+* The uniform distribution
+* The normal distribution
+
+Distributions can be used to answer questions. One important question is, how often would we expect a value within an interval
+or outside of an interval of the distribution?
+
+The expected frequency of values within defined bounds of a distribution will be equal to the area under the distribution curve between those bounds. The curve height at a particular point is proportional to probability of a particular result, if observations were to be repeatedly randomly sampled from the entire distribution.
+
+The uniform distribution
+-----------------------------
+
+The simplest distribution has a single constant value for Y at every allowed value of X:
+
+```{r echo=FALSE, fig.height=3, fig.width=5}
+par(mar=c(4,5,2,1))
+plot( 1,1, xlab="X", ylab="density", xaxs="i",yaxs="i",las=1, col="white",
+      ylim=c(0,0.45), xlim=c(0,10), main="Unform distribution" )
+vals = seq(from=0, to=10, by=0.01)
+for(i in 1:length(vals)){
+    x = vals[i]
+    lines(c(x,x), c(0,0.1), col="cornflowerblue")
+}
+lines(c(0,10), c(0.1, 0.1), lwd=3)
+```
+
+**Figure 2: A uniform distribution bounded by 0 and 10**
+
+This plot shows a distribution. Although we sometimes refer to a distribution as a "curve", there is no rule that says a distribution cannot be a straight line. If you were to sum up the total area under the line, plotted in blue, you would find it equals exactly one. This distribution has the same value for Y at every X; it is therefore called the **uniform distribution**. Note that if we extended the plot to the right past 10 or to the left past 0, the area under the curve would exceed one and the curve could no longer be a distribution. Some distributions therefore will have **bounds**, values that they cannot exceed. 
+
+Note that this distribution can be summarized by one number: the height of the curve. It is a useful property of distributions that they can be summarized by only a few parameters.
+
+Using a distribution to calculate the probability of an observation
+--------------------------------------------------------------------------------
+
+We can use the distribution to calculate the probability that a randomly selected value lies between 4 and 8:
+
+```{r echo=FALSE, fig.height=3, fig.width=5}
+par(mar=c(4,5,2,1))
+plot( 1,1, xlab="X", ylab="density", xaxs="i",yaxs="i",las=1, col="white",
+      ylim=c(0,0.45), xlim=c(0,10), main="Unform distribution" )
+vals = seq(from=0, to=10, by=0.01)
+for(i in 1:length(vals)){
+    x = vals[i]
+    lines(c(x,x), c(0,0.1), col="cornflowerblue")
+}
+lines(c(0,10), c(0.1, 0.1), lwd=3)
+rect( 4, 0, 8, 0.1, col="black")
+
+```
+
+**Figure 3: A uniform distribution with bounds shaded**
+
+*P*(4 to 8) =  
+ = area between X=4 and X=8  
+ = 0.1 x (8-4)  
+ = 0.4  
+ = 40%   
 
 
-Where did P < 0.05 come from?
-================================================
+Many real observations have a bell-shaped histogram
+======================================================
 
-Now that we have a way to quantify the likelihood of an event, we can use that tool to reason about the outcome of scientific experiments. One of the first people to do this was Sir Ronald Fisher, who invented much of modern statistics. Much of Fisher’s work was developed to evaluate agricultural experiments. A typical experiment might ask whether using a new fertilizer resulted in larger harvests of wheat. It would take a whole season to learn the result of a single trial, providing a strong incentive to design efficient trials. Fisher developed the P value as a tool for evaluating the strength of evidence against the null hypothesis; that is, the hypothesis that an intervention had no effect. Quoting one of his early writings gives a clue to a question that many people ask: what is so special about P < 0.05? 
-
->“If one in twenty does not seem high enough odds, we may, if we prefer it, draw the line at one in fifty (the 2 per cent point) or one in a hundred (the 1 per cent point). Personally, the writer prefers to set a low standard of significance at the 5 percent point... A scientific fact should be regarded as experimentally established only if a properly designed experiment rarely fails to give this level of significance.” 
-(*Statistical Methods for Research Workers*)
-
-So this is the essential origin of P < 0.05. There is no deep statistical theory that judges this level of statistical significance to be particularly important. Fisher’s argument was that low P values, in repeated experiments, were interesting and unlikely to be seen in the absence of a real effect. There are several points to make here. First, that using Fisher’s method, a P value is a tool used for *post hoc* interpretation of the results of an experiment. This interpretation was continuous, with no cut-off value determining a decision point. The P value here is used for inference, not for a decision procedure. A P value of 0.048 would be interpreted as nearly indistinguishable from a P value of 0.052.
+When we collect data, the values of a random variable will be different; by definition, they will vary. Although some processes appear to generate random noise with no pattern in the values, most data generated by sampling properties of living things follow a common frequency distribution:  most values are near the mean value, and more extreme values appear much less frequently. The rate of drop-off as we depart from the mean is not random, but has a characteristic shape:
 
 
+Here is a histogram of the height of 25,000 adolescents gathered in Hong Kong. I thank and acknowledge the [UCLA SOCR](http://wiki.stat.ucla.edu/socr/index.php/SOCR_Data_Dinov_020108_HeightsWeights) project for making these data available.
+
+```{r echo=FALSE, fig.height=4, fig.width=8}
+fn_hw='/notebook/biostat_course/supporting_documents/adolescent_heightweight.txt'
+hw = read.table(fn_hw, header=TRUE, sep='\t')
+par(mar=c(4,5,2,1))
+layout(matrix(1:2,1,2))
+hist(hw$height, breaks=50, col="lightgray", freq=FALSE, las=1, main="", 
+     xlab="height (inches)", ylab="", xaxs="i", yaxs="i", ylim=c(0, 0.25))
+box()
+
+hist(hw$height, breaks=50, col="lightgray", freq=FALSE, las=1, main="", 
+     xlab="height (inches)", ylab="", xaxs="i", yaxs="i", ylim=c(0, 0.25))
+vals = seq(from=60,to=75, by=0.01)
+points( vals, dnorm(vals, mean=mean(hw$height), sd = sd(hw$height) ), 
+        type="l", lwd=4, col="cornflowerblue" )
+box()
+```
+
+**Figure 4: Histogram of height of 25,000 adolescents**
+
+Most of the people measured between 64 and 72 inches; only a very small minority were taller than 74 inches or shorter than 62 inches. If we trace along the top of the histogram on the left side of **Figure 4**, we see the rough outline of a bell-shaped curve. The curve is made explicit by plotting it on the same data at right.
+
+The curve drawn in blue is called the "**normal distribution**", which almost sounds as though someone tried to think up the dullest possible name for a distribution. However, this distribution has spectacularly large importance in biostatistics. Variations on this **normal distribution** curve appear over and over again as we sample the real world: the height of 10-year-old children in Maryland, the weight of rabbits raised in captivity, etc. Not all data are normally distributed, but the normal distribution appears frequently enough in biomedical data that many statistical procedures rely on the assumption that data (or the residuals of fitting a model to the data, in the case of linear regression) are approximately normally distributed. Even though real data violate this assumption, in practice, many statistical procedures are very robust to these violations.
+
+The normal distribution can be described using two values:
+
+* the mean (central tendency)
+* standard deviation (spread)
+
+The normal curve on the right side of **Figure 4** was drawn by calculating the mean and standard deviation of the population and then using those parameters to plot a normal curve. You can see that the Y value drops quickly to be very near the X axis. Although the curve never touches the X axis, it gets asymptotically close and is very, very close already when X equals 60 or 76.  
+
+Although real data will never be identical to a particular distribution, the frequency distribution of real data will often be close enough to a distribution that we can use the distributon as a stand-in for the observed data. This is useful for many statistical tasks. For example, we can estimate the frequency of all possible values for the variable, as though we had an infinitely large data set. A useful consequence of using a defined function as a frequency estimate is we have a way to ask the question, "how frequently would we expect to see values of a certain magnitude, if they were generated by this distribution?" This is the fundmental question we need to answer for problems of comparison and hypothesis testing.
 
 
-Making decisions with P values: hypothesis testing
-===============================================================
+There are infinitely many normal curves
+--------------------------------------------------------
 
-A subsequent use of P values was popularized by Neyman and Pearson, who developed a hypothesis testing framework. This framework, which was so widely adopted that many people think of it as the only way to do statistics, uses P values to make a decision. Here a particular P value is set before the experiment is performed. This P value, which has the technical name of alpha, is set as a cut-off. The most familiar alpha level is 0.05, but any value could in principle be used. Deciding on an alpha level for decision-making has several useful implications. The first, most obvious one, is that there is clarity about what to do with the results of a statistical interpretation. This is particularly important in very large, expensive experiments such as clinical trials, where the parties performing the experiment may have a vested financial interest in the results. In this framework, given an alpha level of 0.05, a result where P = 0.048 has very different implications from P = 0.052.
+Because there are two parameters for the normal curve, there are infinitely many normal curves that can be created by varying the parameters. This means the curve can be skinny or very spread out, and have its center at any point on the X axis. Note however that the curve is **always symmetrical around the mean**.
 
-Another important implication is that it is possible to plan about how frequently one is willing to make two distinct types of mistakes. The first mistake is to reject the hypothesis of no effect, that is the null hypothesis, when in fact the truth of the matter is the intervention had no effect. This error, technically referred to as a Type One error by Neyman and Pearson, can be though of as, “I shouldn’t have published that result”. The second sort of error comes from incorrectly failing to reject the null hypothesis; that is, to miss a real effect.  This error is technically referred to as a Type Two error, and can be though of as, “I missed the result and could have published it.” 
+```{r echo=FALSE}
+par(mar=c(4,5,2,1))
+vals = seq(from=-10, to=10, by=0.01)
+plot( vals, dnorm(vals), type="l", lwd=4, col="cornflowerblue", 
+      xlim=c(-6,10), ylim=c(0,1), las=1, ylab="", xlab="", main="Normal distributions")
+points( vals, dnorm(vals, mean = 2, sd = 2), type="l", lwd=4, col="black" )
+points( vals, dnorm(vals, mean = 0, sd = 0.5), type="l", lwd=4, col="gold" )
+```
 
-There is a trade-off between the likelihood of making a type one and type two error; with greater statistical stringency we reduce the chances of type one and increase the chances of type two. The type two error is quantified by statistical power, which has the technical name of beta. Like the alpha, the beta is also a percentage. It represents the percentage of the time one will correctly reject the null hypothesis of no effect. Given a statistical model, alpha and beta levels, and an expected effect size, one can plan how many individual subjects to include in the study. A common formulation is to ask, “how many replicate samples must I include in my study to have an 80% power to detect an effect of given size, rejecting the null hypothesis at a 5% alpha level?” 
+**Figure 5: three normal distributions**
 
-Critiques of the P value
-===============================================================
-
-Although the use of a particular P value cut-off has been justifiably criticized as arbitrary, the ability to make power calculations, and to interpret positive and negative results in light of the power available to perform a test, is extremely valuable. 
-
-Another critique of the P value cannot be as easily answered, and that is that P values are not the same as effect sizes. We are generally interested in the size of an effect, whether that effect measures the result of an intervention or the association between two variables. P values are a function of both effect size and sample size. By increasing the sample size, one can drive the P value arbitrarily low, even when the effect size is too small to be meaningful. It is likewise the case that even in the presence of a truly strong effect, very small sample sizes will result in large P values. 
+**Curve 1 (blue):** Mean 0, standard deviation 1  
+**Curve 2 (black):** Mean 2, standard deviation 2  
+**Curve 3 (gold):** Mean 0, standard deviation 0.5  
 
 
+The standard normal distribution
+--------------------------------------------------------
+
+
+The standard normal distribution has a special and unique role as a kind of ideal histogram. The word 'standard' is derived from the fact that **the distribution has been scaled on the horizontal axis so that one unit on the horizontal axis corresponds to one standard deviation**. The standardization is important because it allows us to compare two or more samples with values on different scales to the standard normal curve; if values from sample one are exactly twice the size of values from sample two, they will have the same standardized distribution. 
+
+```{r echo=FALSE, fig.height=4, fig.width=5}
+vals = seq(from=-10, to=10, by=0.01)
+par(mar=c(4,5,2,1))
+plot( vals, dnorm(vals), xlab="standard units", ylab="density", xaxs="i",yaxs="i",las=1, 
+      type="l", lwd=3, ylim=c(0,0.45), main="Standard normal distribution" , 
+      xlim=c(-5,5))
+for(i in 1:length(vals)){
+    x = vals[i]
+    y = dnorm(x)
+    lines(c(x,x), c(0,y), col="cornflowerblue")
+}
+points( vals, dnorm(vals), type="l", lwd=3 )
+```
+
+**Figure 6: the standard normal distributions**
+
+One horizontal unit = one standard deviation
+
+To convert any normal curve to a standard normal curve, use the standardizing transformation. This transformation is sometimes called *Z* transforming the data because the variable that results is conventionally called *Z*:
+
+${Z = \frac{original - mean}{standard deviation} = \frac{X-\mu}{\sigma} }$
+
+Here I write the transformation in two ways: in English, and using the terms commonly seen in the statistics literature (Greek sigma for the standard deviation, Greek mu for the mean).
+
+Inferring the probability of an observation from a distribution
+--------------------------------------------------------
+
+The formula that defines the curve of the standard normal distribution, which is not something you need to memorize, is rather complicated:
+
+$\large{y = \frac{1}{\sqrt{2\pi}} e^{\frac{-x^2}{2}}}$
+
+where *e* is the special mathematical constant that starts 2.71828, and $\pi$ is the special mathematical constant that starts out 3.141593. Since this formula is difficult to work with by hand, in the past it was common to use look-up tables to obtain the height of the standard normal curve at a given value of X. Now it is easier to use statistical packages such as R to calculate the area under this curve between two points. However, there are a few key values about the area under the standard normal distribution that are important to know:
+
+* Between -1 and 1: area is about 0.68, or 68%.
+* Between -2 and 2: area is about 0.95, or 95%.
+* Between -3 and 3: area about 0.997, or 99.7%.
+
+```{r echo=FALSE, fig.height=4, fig.width=9}
+layout(matrix(1:3,1,3))
+vals = seq(from=-5,to=5, by=0.01)
+par(mar=c(4,5,2,1))
+plot( vals, dnorm(vals), xlab="standard units", ylab="density", xaxs="i",yaxs="i",las=1, 
+      type="l", lwd=3, ylim=c(0,0.45), main="Standard normal distribution" )
+for( i in seq(from=-1, to=1, by=0.01)){
+    lines( c(i,i), c(0, dnorm(i)), col="cornflowerblue", lwd=2)
+}
+axis(1, -5:5)
+points( vals, dnorm(vals), xlab="standard units", ylab="density", xaxs="i",yaxs="i",las=1, 
+      type="l", lwd=3, ylim=c(0,0.45), main="Standard normal distribution" )
+text(0,0.2,"68%", cex=2)
+
+plot( vals, dnorm(vals), xlab="standard units", ylab="density", xaxs="i",yaxs="i",las=1, 
+      type="l", lwd=3, ylim=c(0,0.45), main="Standard normal distribution" )
+for( i in seq(from=-2, to=2, by=0.01)){
+    lines( c(i,i), c(0, dnorm(i)), col="cornflowerblue", lwd=2)
+}
+axis(1, -5:5)
+
+points( vals, dnorm(vals), xlab="standard units", ylab="density", xaxs="i",yaxs="i",las=1, 
+      type="l", lwd=3, ylim=c(0,0.45), main="Standard normal distribution" )
+text(0,0.2,"95%", cex=2)
+plot( vals, dnorm(vals), xlab="standard units", ylab="density", xaxs="i",yaxs="i",las=1, 
+      type="l", lwd=3, ylim=c(0,0.45), main="Standard normal distribution" )
+axis(1, -5:5)
+for( i in seq(from=-3, to=3, by=0.01)){
+    lines( c(i,i), c(0, dnorm(i)), col="cornflowerblue", lwd=2)
+}
+text(0,0.18,"99.8%", cex=1.6)
+points( vals, dnorm(vals), xlab="standard units", ylab="density", xaxs="i",yaxs="i",las=1, 
+      type="l", lwd=3, ylim=c(0,0.45), main="Standard normal distribution" )
+
+```
+
+**Figure 7: The area under three bounds of the standard normal curve**
+
+These bounds have important implications for how we interpret the likelihood of seeing data; for samples that are approximately normally distributed and have been standardized with a *Z* transformation, 95% of the data will fall within +/- two standard deviations of the mean value.
+
+If we were to randomly generate 100 values using this distribution, our expectation is that 95 of the 100 would fall between -2 and 2. Since the process is random, the number of randomly generated values falling in this range might be higher or lower than 95. Seeing a single 3 in 100 randomly generated numbers would not be shocking, since a little under 1 of 100 randomly drawn values would be greater than or equal to 3. Seeing 3 four or more times would be surprising indeed. 
+
+This process of modeling a process using a distribution and then asking how frequently we would expect to see values in various parts of that distribution is fundamental to the understanding of statistical significance testing.
+
+For example, the likelihood of seeing a value at least 2 standard deviations away from the mean of a standard normal curve is 2.5%, and 3 standard deviations is 0.5%. When we look at both positive and negative values, these become the conventional 5% (95%) and 1% (99%) bounds.
+
+```{r echo=FALSE, fig.height=4, fig.width=8}
+
+layout(matrix(1:2,1,2))
+vals = seq(from=-5,to=5, by=0.01)
+par(mar=c(4,5,2,1))
+plot( vals, dnorm(vals), xlab="standard units", ylab="density", xaxs="i",yaxs="i",las=1, 
+      type="l", lwd=3, ylim=c(0,0.45), main="" )
+for( i in seq(from=2, to=5, by=0.01)){
+    lines( c(i,i), c(0, dnorm(i)), col="cornflowerblue", lwd=2)
+}
+for( i in seq(from=-5, to=-2, by=0.01)){
+    lines( c(i,i), c(0, dnorm(i)), col="cornflowerblue", lwd=2)
+}
+axis(1, -5:5)
+points( vals, dnorm(vals), xlab="standard units", ylab="density", xaxs="i",yaxs="i",las=1, 
+      type="l", lwd=3, ylim=c(0,0.45), main="Standard normal distribution" )
+text(-3.75,0.03,"2.5%", cex=1)
+text(3.75,0.03,"2.5%", cex=1)
+
+plot( vals, dnorm(vals), xlab="standard units", ylab="density", xaxs="i",yaxs="i",las=1, 
+      type="l", lwd=3, ylim=c(0,0.45), main="" )
+for( i in seq(from=-5, to=-3, by=0.01)){
+    lines( c(i,i), c(0, dnorm(i)), col="cornflowerblue", lwd=2)
+}
+for( i in seq(from=3, to=5, by=0.01)){
+    lines( c(i,i), c(0, dnorm(i)), col="cornflowerblue", lwd=2)
+}
+axis(1, -5:5)
+text(3.75,0.03,"0.5%", cex=1)
+text(-3.75,0.03,"0.5%", cex=1)
+
+```
+
+**Figure 8: area under 2.5 and 0.5% bounds for a standard normal curve** 
+
+
+```{r echo=FALSE}
+library(knitr)
+knitr::opts_chunk$set( comment = NA )
+knitr::opts_chunk$set( prompt=TRUE ) 
+```
+
+Bounds when the normal curve is not standard normal
+------------------------------------------------------------------
+
+We can use R to calculate the points on the X axis where the left bound of a 68, 95, or 99% area under the curve would lie. These bounds will not be 1, 2, and 3; they will be something else that depends on the shape of the curve. Here we use *R* to find the values for a normal curve with mean 0 and standard deviation 1, sometimes written as *normal(0, 1)*.
+
+```{r}
+# lower bound for 68% 
+lower_bound = qnorm( (0.315/2), mean=0, sd=1 )
+round( lower_bound, 2 )
+```
+
+```{r}
+# lower bound for 95% 
+lower_bound = qnorm( (0.05/2), mean=0, sd=1 )
+round( lower_bound, 2 )
+```
+
+```{r}
+# lower bound for 99% 
+lower_bound = qnorm( (0.01/2), mean=0, sd=1 )
+round( lower_bound, 2 )
+```
+
+R's *qnorm()* function reports the percentage of a normal distribution that exceeds a particular value. 
+
+Standard deviation math
+--------------------------------------------------------------------------------
+
+Since distributions describe the expected frequency of observing a particular outcome, they can be used to calculate the expected frequency with which one would see a particular observation as extreme or greater than a given value. This expectation has the underlying assumption that one could perform many repetitions of the experiment that produced the sample. We can also work in the other direction, asking what value range would we expect to see a given percent of the time. 
+**Example: national exams**
+
+*Scores on a national exam were normally distributed with a mean of 70 and a standard deviation of 5. What score is two standard deviations above the mean? Approximately what percentage of students will do that well?*
+
+The mean score was 70, so two standard deviations above the mean is 70 + (2 x 5) = 80. This is consistent with the fact that *Z* = (80-70)/5 = 10/5 = 2. Although 5% of the class is expected to be more than two standard deviations from the mean, this 5% include both students who did better than the mean (right tail) and those who did worse (left tail). Approximately 5% divided by 2, or 2.5% of the class, was expected to score at or above an 80.
+
+**Example: very tall children**
+
+Refering back to the height distribution we saw earlier, the mean height was 68 inches and the standard deviation was 1.9 inches. How frequently would we expect a randomly selected adolescent to be 74 inches tall?
+
+```{r}
+obs = 74
+mu = 69
+sd = 1.9
+Z = (obs-mu)/sd
+1-pnorm( Z, mean=0, sd=1)
+```
+
+Less than 1% of the time: about 0.4% of the individuals would be expected to be that tall. If we compare that result to the actual percentage of individuals who were measured at that height `r sum(hw$height>=74)` of `r dim(hw)[1]`, or 0.0008, the estimate is fairly close but not exactly right.
+
+The *pnorm()* function in R will return the result of plugging a value into the normal distribution function.
+
+If you are using R for these operations you can skip the step of Z transformation by providing the actual observed mean and standard deviation:
+
+```{r}
+1-pnorm( obs, mean=mu, sd=sd)
+```
+
+
+
+
+Are my data normally distributed?
+======================================================
+
+* Real data never has a perfectly normal distribution
+* If the distribution is close enough to a model, we can reason about it using the model.
+* Many statistical procedures robust to violations of normality
+* However, other distributions may be a better model in some cases
+    + With small samples, use the t distribution
+
+We would sometimes like to determine how closely a sample follows a given distribution. A particular case of this problem is determining whether our data are normally distributed. One way to answer that question is to make a *quantile-quantile* plot, also called a *q-q plot*. Recall that a quantile is the percentage of values in a set that are smaller than the given value. To obtain quantiles at 0, 25%, 50%, 75%, and 100% in R one can use the *quantile()* function. One can also calculate the quantile for any given value by hand:
+
+```{r}
+V = c(4,5,6,3,7,19,8,2,12,8.5)
+quantile(V)
+
+V = sort(V)
+vals_to_quantiles = function(V){
+    ranks = rank(V)
+    quantiles=rep(0,length(V))
+    for(i in 1:length(V)){
+        quantiles[i] = sum( ranks < ranks[i] ) / (length(V)-1)
+    }
+    quantiles*100
+}
+data.frame( V, Q=round(vals_to_quantiles(V), 2) )
+```
+
+When the two populations to be compared of the same size, it isn't necessary to calculate quantiles. You can construct a q-q plot by simply
+
+1. sorting the two sets of values independently from lowest to highest
+2. plotting the sorted values. 
+
+As an example, let's pretend had 1,000 observations in your sample. I will generate these 1000 observations from a standard normal distribution using the *rnorm()* function in R, so we will expect our results to hew closely to a real standard normal distribution. Plotting these values as described produces:
+
+```{r, fig.height=4, fig.width=4, echo=FALSE}
+par(mar=c(5,5,3,3))
+observed=rnorm(1000)
+std_norm = rnorm(1000)
+plot( sort(observed), sort(std_norm), xlab="observed (standard normal)", 
+      ylab="standard normal distribution", main="q-q plot", las=1, pch=19, cex=0.5, col="#998ec3" )
+abline(0,1, lwd=2, col="#11111133")
+```
+
+**Figure 9: a q-q plot**
+
+There is not a perfectly linear relationship between the points, but it is very close to linear. If the data were derived from similar distributions and have the same scale, they will follow the line *Y=X*. If the data were derived from simliar distributions but have different scale or localization, the q-q plot will be linear but a line fit to the data will have a slope and Y-intercept other than {1,0}. If we repeat the previous plot, but multiply all of the observed values by 10, we see:
+
+```{r, fig.height=4, fig.width=4, echo=FALSE}
+par(mar=c(4,5,2,1))
+plot( 10*sort(observed), sort(std_norm), xlab="observed (10x standard normal)", pch=19, 
+      ylab="standard normal distribution", main="q-q plot", las=1, cex=0.5, col="#998ec3" )
+abline(0,1, lwd=2, col="#11111133")
+abline(0,0.1, col="#11111133", lwd=2)
+text(10,2.5, "Y = X", cex=0.75, col="#11111133")
+text(-15,-2.75, cex=0.75, "Y = 0.1 * X", col="#11111133")
+```
+
+**Figure 10: a q-q plot of transformed data**
+
+R has built-in functions *qqnorm()* and *qqline()* that make it easy to generate these plots without writing your own plotting functions.
+
+By comparison, if the observed data were generated by a different distribution such as a t distribution (see section 4.2), the extreme ends of the q-q plot will deviate significantly from a straight line.
+
+**EXAMPLE: life expectancy by country**
+
+The average life expectancy for a person from birth is calculated for each country by the CIA (who knew!). You can see it online on the CIA World Factbook. For 2015, the estimates have the following histogram:
+
+```{r echo=FALSE, fig.height=3, fig.width=4}
+countries=c("Monaco","Japan","Singapore","Macau","San Marino","Iceland","Hong Kong","Andorra",
+"Switzerland","Guernsey","Israel","Luxembourg","Australia","Italy","Sweden","Liechtenstein",
+"Jersey","Canada","France","Norway","Spain","Austria","Anguilla","Netherlands","Bermuda",
+"Cayman Islands","Isle of Man","New Zealand","Belgium","Finland","Ireland","Germany",
+"United Kingdom","Greece","Saint Pierre and Miquelon","Malta","Faroe Islands","European Union",
+"Korea, South","Taiwan","Virgin Islands","Turks and Caicos Islands","United States",
+"Wallis and Futuna","Saint Helena, Ascension, and Tristan da Cunha","Gibraltar",
+"Denmark","Puerto Rico","Portugal","Guam","Bahrain","Chile","Qatar","Cyprus","Czech Republic",
+"Panama","British Virgin Islands","Costa Rica","Cuba","Albania","Slovenia","Curacao",
+"Dominican Republic","Kuwait","Northern Mariana Islands","Argentina","Sint Maarten",
+"Saint Lucia","New Caledonia","Lebanon","Poland","United Arab Emirates","Uruguay",
+"Paraguay","French Polynesia","Brunei","Slovakia","Dominica","Morocco","Croatia","Algeria",
+"Ecuador","Aruba","Sri Lanka","Bosnia and Herzegovina","Estonia","Antigua and Barbuda",
+"Libya","Tonga","Macedonia","Georgia","West Bank","Tunisia","Hungary","Mexico","Cook Islands",
+"Saint Kitts and Nevis","Colombia","China","Mauritius","Maldives","Serbia","Oman","Barbados",
+"American Samoa","Solomon Islands","Saint Vincent and the Grenadines","Saudi Arabia","Romania",
+"Gaza Strip","Iraq","Malaysia","Lithuania","Syria","Turkey","Venezuela","Seychelles",
+"Thailand","El Salvador","Bulgaria","Armenia","Jordan","Latvia","Montserrat","Grenada",
+"Egypt","Jamaica","Uzbekistan","Brazil","Peru","Samoa","Vietnam","Vanuatu","Nicaragua",
+"Palau","Marshall Islands","Micronesia, Federated States of","Trinidad and Tobago",
+"Belarus","Indonesia","Fiji","Bahamas, The","Azerbaijan","Greenland","Guatemala",
+"Suriname","Cabo Verde","Ukraine","Iran","Honduras","Bangladesh","Kazakhstan","Russia",
+"Moldova","Kyrgyzstan","Korea, North","Turkmenistan","Bhutan","Mongolia","Philippines",
+"Bolivia","Belize","India","Guyana","Timor-Leste","Nepal","Pakistan","Tajikistan",
+"Papua New Guinea","Nauru","Burma","Ghana","Tuvalu","Kiribati","Madagascar","Yemen",
+"Gambia, The","Sao Tome and Principe","Togo","Cambodia","Laos","Comoros",
+"Equatorial Guinea","Eritrea","Kenya","Sudan","Haiti","Djibouti","Mauritania","Western Sahara",
+"South Africa","Tanzania","Ethiopia","Benin","Senegal","Malawi","Burundi","Guinea","Rwanda",
+"Congo, Republic of the","Liberia","Cote d'Ivoire","Cameroon","Sierra Leone","Zimbabwe",
+"Congo, Democratic Republic of the","Angola","Mali","Niger","Burkina Faso","Uganda",
+"Botswana","Nigeria","Mozambique","Lesotho","Zambia","Gabon","Somalia",
+"Central African Republic","Namibia","Swaziland","Afghanistan","Guinea-Bissau","Chad")
+years = c(89.52,84.74,84.68,84.51,83.24,82.97,82.86,82.72,82.5,82.47,82.27,82.17,82.15,82.12,81.98,
+81.77,81.76,81.76,81.75,81.7,81.57,81.39,81.31,81.23,81.15,81.13,81.09,81.05,80.88,80.77,
+80.68,80.57,80.54,80.43,80.39,80.25,80.24,80.2,80.04,79.98,79.89,79.69,79.68,79.57,79.36,
+79.28,79.25,79.25,79.16,78.98,78.73,78.61,78.59,78.51,78.48,78.47,78.46,78.4,78.39,78.13,
+78.01,77.98,77.97,77.82,77.82,77.69,77.61,77.6,77.5,77.4,77.4,77.29,77,76.99,76.98,76.97,
+76.88,76.79,76.71,76.61,76.59,76.56,76.56,76.56,76.55,76.47,76.33,76.26,76.04,76.02,75.95,
+75.91,75.89,75.69,75.65,75.6,75.52,75.48,75.41,75.4,75.37,75.26,75.21,75.18,75.14,75.12,
+75.09,75.05,74.92,74.87,74.85,74.75,74.69,74.69,74.57,74.54,74.49,74.43,74.42,74.39,74.37,
+74.35,74.23,74.14,74.05,73.7,73.55,73.55,73.53,73.48,73.46,73.16,73.06,72.98,72.87,72.84,
+72.62,72.59,72.48,72.45,72.43,72.2,72.2,72.1,72.02,71.97,71.85,71.57,71.15,71,70.94,70.55,
+70.47,70.42,70.36,70.11,69.78,69.51,69.29,68.96,68.86,68.59,68.13,68.09,67.72,67.52,67.39,
+67.39,67.03,66.75,66.29,66.18,66.16,65.81,65.55,65.18,64.6,64.58,64.51,64.14,63.88,63.85,
+63.85,63.81,63.77,63.68,63.51,62.79,62.65,62.64,62.34,61.71,61.48,61.47,61.32,60.66,60.09,
+60.08,59.67,58.79,58.6,58.34,57.93,57.79,57.05,56.93,55.63,55.34,55.13,55.12,54.93,54.18,
+53.02,52.94,52.86,52.15,52.04,51.96,51.81,51.62,51.05,50.87,50.23,49.81)
+
+par(mar=c(3,3,1,1))
+hist(years, breaks=20, las=1, freq=FALSE, xlab="life expectancy in years", col="#f7f7f7", main="")
+lines(c(mean(years), mean(years)), c(0, 1), lwd=2,  col="#67a9cf" )
+text(62, 0.07, paste("mean=",round( mean(years), 1)), cex=1 )
+```
+
+**Figure 11: histogram of life expectancy by country**
+
+There is a huge range of average lifespans, from Japan (`r round( years[countries=="Japan"],1)` years) to Chad (`r round(years[countries=="Chad"],1)`). The histogram shows that the peak of the density plot is to the right of the mean (`r round(mean(years),1)` years, show as a blue line). There is *left skew* due to a large number of countries with distressingly low life expectancies. We could ask whether these values are normally distributed using a q-q plot:
+
+```{r echo=FALSE, fig.height=2.5, fig.width=4}
+par(mar=c(4,5,2,1))
+vals=qqnorm( years, las=1, pch=19, cex=0.5, col="#998ec3" )
+abline( lm( vals$y~vals$x) )
+```
+
+**Figure 12: normal Q-Q plot of life span**
+
+From this plot, the data appear to deviate dramatically from a normal distribution. If we were to go ahead with a normal distribution assumption in this, we would be asserting that the following fit is reasonable, which seems to be a dubious assertion:
+
+```{r echo=FALSE, fig.height=2.5, fig.width=4}
+par(mar=c(5,5,1,1))
+hist(years, breaks=20, las=1, freq=FALSE, xlab="life expectancy in years", 
+     col="#f7f7f7", main="")
+lines(seq(from=40, to=90, by=0.1), dnorm(seq(from=40, to=90, by=0.1), mean = mean(years), sd=sd(years)), col="cornflowerblue", lwd=2)
+box()
+```
+
+**Figure 13: histgram of life span, with normal(mean, SD) in blue**
+
+
+Why is the normal distribution a reasonable choice in many cases?
+======================================================
+
+Aside from simple emperical demonstrations that large datasets appear to follow the normal distribution, there is a strong mathematical basis for the use of the normal distribution. We will not follow a proof, but again will use a demonstration to show that this mathematical truth, the Central Limit Theorem, makes the normal distribution a good choice in many cases.
+
+The Central Limit Theorem
+----------------------------------
+
+Unlike the standard Normal distribution, the Central Limit Theorem has a rather grand name. The Central Limit theorem, stated informally, states:
+
+**If one generates a sufficiently large number of samples through an independent, identically distributed process, the mean of these values will be normally distributed even if the distribution generating the samples is not itself normal**.
+
+There is a formal proof of this statement, but we can show it by example a uniform distribution.  Sampling from this distribution will produce all of its possible values with equal likelihood. It turns out we could use any distribution for this demonstration.
+
+```{r echo=FALSE, fig.height=3, fig.width=5}
+par(mar=c(3,3,2,1))
+plot( 1,1,  ylab="density", xaxs="i",yaxs="i",las=1, col="white",ylim=c(0,0.2), xlim=c(0,20), main="Unform distribution", xlab="")
+vals = seq(from=0, to=20, by=0.01)
+for(i in 1:length(vals)){
+    x = vals[i]
+    lines(c(x,x), c(0,0.05), col="cornflowerblue")
+}
+lines(c(0,20), c(0.05, 0.05), lwd=3)
+```
+
+**Figure 14: the uniform distribution**
+
+As we take larger and larger samples and plot a histogram of the raw data, the histogram of the sample approaches a uniform distribution.
+
+```{r echo=FALSE}
+vals = runif(100000,0, 20)
+vals_n = seq(from=0, to=20, by=0.01)
+means = rep(0, 10000)
+for(i in 2:10000){
+    means[i] = mean( vals[(10*(i-1)):(10*i) ] )
+}
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=9}
+par(mar=c(4,5,4,1))
+layout(matrix(1:4,1,4))
+hist(vals[1:10], xlim=c(0,20), las=1, freq=FALSE, col="lightgray", main="N=10", xlab="", ylab="")
+
+hist(vals[1:100], xlim=c(0,20), las=1, freq=FALSE, col="lightgray", main="N=100", xlab="", ylab="")
+
+hist(vals[1:1000], xlim=c(0,20), las=1, freq=FALSE, col="lightgray", main="N=1,000", xlab="", ylab="")
+
+hist(vals[1:100000], xlim=c(0,20), las=1, freq=FALSE, col="lightgray", main="N=100,000", xlab="", ylab="")
+```
+
+**Figure 15: samples from the uniform distribution**
+
+We will now ask what happens to the **distribution of sample means** as we repeatedly sample the data. Each sample will be 10 observations. We will now report for the **histograms of the sample mean**, rather than the raw data. 
+
+The Central Limit Theorm states it will be normal, given enough data.
+
+
+```{r echo=FALSE, fig.height=3, fig.width=9}
+par(mar=c(4,5,4,1))
+layout(matrix(1:4,1,4))
+hist(means[1:10], xlim=c(0,20), ylim=c(0,0.3), las=1, freq=FALSE, col="lightgray", 
+     main="10 sample means", xlab="", ylab="")
+points( vals_n, dnorm(vals_n, mean=10, sd = sd(means) ), type="l", lwd=2, col="cornflowerblue" )
+
+hist(means[1:100], xlim=c(0,20), ylim=c(0,0.3),las=1, freq=FALSE, col="lightgray", 
+     main="100 sample means", xlab="", ylab="")
+points( vals_n, dnorm(vals_n, mean=10, sd = sd(means) ), type="l", lwd=2, col="cornflowerblue" )
+
+hist(means[1:1000], xlim=c(0,20), ylim=c(0,0.3),las=1, freq=FALSE, col="lightgray", 
+     main="1,000 sample means", xlab="", ylab="")
+points( vals_n, dnorm(vals_n, mean=10, sd = sd(means) ), type="l", lwd=2, col="cornflowerblue" )
+
+
+hist(means[1:10000], xlim=c(0,20), ylim=c(0,0.3),las=1, freq=FALSE, col="lightgray",
+     main="10,000 sample means", xlab="", ylab="")
+points( vals_n, dnorm(vals_n, mean=10, sd = sd(means) ), type="l", lwd=2, col="cornflowerblue" )
+
+```
+
+**Figure 16: The distribution of sample means**
+
+The **sample means** become normally distributed as the sample size increases.
+
+As we increase the number of repetitions, the histograms showing the sample estimates look more and more like the standard normal distribution. The key thing about the Central Limit Theorem is that any distribution will produce the normally distributed mean value. The limiting normal distribution will have a mean equal to the mean of the underlying distribution, and the variance equal to the variance of the underlying distribution divided by the sample size.
+
+This result is important because it means that the normal distribution can substitute for many other well-behaved distributions, provided we will gather sufficiently large amounts of data.
+
+
+Summary
+========
+
+* A distribution is a function whose graph works like a histogram with infinitely small bins.
+
+* The Unform distribution has the same height at all points
+
+* Many real observations have a bell-shaped frequency distribution modeled well by the normal distribution
+
+* Probability distributions can be used to calculate how frequently we would expect to see observations within particular bounds.
+
+* The Central Limit Theorem illustrates that, given sufficient data, the mean values of many samples will be normally distributed even if the underlying distribution is not normal.

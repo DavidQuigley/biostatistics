@@ -1,10 +1,12 @@
 ---
-title: "Module 1.3: Observational Studies"
+title: 'Module 1.3: Observational Studies'
 author: "David Quigley"
-output: 
-    html_document:
-        toc: true
-        css: swiss.css
+output:
+  html_document:
+    css: swiss.css
+    toc: yes
+  word_document:
+    toc: yes
 ---
 
 [Return to the table of contents](index.html)
@@ -22,9 +24,10 @@ What you'll learn in this module
 Cohort studies
 ================================================================================
 
-A fundamental element of study design is whether the experimenter intervenes with the subjects, or instead observes the natural world and draws inferences about the association between exposures and outcomes. The term "exposure", borrowed from epidemiology, broadly means any factor that could affect the outcome under investigation. Observational studies are common in the field of epidemiology, as many questions about humans at a population scale are intractable except as observational studies. 
+A fundamental element of study design is whether the experimenter intervenes with the subjects, or instead observes the natural world and draws inferences about the association between exposures and outcomes. Observational studies are common in the field of epidemiology, as many questions about humans at a population scale are intractable except as observational studies. 
+The term **exposure**, borrowed from epidemiology, broadly means any factor that could affect the outcome under investigation. Exposures do not have to be exogenous chemicals; in genetic epidemiology, which studies the effect of rare and common variations in our DNA on disease risk, possessing a particular form of genetic variant is an exposure. 
 
-The simplest observational study design is to identify a group of subjects (a cohort) who are likely to experience the exposure, and follow their history to see what happens to them over time. Studies over time are also called **longitudinal studies**. There is no intervention to affect the subject's exposure. Cohort studies assess the assocation between some **exposure** and an **outcome** in a group of individuals. In a *prospective* cohort study, the cohort is assembled before individuals are exposed to the factor under consideration, and then the cohort is followed over time. In a *retrospective* cohort study, individuals are sampled after the exposures and outcomes have already occurred, and the association between exposure and treatment is determined looking back in time.
+Perhaps the simplest observational study design is to identify a group of subjects who are likely to experience the exposure, and follow their history to see what happens to them over time. Studies over time are called **cohort** studies, or **longitudinal studies**. In this study design there is no intervention to affect the subject's exposure. Cohort studies assess the assocation between some **exposure** and an **outcome** in a group of individuals. In a *prospective* cohort study, the cohort is assembled before individuals are exposed to the factor under consideration, and then the cohort is followed over time. In a *retrospective* cohort study, individuals are sampled after the exposures and outcomes have already occurred, and the association between exposure and treatment is determined looking back in time.
 
 ![](images/cohort_studies.png)
 
@@ -33,12 +36,20 @@ The simplest observational study design is to identify a group of subjects (a co
 Examples of two large, successful cohort studies
 ------------------------------------------
 
-The *Nurses' Health Study* (www.nurseshealthstudy.org) was started in 1976, with the goal of identifying the consequences of oral contraceptive, smoking, cancer and heart disease use on women's health. Registered nurses were chosen for the study because they were straightforward to identify, easy to find for follow-up, and able to respond to detailed technical questionnaires. Only married women between 30 and 55 were chosen for this study. Over time the study has grown in complexity and many additional sub-projects have been spun off. 
+The *Nurses' Health Study* (www.nurseshealthstudy.org) was started in 1976, with the goal of identifying the consequences of oral contraceptives, smoking, cancer and heart disease on women's health. Registered nurses were chosen for the study because they were straightforward to identify, easy to find for follow-up, and able to respond to detailed technical questionnaires. Only married women between 30 and 55 were chosen for this study. Over time the study has grown in complexity and many additional sub-projects have been spun off. 
 
-While the knowledge gained from such a study is tremendous, it is worth noting that this study is also an excellent example of a convenience sample. The original core population of married, middle-aged women would be less informative about the effects of oral contraception in other populations, such as women in their early teens or twenties.
+While the knowledge gained from such a study is tremendous, it is worth noting that this study is also an excellent example of a convenience sample. There may be features of the lifestyle or physiology of women in their early teens or twenties from different socioeconomic or ethnic backgrounds that differ systematially from the original core population of married, middle-aged women.
 
 Another major cohort study was founded in Framingham Massachusetts, with the goal of understanding causes of cardiovascular disease. The Framingham Heart Study (www.framinghamheartstudy.org) enrolled 5,209 adults living in Framingham, a mixture of randomly selected individuals and some volunteers. As the founders of the study recognized, the middle-class caucasian population in Framingham was not representative of all humans. No study is design can be perfect, and this did not prevent the study from contributing a great deal to our understanding of cardiovascular disease and other aspects of human health that have been added to the study along the way.
 
+Environmental confounding in longitudinal studies
+----------------------------------------------
+
+![](images/module_01_3_tamoxifen.png)
+
+**Figure 2: environmental confounding**
+
+If control groups are drawn from distinct regions or countries from the cases, this can impact outcomes due to differences in medical practice, environmental exposures, or other confounding factors. Environmental confounding in a longitudinal study can occur due to events that happen after the start of the study. Over time, the medical and real-world environment can change in ways that affect the outcome of a cohort experiment. An obvious example would be the widespread introduction of an effective new therapy such as the anti-estrogen drug Tamoxifen to the standard of care mid-way through a long-term cohort study experiment; patients who benefit from this new therapy would have better outcomes than patients who developed disease earlier or who were enrolled earler. 
 
 Cohort study advantages and drawbacks
 ------------------------------------------
@@ -60,26 +71,21 @@ Cohort study advantages and drawbacks
     + In an ideal prospective cohort studies, selection bias due to sampling is lessened because the outcomes occur after the individuals are sampled. 
     + In prospective cohorts, selection bias *can* occur due to differences in loss to follow-up, or covariates associated with self-selection.
 
-Although cohort studies do not control the number of exposed individuals directly, the size of the cohort will be chosen to reflect 
+Despite the drawbacks and imperfections of a cohort design, studies such as the Nurses' Health study contribute information that cannot be gathered by studying model organisms in a laboratory.
+
+Although cohort studies do not control the number of exposed individuals directly, the size of the cohort will be chosen to reflect features including:
 
 * the expected number of exposures that will occur in a cohort of that size
 * the expected number of events, given the expected number of exposures
+* the diversity of the cohort
+* the anticipated effect size of an exposure
 
 *Power analysis* is the process that calculates the relationship between the size of the study, the size of the effect, and what kind of conclusions can be drawn from those factors.
-
-Environmental confounding in longitudinal studies
-----------------------------------------------
-
-![](images/module_01_3_tamoxifen.png)
-
-**Figure 2: environmental confounding**
-
-Other environmental confounding can occur due to events that happen after the start of the study. Over time, the medical and real-world environment can change in ways that affect the outcome of a cohort experiment. An obvious example would be the widespread introduction of an effective new therapy such as the anti-estrogen drug Tamoxifen to the standard of care mid-way through a long-term cohort study experiment; patients who benefit from this new therapy would have better outcomes than patients who developed disease earlier or who were enrolled earler. If control groups are drawn from distinct regions or countries from the cases, this can impact outcomes due to differences in medical practice, environmental exposures, or other confounding factors.
 
 Case-control studies
 ==================
 
-The case-control study is a retrospective (backward-looking) study design that measures the assocation between an exposure and individuals with two or more distinct outcomes. The term "exposure" comes from the epidemiology literature, but can be broadly interpreted as any differentiating feature between the cases, who possess that feature, and the controls, who do not. Exposures do not have to be exogenous chemicals; in genetic epidemiology, which studies the effect of rare and common variations in our DNA on disease risk, possessing a particular form of genetic variant is an exposure. 
+The case-control study is a retrospective (backward-looking) study design that measures the assocation between an exposure and individuals with two or more distinct outcomes. 
 
 ![](images/module_01_3_case_control.png)
 
@@ -129,3 +135,18 @@ Treatment and outcome factors
 How clearly defined are the groups and exposure? In some cases the exposure can be measured precisely, such as the presence of a defined genetic mutation in a person's DNA. In other cases the exposure is more losely defined or qualitatively defined. Qualitative measures can be rigorous, but they require careful definition.
 
 What is the reported effect size and statistical significance? Very small effect sizes may have importance at the level of the entire population, but they are unlikely to be clinically relevant to individual people. We will discuss the evaluation of statistical significance, including *P* values and confidence intervals, in Modules 4 and 5.
+
+
+Summary
+===============
+
+* Cohort studies 
+    + follow a group of subjects over an extended period of time
+    + usually prospective
+    + lengthy, expensive
+* case-control studies 
+    + retrospectively examine the association between a group of cases, who experienced the exposure, and controls, who did not, and an outcome
+    + usually retrospective
+    + subject to sampling bias
+* Cannot infer causality from observational studies
+* Confounding can affect both study designs, though it is more likely to be a problem in retrospective studies

@@ -1,11 +1,12 @@
 ---
-title: "Module 2: Just Enough R to get Started"
+title: 'Module 2: Just Enough R to get Started'
 author: "David Quigley"
-date: "September 25, 2015"
-output: 
-    html_document:
-        toc: true
-        css: swiss.css
+output:
+  html_document:
+    css: swiss.css
+    toc: yes
+  word_document:
+    toc: yes
 ---
 
 

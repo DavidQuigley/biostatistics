@@ -1,11 +1,14 @@
 ---
 title: 'Module 8.1: Robust Statistics and outliers'
 author: "David Quigley"
-date: "December 3, 2015"
-output: 
-    html_document:
-        toc: true
-        css: swiss.css
+output:
+  html_document:
+    css: swiss.css
+    toc: yes
+  pdf_document:
+    toc: yes
+  word_document:
+    toc: yes
 ---
 
 <style type="text/css">
@@ -72,28 +75,35 @@ had.events[ 6 ] = 0
 surv.all = survfit(Surv(times, had.events)~conditions)
 cox = coxph(formula = Surv(times,had.events==1)~conditions)
 p.val = as.numeric(summary(cox)$logtest[3])
+par(mar=c(4,4,1,1))
 plot(surv.all, lwd=3, col=c( "cornflowerblue","black"),
         main=paste("Complete data: P =", round(p.val, 3)), las=1,
         xlab="days", cex.axis=1.5, bty="n", xlim=c(0,40), ylab="Percent alive")
 legend( 1,0.4, c("drug", "control"), col=c("cornflowerblue","black"), pch=19)
 ```
 
-These line plots show survival of the mice over time in each experimental arm; each drop in the height of the line represents an event, here the death of a mouse. The height of the drop corresponds to the number of animals still alive at that time in the experiment. The log rank test measures the likelihood that the two plots derive from the same population. 
+**Figure 1: Survival plots of two experimental arms**
 
-The P value for a log-rank test comparing the life-span post oncogene activation of the control mice, in black, to the drug-treated mice, in blue, is `r round(p.val, 3)`. This fails to support the hypothesis that the drug extends life. However, there is a data point that appears to defy our expectations: **one of the control animals was still alive at 40 days**. A  necropsy of that animal showed *it never developed a brain tumor*. Given the 100% penetrance of the phenotype, the most likely  explanation for a mouse surviving this experiment was *failure to activate the oncogene*. If this is correct, the data from this mouse are a technical error. Re-doing the analysis without the mouse that failed to develop a tumor produces the following result:
+The plots in **Figure 1** show survival of the mice over time in each experimental arm; each drop in the height of the line represents an event, here the death of a mouse. The height of the drop corresponds to the number of animals still alive at that time in the experiment. The log rank test measures the likelihood that the two plots derive from the same population. 
+
+The *P* value for a log-rank test comparing the life-span post oncogene activation of the control mice, in black, to the drug-treated mice, in blue, is `r round(p.val, 3)`. This fails to support the hypothesis that the drug extends life. However, there is a data point that appears to defy our expectations: **one of the control animals was still alive at 40 days**. A  necropsy of that animal showed *it never developed a brain tumor*. Given the 100% penetrance of the phenotype, the most likely  explanation for a mouse surviving this experiment was *failure to activate the oncogene*. If this is correct, the data from this mouse are a technical error. Re-doing the analysis without the mouse that failed to develop a tumor produces the following result:
 
 ```{r echo=FALSE, fig.height=4, fig.width=5}
 times=c(21,19,17,23,21,NA,23,19,20,23,  26,22,24,22,23,24,20,25,22,21)
 surv.all = survfit(Surv(times, had.events)~conditions)
 cox = coxph(formula = Surv(times,had.events==1)~conditions)
 p.val = as.numeric(summary(cox)$logtest[3])
+par(mar=c(4,4,1,1))
 plot(surv.all, lwd=3, col=c("black", "cornflowerblue"),
         main=paste("data minus one point: P =", round(p.val, 3)), las=1,
         xlab="days", cex.axis=1.5, bty="n", xlim=c(0,40))
 legend( 1,0.4, c("drug", "control"), col=c("black", "cornflowerblue"), pch=19)
 ```
 
-If we were to remove the anomalous mouse, the P value for a log-rank test is now `r round(p.val, 3)`, which is conventionally below the alpha-level threshold for reporting a significant effect.
+**Figure 2: Survival plots of two experimental arms minus one data point**
+
+
+If we were to remove the anomalous mouse, the *P* value for a log-rank test is now `r round(p.val, 3)`, which is conventionally below the alpha-level threshold for reporting a significant effect.
 
 What to do?
 --------------------------------------------------------------------------------
@@ -138,6 +148,8 @@ legend( 50, 1.2, c("mean", "median"), lty=c(1,2), lwd=2, box.col="white", xjust=
 
 ```
 
+**Figure 3: mean *vs.* median**
+
 Most of the samples stop dividing around 10 population doublings. However, there are two extreme values of 38 and 49.
 
 Here the two extreme values at 38 and 49 drag the mean out to `r round(mean( c(vals, valskew)),2)`, while the median is  `r round(median( c(vals, valskew)),2)`, much closer to the center of the distribution. Although the mean is frequently used as a summary statistic and has important properties mathematically, it is always worth comparing the mean to the median to see how different they are.
@@ -148,6 +160,7 @@ The Median Absolute Deviation
 The Standard Deviation describes variability of a sample using deviations from the mean as a guide. There is a corresponding statistic for the median called the **Median Absolute Deviation**. The Median Absolute Deviation (MAD) is a robust version of the Standard Deviation. The MAD is the median value of the absolute value of all differences between the sample median and individual observations:
 
 $\large{MAD = median( |X_i - median(X)| )}$
+
 
 ```{r echo=FALSE, small.mar=TRUE,  fig.height=3, fig.width=5}
 par(mar=c(4,1,1,1))
@@ -174,7 +187,9 @@ text(med+7, 1.08, "+/- 1 MAD", col="cornflowerblue")
 
 ```
 
-These plots show the median and mean (vertical lines) and +/- one MAD and SD (horizontal lines). You can see that the MAD is much smaller than the SD, and in this case most of the points are within 1 MAD of the median. If we wish to robustly characterize the behavior of the observations, the median and MAD would be an appropriate choice.
+**Figure 4: standard deviation *vs.* median absolute deviation**
+
+The plots in **Figure 4** show the median and mean (vertical lines) and +/- one MAD and SD (horizontal lines). You can see that the MAD is much smaller than the SD, and in this case most of the points are within 1 MAD of the median. If we wish to robustly characterize the behavior of the observations, the median and MAD would be an appropriate choice.
 
 ```{r echo=FALSE}
 aa=c(2.24,2.65,3.01,3.17,2.69,1.59,1.77,3.06,3.92,2.51,10.00)
@@ -213,7 +228,10 @@ text(10, 1,paste("P =", round( p.11, 3) ), adj=1, font=2)
 text(aa, bb, c('a','b','c','d','e','f','g','h','i','j','k'), col="white", cex=0.75)
 ```
 
-The plot on the left, generated using observations *a* through *j*, shows two variables with an inverse correlation. The plot on the right was generated by **adding a single point *k* to the distribution on the left** (colored in black). The correlation coefficient value changes from `r cor.10` to `r cor.11`. In both data sets the P value for a test of significant correlation is below 0.05. 
+**Figure 5: correlation with and without a single extreme value**
+
+In **Figure 5** on the left, generated using observations *a* through *j*, shows two variables with an inverse correlation. The plot on the right was generated by **adding a single point *k* to the distribution on the left** (colored in black). The correlation coefficient value changes from `r cor.10` to `r cor.11`. In both data sets the *P* value for a test of significant correlation is below 0.05. 
+
 
 What to do?
 -----------------
@@ -228,11 +246,13 @@ where covariance is calculated as
 
 $\large{ \sigma_{X,Y} = \frac{1}{N-1}\sum_{1}^N( (x_i-\bar{x})(y_i-\bar{y}) ) }$
 
-The addition of point *k* shifts the values of $\bar{x}$ from `r round(mean(aa[1:10]),2)` to `r round(mean(aa),2)` and $\bar{y}$ from `r round( mean(bb[1:10]),2)` to `r round( mean(bb), 2)`. The covariance changes from 
-`r signif( sum( (aa[1:10]-mean(aa[1:10])) - (bb[1:10]-mean(bb[1:10])) ) / (10-1), 2)` to 
-`r signif( sum( (aa-mean(aa)) - (bb-mean(bb)) )/ (11-1), 2)`, moving from negative to positive. This accounts for the change in sign of the correlation coefficient, from negative (inverse) to positive (direct) correlation.
+
+The addition of point *k* shifts the values of $\bar{x}$ from $`r round(mean(aa[1:10]),2)`$ to $`r round(mean(aa),2)`$ and $\bar{y}$ from $`r round( mean(bb[1:10]),2)`$ to $`r round( mean(bb), 2)`$. The covariance changes from 
+$`r signif( sum( (aa[1:10]-mean(aa[1:10])) - (bb[1:10]-mean(bb[1:10])) ) / (10-1), 2)`$ to 
+$`r signif( sum( (aa-mean(aa)) - (bb-mean(bb)) )/ (11-1), 2)`$, moving from negative to positive. This accounts for the change in sign of the correlation coefficient, from negative (inverse) to positive (direct) correlation.
 
 The change in signs is also clear from a linear model fit, as the line of best fit when including point *k* is nearly perpendicular to the line of best fit when *k* is excluded:
+
 
 ```{r echo=FALSE, fig.height=4, fig.width=4}
 par(mar=c(3,3,3,1))
@@ -244,6 +264,8 @@ text(1.5,6,"without K", col="cornflowerblue")
 abline( lm( bb~aa ), lwd=2)
 text(1.5,1,"with K")
 ```
+
+**Figure 6: a linear model fit with and without a single extreme value**
 
 Point K has a much larger impact on the overall statistic than any other point in the sample. When points have a disproportionate effect on the final statistic, they should be scrutinized as potential outliers. 
 
@@ -266,9 +288,10 @@ for(i in seq(from=0, to=10, by=2)){
     text(10, 2,paste("Rho =", round( cor.x, 2) ), adj=1, font=2)
     text(10, 1,paste("P =", round( p.x, 3) ), adj=1, font=2)
 }
-
-
 ```
+
+**Figure 7: The increasing effect of an outlier point**
+
 
 
 Detecting outliers visually and through statistics
@@ -291,6 +314,9 @@ hist(bb, breaks=10, col="cornflowerblue", main="histogram", xlab="", freq=FALSE,
 boxplot(bb, main="boxplot", las=1, boxwex=0.5, pch=19)
 ```
 
+**Figure 8: a histogram and box and whiskers plot of the same data**
+
+
 Note that the histogram has almost all of of its density on the left side of the plot, with a single bar on the far right side. This is suggestive of an extreme value. More explicitly, the box plot shows an interquartile range that is only slightly smaller than the whiskers, with a single point plotted at 10. When you plot a box plot using R, points whose values lie outside of the whiskers are plotted individually. These points are informally called outliers. This terminology does not indicate that the values should be removed from the analysis, but only that they deviate dramatically from the central tendency of the data. 
 
 Cook's distance 
@@ -308,12 +334,15 @@ axis(2, seq(from=0, to=50, by=10), las=1)
 axis(1, at=1:11, labels=letters[1:11])
 ```
 
+**Figure 9: Cook's Distance for each point in figure 8**
+
+
 
 What should be done about this observation? There are several heuristics for values of Cook's Distance that indicate particularly influential values, including:
 
-* Cook's Distance > 1
-* Cook's Distance > 4/*N* 
-* Distance > 4/(*N*−*k*−1)
+* $\emph{Cook's Distance} > 1$
+* $\emph{Cook's Distance} > \frac{4}{N}$ 
+* $\emph{Cook's Distance} > \frac{4}{(N - k - 1)}$
 
 where *N* is the number of observations and *k* is the number of explanatory variables. By any measure, point *k* has an enormous Cook's distance and is therefore disproportionately influential. In the absence of any strong prior information that the data are *fundamentally mistaken* due to a technical error, it would be inappropriate to remove the errant point, particularly in a *post-hoc* analysis. However, the point is clearly problematic due to its excessive influence. One approach would be to **replace the Pearson correlation with an analysis that is robust to outliers**.
 
@@ -381,6 +410,9 @@ for(i in 1:10){
 }
 ```
 
+**Figure 10: Pearson *vs.* Spearman rank correlation**
+
+
 The point to take away from these plots: 
 
 1. It is generally safe to use the Spearman rank correlation in place of the Pearson correlation.
@@ -426,6 +458,9 @@ text(100,8,paste("Pearson:",round( cor.after.p,2) ), adj=1)
 text(100,7.25,paste("Spearman:",round( cor.after.s,2)), adj=1)
 ```
 
+**Figure 11: Spearman rank correlation is nearly unaffected by single outliers**
+
+
 Extreme data points produce different findings
 --------------------------------------------------------------------------------
 
@@ -459,16 +494,18 @@ text(rank(aa), rank(bb), c('a','b','c','d','e','f','g','h','i','j','k'),
      cex=0.75, col="white")
 ```
 
+**Figure 12: Converting values to ranks**
+
 The relative positioning of points "a" through "j" is not dramatically affected by replacing their actual values with ranks; it's only the position and relationship of point "k" (the outlier) that has shifted. The rank transformation has two consequences:
 
 1. The reported rho value is now once-again negative
-2. The P value for the correlation is now much higher, at `r p.rank`
+2. The *P* value for the correlation is now much higher, at `r p.rank`
 
 
-A rank-based t test: the Wilcoxon Rank Sum test
+A rank-based *t* test: the Wilcoxon Rank Sum test
 ================================================================================
 
-Similar in spirit to the Spearman rank correlation, the **Wilcoxon Rank Sum test** assesses the likelihood that two samples of numbers were derived from the same population. Although the t test is robust to moderate violations of its assumption of normality, the *t* test is compromised by more serious violations of normality. The Wilcoxon Rank Sum test makes no distributional assumptions.
+Similar in spirit to the Spearman rank correlation, the **Wilcoxon Rank Sum test** assesses the likelihood that two samples of numbers were derived from the same population. Although the *t* test is robust to moderate violations of its assumption of normality, the *t* test is compromised by more serious violations of normality. The Wilcoxon Rank Sum test makes no distributional assumptions.
 
 The primary assumption made by the Wilcoxon Rank Sum test is that the individual observations are independent and can be ordered somehow.
 
@@ -489,7 +526,9 @@ axis(2,-1:3, las=1)
 axis(1,at=c(1,2), labels=c("Y1", "Y2"), tick=FALSE)
 ```
 
-A *t* test of these values reports P = `r round( t.test(y1,y2)$p.value,3)`, while a Wilcoxon Rank test reports P = `r round( wilcox.test(y1, y2)$p.value, 3)`. If we add an outlier to Y1, the results change dramatically for a t test but less so for the Wilcoxon Rank test:
+**Figure 13: Example data for the Wilcoxon rank sum test**
+
+A *t* test of these values reports P = `r round( t.test(y1,y2)$p.value,3)`, while a Wilcoxon Rank test reports P = `r round( wilcox.test(y1, y2)$p.value, 3)`. If we add an outlier to Y1, the results change dramatically for a *t* test but less so for the Wilcoxon Rank test:
 
 ```{r echo=FALSE, fig.height=3, fig.width=3}
 y[1] = 8
@@ -501,7 +540,19 @@ box()
 y1 = y[1:10]
 ```
 
-A t test of these values reports P = `r round( t.test(y1,y2)$p.value,3)`, while a Wilcoxon Rank test reports P = `r round( wilcox.test(y1, y2)$p.value, 3)`. Once again, a robust test is an appropriate analytical choice in the face of outlier values.
+**Figure 14: Example data for the Wilcoxon rank sum test, with an outlier**
+
+A *t* test of these values reports P = `r round( t.test(y1,y2)$p.value,3)`, while a Wilcoxon Rank test reports P = `r round( wilcox.test(y1, y2)$p.value, 3)`. Once again, a robust test is an appropriate analytical choice in the face of outlier values.
+
+Summary
+================
+
+* Unusual data values may be created by technical error or through biological processes
+* Outliers can be detected through exploratory data analysis and statistical means such as Cook's Distance
+* Selectively removing values *post-hoc* is likely to introduce bias, but can be justified.
+    + document what was done
+    + make the unvarnished data available
+* Robust statistics can reduce the impact of outliers without removing them
 
 R code examples
 =======================

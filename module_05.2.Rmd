@@ -1,226 +1,353 @@
 ---
-title: 'Module 5.2: The t test: deriving P values from statistics'
+title: 'Module 5.2: Quantifying the confidence of an estimate'
 author: "David Quigley"
-date: "November 4, 2015"
-output: 
-    html_document:
-        toc: true
-        css: swiss.css
-
+output:
+  word_document:
+    toc: yes
+  html_document:
+    css: swiss.css
+    toc: yes
 ---
 
-```{r echo=FALSE}
-quick.t.plot = function( X, Y ){
-    plot( c( rep(1, length(X)), rep(2, length(Y)) ),
-         c( X, Y),
-      xlim=c(0.5,2.5), ylim=c(0,10), pch=19, ylab="", xlab="", axes=FALSE)
-    axis(1, at=c(1,2), labels=c("group 1", "group 2"), tick=FALSE)
-    axis(2, at=c(0, 2,4,6,8,10), las=1)
-}
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(comment = NA)
+knitr::opts_chunk$set( prompt=TRUE ) 
+
+knitr::knit_hooks$set(small.mar = function(before, options, envir) {
+    if (before) par(mar = c(2, 2, 1, 1))  # smaller margin on top and right
+})
+knitr::knit_hooks$set(left.mar = function(before, options, envir) {
+    if (before) par(mar = c(2, 4, 1, 1))  # smaller margin on top and right
+})
+knitr::knit_hooks$set(med.mar = function(before, options, envir) {
+    if (before) par(mar = c(4, 4, 1, 1))  # smaller margin on top and right
+})
+knitr::knit_hooks$set(bottom.mar = function(before, options, envir) {
+    if (before) par(mar = c(3, 2, 1, 1))  # smaller margin on top and right
+})
 ```
+
+
+[Return to the table of contents](index.html)
+
+********************************************************************************
 
 Introduction
 ========================================
 
 **This module explains:**
 
-* the t distribution
-* t tests to compare two samples
-    + unpaired t tests
-    + paired t tests
+* Quantifying confidence of an estimate
+    + standard error of the mean (SEM)
+    + confidence intervals
+* Comparing the SEM and the standard deviation
 
-Student's t distribution
+
+The accuracy of an estimate of the mean
 ================================================================================
 
-The fact that as the number of observations increase, the distribution values will often tend towards a normal frequency distribution allows statisticians to make important inferences about statistical properties. However, in practice, due to experimental costs or the availability of subject populations, **scientists often are constrained to use small sample sizes**. The *t* distribution is very useful in these cases. The *t* distribution is sometimes named Student's *t* distribution after the pseudonym of the statistician William Sealy Gosset, who developed it while working at the Guiness Brewery.
+When we estimate the mean of a population using a sample from that population, how accurate is that estimate? We can demonstrate emperically that the accuracy will depend upon
 
-The t distribution describes the **frequency distribution of small numbers of samples chosen from a normal distribution**. Like the normal distribution, the function that defines its probability density is complex and understanding it is not required to make use of the *t* distribution.
+1. The variance of the population. The more variable the population is, the harder it will be to get a representative sample of any given size.
+2. The size of the sample, proportionate to the total population. Larger samples are more likely to be representative of the overall population than smaller samples.
 
-Defining the t statistic
----------------------------
+The law of large numbers
+--------------------------
 
-Recall that for *n* samples, the sample mean is defined:
+We can demonstrate emperically that the larger the sample is, the more accurate the sample estimate of the mean. 
 
-$\bar{x} = \frac{x_1 + ... + x_n}{n}$ 
-
-and the sample variance is defined:
-
-$s^2 = \frac{ \sum_{i=1}^n(x_i-\bar{x})^2 }{n-1}$. 
-
-The *t* value for an individual sample of size *n* from of a population with mean $\mu$ is given by:
-
-$\large{t = \frac{\bar{x}-\mu}{ \frac{s}{\sqrt{n} } }}$
-
-So *t* will increase as 
-
-1) *n* increases
-2) *s* (the standard deviation, $\sqrt(variance)$) decreases
-3) the difference between $\bar{x}$ and $\mu$ decreases
-
-Note that this equation defines the *t* statistic for a particular observation; the *t* distribution describes the **frequency with which one would observe all possible *t* statistics for a given number of degrees of freedom** . The distribution of the *t* statistic is symmetric around zero. It is shaped like a standard normal distribution, but its tails do not get close to zero quite as quickly as a standard normal curve; in statistical jargon, it has "fatter tails". The shape of the *t* distribution is influenced by on the number of degrees of freedom. The degrees of freedom for a *t* statistic is equal to the number of samples minus one. As the number of degrees of freedom increases, the *t* distribution becomes more simlar to a normal distribution:
+As we showed earlier, for the same 1000 points generated from a normal distribution with standard deviation equal to 3 and mean equal to 15, increasing the sample size decreases the standard deviation of estimates of the mean. Each point in the figures below is an estimate of the mean, taken by randomly sampling 10, 100, or 500 of the 1000 points.
 
 ```{r echo=FALSE, fig.height=4, fig.width=8}
-vals = seq(from=-7,to=7, by=0.01)
-layout(matrix(1:2,1,2))
-par(mar=c(4,4,1,1))
-plot(dt( vals, df=1 ), type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, 
-     xlab="t statistic", ylab="density", main="t and standard normal distribution", ylim=c(0,.4) )
-points( dnorm( vals ), type="l", lwd=3, col="gray" )
-legend( 900,0.35, c("t DF=1", "normal"), col=c("black", "gray"), pch=19)
-axis(2, seq(from=0, to=0.4, by=0.1), las=1)
-axis(1, at=( length(vals) / 14 * 0:14) , labels=seq(from=-7, to=7, by=1), las=1)
+values = rnorm(n=1000, sd=3)+15
 
-plot(dt( vals, df=1 ), type="l", yaxs="i", xaxs="i", lwd=3, axes=FALSE, 
-     xlab="t statistic", ylab="density", main="t and standard normal distribution", ylim=c(0,.4) )
-axis(2, seq(from=0, to=0.4, by=0.1), las=1)
-axis(1, at=( length(vals) / 14 * 0:14) , labels=seq(from=-7, to=7, by=1), las=1)
-points( dt( vals, df=3 ), type="l", lwd=3, col="cornflowerblue" )
-points( dt( vals, df=6 ), type="l", lwd=3, col="gold" )
-points( dt( vals, df=20 ), type="l", lwd=3, col="darkgreen" )
-points( dnorm( vals ), type="l", lwd=3, col="gray" )
-legend( 900,0.35, c("t DF=1","t DF=3","t DF=6","t DF=20", "normal"), col=c("black", "cornflowerblue", "gold", "darkgreen", "gray"), pch=19)
-```
+layout(matrix(1:3,1,3))
+par(mar=c(1,3,3,1))
 
-The formula describing the *t* distribution is rather complicated. In the past to derive a specific value for the distribution, given a value for *t* and the number of degrees of freedom, one would have used a table of pre-computed values. Nowadays we can use a statistical package such as R to do this. 
+mus = rep(0, 100)
 
-
-The t test
-===============================================================
-
-We frequently wish to test whether two samples are likely to have come from distinct populations. For example:
-
-* Do mice of the C57BL/6 strain run on a wheel more hours per night than FVB/N mice?
-* Patients in a clinical trial were randomized to receive drug or a placebo. Do subjects receiving the drug have a lower blood pressure than when they started?
-* Did tenured scientists whose PhD was supervised by a member of the National Academy of Science receive their first RO1 at a younger age than those who were not supervised by a NAS member?
-
-The simplest way to evaluate the statistical strength of evidence for this form of question is a *t* test.  If we have exactly two groups defined by a categorical variable, then the *t* test is often appropriate. The null hypothesis of the *t* test is that both samples are random samples from the same population. The **alternative hypothesis** is that there are two distinct populations. The *t* test produces a *t* statistic; that is, a statistic that has a *t* distribution. The farther the *t* statistic is from zero, the less likely it is that the two samples came from the same original distribution.
-
-The *t* statistic is a ratio: roughly speaking, it measures the difference in means of two samples, divided by sample variance, normalized by the number of samples. Stated more formally, *t* for two samples is the difference in sample means divided by the sum of squared standard deviations, with each group's standard deviation normalized by the number of samples in that group.
-
-$\large{t = \frac{ \bar{Y_1} - \bar{Y_2}} { \sqrt{ \frac{s_1^2}{N_1} + \frac{s_2^2}{N_2} } } }$
-
-Recall that $\bar{Y_1}$ is the mean of group $Y_1$ and $s_1^2$ is the variance of group 1. As the difference in means gets smaller, the *t* statistic will get closer to zero. Since the *N* values are the denominator of a denominator, larger N values will tend to *increase* the magnitude of the *t* statistic by decreasing the variance term in the denominator. This makes sense intuitively: the more samples we have, the more certain we can be of our statistic.
-
-The formulation of the *t* statistic shown above is appropriate if the variance of the two groups may differ. This test is also called "Welsh's *t* test". 
-
-```{r echo=FALSE, fig.height=4, fig.width=3}
-X = c(7.9,6.3,5.0,6.7,9.7,6.0,6.8,6.5,5.8,5.9,7.0,7.5,5.6,5.7,6.1,8.1,5.7,4.9,5.5,6.2)
-Y = c(5.8,4.2,2.9,4.3,8.1,3.7,4.7,4.4,3.7,3.7,5.1,5.4,3.4,3.7,3.9,6.3,3.7,2.9,3.5,4.1)
-par(mar=c(3,3,1,1))
-quick.t.plot(X,Y)
-text(2,0.5, paste("P =", signif( t.test(X,Y)$p.value, 3)), adj=1) 
-group_1 = X
-group_2 = Y
-ts = t.test( group_1, group_2 )
-```
-
-Here I show two samples where *N* for both groups is 20. The *t* test returns the following results:
-```{r}
-t.test( group_1, group_2 )
-```
-
-The t statistic is `r round( ts$statistic, 3)`, which produces a P value of `r signif( ts$p.value, 3)` when tested on a *t* distribution with `r round(ts$parameter,2)` degrees of freedom. The number of degrees of freedom is not a round number. There are 40 independent values, so knowing 39 values you can infer the 40th value from the population mean. However, because of allowance for unequal variance, the number of degrees of freedom is calculated by an equation called the Welsh-Satterthwaite equation:
-
-$\large{df = \frac{ ( \frac{s^2_1}{N_1} + \frac{s^2_2}{N_2} )^2 }{ \frac{ (\frac{s^2_1}{N_1})^2 }{(N_1-1)} + \frac{ (\frac{s^2_2}{N_2})^2 }{(N_2-1)} }}$
-
-
-If both samples are assumed to have the same variance, a slightly different equation is used to calculate the *t* statistic:
-
-$\large{t = \frac{ \bar{Y_1} - \bar{Y_2}} {  S_{X_1X_2} \times \sqrt{ \frac{1}{N_1} + \frac{1}{N_2}} } }$
-
-This equation uses the pooled variance of both samples; the number of degrees of freedom is $N_1 - 1$ + $N_2 - 1$.
-
-If we ask R to assume the variances are equal, this changes the the number of degrees of freedom and results in a slightly lower *P* value.
-
-```{r}
-t.test( group_1, group_2, var.equal=TRUE )
-```
-
-Paired data
--------------------
-
-The *t* test assumes that individual data points in the samples are statistically independent. This is not always the case. Some examples:
-
-* Number of lymphocytes in a breast tumor sample *vs.* adjacent normal tissue from the same woman
-* Blood pressure of the same individual before *vs.* after drug administration
-* Number of hours mice spend running on a wheel at day *vs.* at night
-
-In each of these cases, one of the values will be linked to the other because the same individual is being sampled twice. In statistical parlance this is a "repeated measure." If data were derived from a samples where values in group 1 are linked to a corresponding value in group 2, then it is important to perform a **paired *t* test** rather than an unpaired *t* test. The paired *t* test links each value in group 1 with a corresponding value in group 2. This means that the *t* statistic depends on the pairing. Here I plot the same points with two different pairings; note the P values for each test.
-
-```{r echo=FALSE, fig.height=3, fig.width=7}
-layout(matrix(1:2,1,2))
-par(mar=c(3,3,1,1))
-X = c(7.9,6.3,5.0,6.7,9.7,6.0,6.8,6.5,5.8,5.9,7.0,7.5,5.6,5.7,6.1,8.1,5.7,4.9,5.5,6.2)
-Y = c(5.8,4.2,2.9,4.3,8.1,3.7,4.7,4.4,3.7,3.7,5.1,5.4,3.4,3.7,3.9,6.3,3.7,2.9,3.5,4.1)
-quick.t.plot(X,Y)
-for( i in 1:length(X)){
-    lines(c( 1,2), c(X[i], Y[i] ) )
+for(i in 1:100){
+    sample_size=10
+    mus[i] = mean( sample( values, size=sample_size ))
 }
-text(2,0.5, paste("P =", signif( t.test(X,Y, paired=TRUE)$p.value, 3)), adj=1) 
+plot( mus, axes=FALSE, xlab="", ylab="attribute", ylim=c(12,18), 
+     pch=19, col="#0000ff33", main="Sample mean estimate")
+axis(2,seq(from=10, to=20, by=2), las=1)
+abline( mean(values), 0)
+text( 50, 13, "Sample size: 10", font=2, cex=2)
+text( 50, 12.5, "Population SD: 3", font=2, cex=2)
+box()
 
-idx = sample(1:20)
-quick.t.plot(X,Y[idx])
-for( i in 1:length(X)){
-    lines(c( 1,2), c(X[i], Y[idx][i] ) )
+for(i in 1:100){
+    sample_size=100
+    mus[i] = mean( sample( values, size=sample_size ))
 }
-text(2,0.5, paste("P =", signif( t.test(X,Y[idx], paired=TRUE)$p.value, 3)), adj=1) 
+plot( mus, axes=FALSE, xlab="", ylab="attribute", ylim=c(12,18), 
+     pch=19, col="#0000ff33", main="Sample mean estimate")
+axis(2,seq(from=10, to=20, by=2), las=1)
+abline( mean(values), 0)
+text( 50, 13, "Sample size: 100", font=2, cex=2)
+text( 50, 12.5, "Population SD: 3", font=2, cex=2)
+box()
 
+for(i in 1:100){
+    sample_size=500
+    mus[i] = mean( sample( values, size=sample_size ))
+}
+plot( mus, axes=FALSE, xlab="", ylab="attribute", ylim=c(12,18), 
+     pch=19, col="#0000ff33", main="Sample mean estimate")
+axis(2,seq(from=10, to=20, by=2), las=1)
+abline( mean(values), 0)
+text( 50, 13, "Sample size: 500", font=2, cex=2)
+text( 50, 12.5, "Population SD: 3", font=2, cex=2)
+box()
 ```
 
-For a paired *t* test, one calculates the differences between the two groups *D*. Normally the paired *t* statistic is calculated as
+**Figure 1: Demonstration of the law of large numbers**
 
-$\large{t = \frac{ \bar{D}}{ \frac{s_D}{\sqrt(N)} } }$
+**Figure 1** shows that the sample estimate becomes more accurate as the sample size increases. We will next show that for a **constant sample size**, the standard deviation of our estimate of the mean **increases as the variance of the underlying population increases**. This should make intuitive sense, as the more variance there is in the population, the more likely it is that any particular random sample will not be representative of the overall population.
 
-with N-1 degrees of freedom. If you wish to test whether the paired differences are significantly different from some other value than zero, the test statistic is calculated using that value *V* as 
+The figure below shows three distributions sampled with N=10; the distribution SD ranges from 1 to 3.
 
-$\large{t = \frac{ \bar{D} - V}{ \frac{s_D}{\sqrt(N)} } }$
+```{r echo=FALSE, fig.height=4, fig.width=8}
+values1 = rnorm(n=1000, sd=1)+15
+values2 = rnorm(n=1000, sd=2)+15
+values3 = rnorm(n=1000, sd=3)+15
+
+layout(matrix(1:3,1,3))
+par(mar=c(1,3,3,1))
+
+mus = rep(0, 100)
+
+for(i in 1:100){
+    sample_size=10
+    mus[i] = mean( sample( values1, size=sample_size ))
+}
+plot( mus, axes=FALSE, xlab="", ylab="attribute", ylim=c(12,18), 
+     pch=19, col="#0000ff33", main="Sample mean estimate")
+axis(2,seq(from=10, to=20, by=2), las=1)
+abline( mean(values1), 0)
+text( 50, 13, "Sample size: 10", font=2, cex=2)
+text( 50, 12.5, "Population SD: 1", font=2, cex=2)
+box()
+
+for(i in 1:100){
+    sample_size=10
+    mus[i] = mean( sample( values2, size=sample_size ))
+}
+plot( mus, axes=FALSE, xlab="", ylab="attribute", ylim=c(12,18), 
+     pch=19, col="#0000ff33", main="Sample mean estimate")
+axis(2,seq(from=10, to=20, by=2), las=1)
+abline( mean(values2), 0)
+text( 50, 13, "Sample size: 10", font=2, cex=2)
+text( 50, 12.5, "Population SD: 2", font=2, cex=2)
+box()
+
+for(i in 1:100){
+    sample_size=10
+    mus[i] = mean( sample( values3, size=sample_size ))
+}
+plot( mus, axes=FALSE, xlab="", ylab="attribute", ylim=c(12,18), 
+     pch=19, col="#0000ff33", main="Sample mean estimate")
+axis(2,seq(from=10, to=20, by=2), las=1)
+abline( mean(values3), 0)
+text( 50, 13, "Sample size: 10", font=2, cex=2)
+text( 50, 12.5, "Population SD: 3", font=2, cex=2)
+box()
+```
+
+**Figure 2: Demonstration of the law of large numbers**
+
+The **standard error of the mean** (also written SEM or *s.e.* or *s.e.m.*) is a random variable that can be calculated by dividing the sample standard deviation by the square root of the sample size. For a sample size *N*:
+
+$SEM = \frac{{SD}_{sample}}{\sqrt{N}}$
+
+Because the standard error of the mean is proportional to the square root of *N*, you need to quadruple the size of your sample to reduce the SEM by 50%. Standard error can be calculated for many statistics, so writing "standard error" is somwwhat inexact, but if you write it in the context of a test of two means it will be understood in this context.
+
+The sample mean and SEM can be used to estimate probability that population mean lies within given bounds, given the assumption that the population has approximately normal distribution. This assumption is often met, although we will see that for small sample sizes an different distribution called the *t* distribution is appropriate.
 
 
+Confidence intervals for the mean
+================================================================================
 
+Confidence intervals
+-----------------------
 
-R code examples
-=======================
+We would like to be able to report not only our estimate of the population mean, but some information about how confident we are that our estimate reflects the true population mean. 
 
-> The t distribution value for a given number of degrees of freedom
+> If we repeated the sampling process many times, confidence interval expresses the percentage of the time the parameter should fall in the range.
+
+Confidence intervals are reported as two values:
+
+1. a range (on the same scale as the statistic)
+2. a percentage used to generate range (typically 95% or 99%)
+
+If our population follows a normal distribution-- or is reasonably close to one-- we can use the SEM (which is a standard deviation) to estimate bounds on where we expect the true population mean to lie. This is analgous to using the standard deviation of a normal distribution to ask how frequently we would expect to see a value 1, 2, or 3 standard deviations away from the mean. 
+
+A typical example of reporting confidence intervals comes from (Chapman et al. NEJM 2011), the vemurafinib study introduced earlier:
+
+>"At 6 months, overall survival was 84% (95% confidence interval [CI], 78 to 89) in the vemurafinib group and 64% (95% CI, 56 to 73)." (Chapman et al. 2011)
+
+Calculating a confidence interval
+----------------------------------
+
+Using this logic, given the following sample:  
+
+```
+mean = 5  
+standard deviation = 2  
+sample N = 100  
+SEM  = 2 / sqrt(100) = 0.2
+```
+
+Then we would predict that if we repeatedly sampled the mean:
+
+* 68% within 4.8 and 5.2 (mean ± 1.0 x SE)
+* 95% within 4.6 and 5.4 (mean ± 1.96 x SE)
+* 99% within 4.48 and 5.52 (mean ± 2.58 x SE)
+
+We can make this claim without knowing the true population standard deviation because of the assumption that the population has an approximately normal distribution.
+
+The next section of R code demonstrates that confidence intervals work when the assumptions are met. The code:
+
+1. Generates a population 100,000 values with distribution normal( mean=5, SD=2 )
+2. Obtains 1,000 samples where N = 100
+3. Reports how many of the 1,000 samples have means that lie within the 68%, 95%, or 99% confidence intervals
 
 ```{r}
-t_value = 3
-degrees_of_freedom=5
-dt(t_value, df=degrees_of_freedom)
-
-```
-
-> The t test
-
-I'll show some t tests of the following data:
-
-```{r fig.width=3, fig.height=4, echo=FALSE}
-group_1 = c(3,6,7,2,1,4,4.5, 6)
-group_2 = c(5,4,12,6,7,6,8,9)
-par(mar=c(3,3,1,1))
-quick.t.plot(group_1, group_2)
+population = rnorm( n=100000, mean=5, sd=2 )
+sample_means = rep( 0, 1000 )
+for( i in 1:1000 ){
+     sample_means[i]= mean( sample( population )[1:100] )
+}
 ```
 
 ```{r}
-group_1 = c(3,6,7,2,1,4,4.5, 6)
-group_2 = c(5,4,12,6,7,6,8,9)
-t.test(group_1, group_2)
+# predicted: 68%
+sum( sample_means > 4.8 & sample_means < 5.2 ) / 1000
+# predicted: 95%
+sum( sample_means > 4.6 & sample_means < 5.4 ) / 1000
+# predicted: 99%
+sum( sample_means > 4.48 & sample_means < 5.52 ) / 1000
 ```
 
-It is usually correct to perform a two-sided *t* test; that is, to test the alternative hypothesis that group 2 is either larger *or* smaller than group 1. If you have a very well-motivated reason, you can test a one-sided hypothesis using the *alternative* parameter, passing in either "less" or "greater". Note that the "less" refers to the first group:
+These bounds are called *confidence intervals*, because they describe the bounds under which we would expect our statistic to fall a given percentage of the time. **Confidence intervals are not a guarantee**. We **expect** that using confidence intervals for 2 SEM, 5% of the time the population mean will lie outside of the sample mean estimate.
 
-```{r}
-group_1 = c(3,6,7,2,1,4,4.5, 6)
-group_2 = c(5,4,12,6,7,6,8,9)
-t.test(group_1, group_2, alternative="less")
+
+
+Any time you report a mean value, you should also report confidence intervals. Many journals will require this; the statistical checklist for Nature journals, for example, states as requirements:
+
+* n for each data set is clearly stated
+* A clearly labeled measure of center (e.g. mean or median) is given
+* A clearly label measure of variability (e.g. standard deviation or range) is given
+* All numbers following a ± sign are identified as standard errors (s.e.m.) or standard deviations (s.d.)
+
+*source: http://www.nature.com/nature/authors/gta/Statistical_checklist.doc*
+
+
+Error bars
+================================================================================
+
+When we report a mean value in text, the confidence interval must be reported as well. If we plot a mean value in a figure, we must also report the confidence interval for this estimate. **Error bars** are the visual counterpart to confidence intervals.
+When error bars are plotted, the figure legend must indicate the number of s.e.m. that each arm of the error bars represents.
+
+
+In the following figure, a sample of 100 observations is made from a population of size 10,000. 
+
+```{r echo=FALSE, fig.height=5, fig.width=8}
+
+par(mar=c(2,4,1,1))
+values2 = rnorm(n=10000, sd=3)+15
+s = sample(values2)[1:100]
+layout(matrix(1:5,1,5))
+
+yy = c(0, 5, 10, 15, 20, 25 )
+ymax=25
+plot( jitter(rep(1,length(values2))), values2, ylim=c(0,ymax), axes=FALSE, 
+      yaxs="i", pch=19, cex=0.2, col="cornflowerblue", ylab="", xlab="")
+axis(2, yy, las=1, cex.axis=1.5 )
+lines( c(-0.5, 1.5), c(mean(values2), mean(values2) ), lwd=2 )
+box()
+text(1,1, "A", cex=2)
+
+plot( jitter(rep(1,length(s))), s, ylim=c(0,ymax), axes=FALSE, yaxs="i", ylab="", xlab="")
+axis(2, yy, las=1, cex.axis=1.5 )
+box()
+text(1,1, "B", cex=2)
+
+boxplot( s, las=1, cex.axis=1.5, ylim=c(0,ymax ),  yaxs="i" )
+text(1,1, "C", cex=2)
+
+b=barplot( mean(s), ylim=c(0,ymax ), axes=FALSE, xlim=c(0,1.5) )
+axis(2, yy, las=1, cex.axis=1.5 )
+box()
+lines( c(b, b), c(mean(s), mean(s) + sd(s)), lwd=2 )
+lines( c(b, b), c(mean(s), mean(s) - sd(s)), lwd=2 )
+lines( c(b-0.2, b+0.2), c( mean(s) + sd(s), mean(s) + sd(s) ), lwd=2 )
+lines( c(b-0.2, b+0.2), c( mean(s) - sd(s), mean(s) - sd(s) ), lwd=2 )
+text(b,1, "D", cex=2)
+
+SEM = sd(s) / sqrt(10)
+b=barplot( mean(s), ylim=c(0,ymax ), axes=FALSE, xlim=c(0,1.5) )
+axis(2, yy, las=1, cex.axis=1.5 )
+box()
+CIB = abs(qt( 0.32/2, df=length(s)-1))
+
+lines( c(b, b), c(mean(s), mean(s) + CIB*SEM), lwd=2 )
+lines( c(b, b), c(mean(s), mean(s) - CIB*SEM), lwd=2 )
+lines( c(b-0.2, b+0.2), c( mean(s) + CIB*SEM, mean(s) + CIB*SEM ), lwd=2 )
+lines( c(b-0.2, b+0.2), c( mean(s) - CIB*SEM, mean(s) - CIB*SEM ), lwd=2 )
+text(b,1, "E", cex=2)
+
 ```
 
-Note that the p-value reported by the *t.test()* function has dropped because only one side of the t-distribution is being considered in the "as extreme or more extreme" calculation. 
+**Figure 3: Presenting the variation using SEM and SD**
 
-To test paired data, set the *paired* parameter to true. This requires that you have the same number of samples in each group:
+**Figure 3A** shows the entire dataset.  
+**Figure 3B** shows the sample from the dataset.  
+**Figure 3C** shows a box and whiskers plot.  
+**Figure 3D** shows a bar plot +/- one SD.  
+**Figure 3E** shows a bar plot +/- one SEM.
 
-```{r}
-group_1 = c(3, 6, 7, 2, 1, 4, 4.5, 6)
-group_2 = c(5, 4, 12,6, 7, 6, 8, 9)
-t.test(group_1, group_2, paired=TRUE)
-```
+We can observe:
+
+* The SEM error bars in 3E are dramatically smaller than the SD error bars in 3D. 
+* The SD error bars in 3D are much more representative of the true variation in the population. 
+* The box and whiskers plot does a good job of conveying the central tendency and spread of the population.
+
+
+The standard deviation *vs.* the s.e.m
+================================================================================
+
+Newcomers to statistics are often confused by the difference between the standard 
+deviation and the standard error of the mean, and are unsure about which to use when reporting results.
+
+The standard deviation describes **variation in a *sample* or *population*.**
+
+The standard error of the mean describes **variation in an estimate of the sample or population *mean*.**
+
+Assuming you have at least two observations in your sample, the sample s.e.m. will always be lower than the sample standard deviation. You may be tempted to report the s.e.m. instead of the standard deviation because the error bars you draw on a figure or confidence intervals you report in text will be smaller, making the observation appear more robust. However, 
+to communicate how much variation there is in a sample, you need to use the standard deviation. 
+
+The standard deviation of a whole population has a fixed value. As the size of a sample increases, the standard deviation of the *sample* may get larger or smaller. By contrast, the standard error of the mean will almost invariably decrease as the sample size increases, because *N* is in the denominator of the standard error of the mean. You can drive the sample standard error of the mean to an arbitratily low value by taking larger and larger samples. 
+
+Whenever possible, prefer to plot the actual data. When this is impractical, plot a box-and-whiskers figure or a violin plot. The actual data can be combined with a box-and-whiskers plot to get the best of both worlds.
+
+
+Summary
+===========
+
+* Standard Error of the Mean (SEM) depends on 
+    + population variance
+    + sample size
+* SEM is a standard deviation of the sample corrected for the square root of the number of samples
+
+* Express the Confidence Interval (CI) using bounds and a percentage
+
+* If we repeated the sampling process many times, the CI expresses the percentage of the time the parameter should fall in the range.
+
+* Do not use SEM to communicate the variation in the population.
+
+
+

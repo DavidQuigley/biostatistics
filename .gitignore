@@ -4,3 +4,7 @@
 .Rhistory
 
 images/module_01_drug_experiment.psd
+
+*.pdf
+
+*.docx

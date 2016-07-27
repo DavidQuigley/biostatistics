@@ -1,11 +1,12 @@
 ---
-title: "Module 7.2: The Poisson Distribution"
+title: 'Module 7.2: The Poisson Distribution'
 author: "David Quigley"
-date: "October 28, 2015"
-output: 
-    html_document:
-        toc: true
-        css: swiss.css
+output:
+  html_document:
+    css: swiss.css
+    toc: yes
+  word_document:
+    toc: yes
 ---
 
 
@@ -48,33 +49,40 @@ The last point is stated very clearly in material produced by the Warring States
 
 >This last point sums up the contrast with the Binomial situation, where the probability of each of two mutually exclusive events (p and q) is known. The Poisson Distribution, so to speak, is the Binomial Distribution Without Q. In those circumstances, and they are surprisingly common, the Poisson Distribution gives the expected frequency profile for events.
 
-*SOURCE: http://www.umass.edu/wsp/resources/poisson/index.html*
+SOURCE: http://www.umass.edu/wsp/resources/poisson/index.html
 
 The following equation calclates the exact probability of observing *x* events in a time interval when the event frequency is Poisson distributed:
 
 $\large{ P(X) = \frac{e^{-\mu}\mu^x }{x!} }$
 
-Where *e* is the mathematical constant *e* (2.81929...), $\mu$ is the mean number of events per time interval, and *x!* means "x factorial". The factorial operation means to multiply a value by all decreasing integers down to 1, so *4! = 4 x 3 x 2 x 1 = 24*. To come up with a value for $\mu$, one must either specify a value *a priori*, or observe a real system long enough that you are satisfied with your estimate. 
+Where *e* is the mathematical constant *e* (2.71828...), $\mu$ is the mean number of events per time interval, and *x!* means "x factorial". The factorial operation means to multiply a value by all decreasing integers down to 1, so *4! = 4 x 3 x 2 x 1 = 24*. To come up with a value for $\mu$, one must either specify a value *a priori*, or observe a real system long enough that you are satisfied with your estimate. 
 
-```{r echo=FALSE}
+```{r echo=FALSE, fig.height=6, fig.width=7}
+layout(matrix(1:3,3,1))
 vals = seq(from=0, to=15, by=1)
 par(mar=c(4,4,1,1))
-b=barplot(dpois(vals,1 ), xlab="trials", ylab="density", main="Poisson distributions", axes=FALSE, ylim=c(0,0.4) )
+b=barplot(dpois(vals,1 ), xlab="trials", ylab="density", 
+          main="Poisson distribution: mean=1", axes=FALSE, ylim=c(0,0.4) )
 axis(1, at=c( b[1], b[5], b[10], b[15]), labels=c(0, 5, 10, 15) )
 axis(2, seq(0,0.5,0.1), las=1)
 
 vals = seq(from=0, to=15, by=1)
 par(mar=c(4,4,1,1))
-b=barplot(dpois(vals,2 ), xlab="trials", ylab="density", main="Poisson distributions", axes=FALSE, ylim=c(0,0.4) )
+b=barplot(dpois(vals,2 ), xlab="trials", ylab="density", 
+          main="Poisson distribution: mean=2", axes=FALSE, ylim=c(0,0.4) )
 axis(1, at=c( b[1], b[5], b[10], b[15]), labels=c(0, 5, 10, 15) )
 axis(2, seq(0,0.5,0.1), las=1)
 
 vals = seq(from=0, to=15, by=1)
 par(mar=c(4,4,1,1))
-b=barplot(dpois(vals,3 ), xlab="trials", ylab="density", main="Poisson distributions", axes=FALSE, ylim=c(0,0.4), col="#0000ff11" )
+b=barplot(dpois(vals,3 ), xlab="trials", ylab="density", 
+          main="Poisson distribution, mean=3", axes=FALSE, 
+          ylim=c(0,0.4) )
 axis(1, at=c( b[1], b[5], b[10], b[15]), labels=c(0, 5, 10, 15) )
 axis(2, seq(0,0.5,0.1), las=1)
 ```
+
+**Figure 1: three Poisson distributions with varying means**
 
 The Poisson approximation to the Binomial Distribution
 --------------------------------------------------------------------------------
@@ -88,6 +96,8 @@ Examples of applying the Poisson distribution
 **EXAMPLE ONE**:
 
 A graduate student observes that most days, her principle investigator drinks two cups of espresso. What is the probability that the supervisor will drink three cups of expresso?
+
+*Why use the Poisson distribution?* The student observes a discrete, infrequent event. She can tabulate the number of days the P.I. drank two cups of coffee, but cannot enumerate the number of possible outcomes that could have happened.
 
 *Answer:* Here $\mu$ = 2, and we are asked to calculate P(3).
 
@@ -103,11 +113,11 @@ Mice of the strain RX47 usually produce five healthy pups in a litter. You have 
 
 $\large{ P(3) = \frac{e^{-5}\times5^3 }{3!} } = 0.2807$, or 28%. 
 
-Not very strong evidence that the chow is associated with lower litter sizes.
+This suggests the evidence the change in chow was associated with lower litter sizes is not very strong.
 
-**EXAMPLE THREE**
+**EXAMPLE THREE**:
 
-Robert the Post Doc typically stays at the lab after 8:00 p.m. five times as week. What are the chances that Robert will miss dinner today?
+Robert the Post Doc typically stays at the lab after 8:00 p.m. five times as week. His partner at home eats dinner at 6:30 p.m. What are the chances that Robert will miss dinner today?
 
 The average number of days per week Robert is at work past 8:00 p.m. is $\frac{5}{7} = 0.71$. The probability that Robert will have a late night is $\frac{e^{-0.71}\times0.71^1}{1!}$ = 0.349 = 35%.
 
@@ -117,6 +127,26 @@ In this case, we can also calculate the probability of a late night using the Bi
 $P_{late} = 0.71$, $P_{not late} = 0.29$, so 
 
 $\large{ {n \choose x} p^x(1-p)^{(n-x)} }$
+
+Summary
+=========
+
+* The Poisson distribution is useful for modeling the frequency distribution of rare events
+
+R code examples
+=======================
+
+>Obtain the probability of a positive result in 1 to 15 trials for a Poisson distribution with mean *mu*
+
+The *dpois()* function returns the density of the poisson distribution at a given number of trials for a given mean.
+
+```{r rank, comment=""}
+mu=1
+n_trials = seq(from=0, to=15, by=1)
+probabilities = dpois(n_trials, mu )
+data.frame( trials = n_trials, probability=signif( probabilities, 3 ) )
+```
+
 
 
 
