@@ -1,47 +1,25 @@
 ---
-title: "UCSF Introduction to Biostatistics Online course"
+title: "UCSF Introduction to Biostatistics"
 author: "David Quigley"
-date: "December 4, 2015"
-output: 
-    html_document:
-        toc: true
-        css: swiss.css
+output:
+  html_document:
+    css: swiss.css
+    toc: yes
+  word_document:
+    toc: yes
 ---
 
 Course Syllabus
 ====================
 
-Module | Description 
------- | ------- 
-1.1    | [Introduction to biostatistics and data analysis](module_01.1.html)
-1.2    | [Study designs and practical issues in data analysis](module_01.2.html)
-2      | [Just enough R to get started](module_02.html)
-3.1    | [Data types and visualizing a single variable](module_03.1.html)
-3.2    | [Summarizing data with the mean, median, variance, and standard deviation](module_03.2.html)
-4.1    | [Distributions: The normal distribution and the central limit theorem](module_04.1.html)
-5.1    | [What's a P value?](module_05.1.html)
-5.2    | [The t distribution and the t test: deriving P values from statistics](module_05.2.html)
-5.3    | [Probability and Multiple test correction](module_05.3.html)
-6.1    | [Comparisons between two continuous variables: correlation](module_06.1.html)
-7.1    | [Counts and categories: The Binomial, Chi-squared and Fisher's Exact tests](module_07.1.html)
-7.2    | [Counts and categories: The Poisson distribution](module_07.2.html)
-7.3    | [Counts and categories: ANOVA](module_07.3.html)
-8.1    | [Robust statistics and outliers](module_08.1.html)
-9.1    | [Reproducible statistical analysis](module_0.9.1.html)
+Introduction
+--------------------------------------------------------------------------------
 
-Instructor
-====================
+Statistical maturity is a core competency for researchers and health professionals, but formal education in statistical methods and practice varies widely among the graduate schools at UCSF. Although graduate students may opt to take a full introductory course such as Biostat 183, no statistical classwork is required of BMS, Informatics, PSPG, or Tetrad students. Students arrive on a continuum between a complete lack of formal training and having completed Masters level work in statistics. This course will provide a **flexible, introductory set of modules** that will allow biomedical students to design studies, perform essential analysis, and consume statistical data.
 
-This course is being developed by [David Quigley](http://davidquigley.com), a member of the [UCSF Helen Diller Comprehensive Cancer Center](http://cancer.ucsf.edu) and the [UCSF Department of Epidemiology and Biostatistics](http://epibiostat.ucsf.edu). This work was supported by a grant from the UCSF Graduate division.
+This course will emphasize practical considerations important to a working bench scientist. Mathematical detail and notation will be included where it is essential. The *P* value is both crucial and widely misunderstood, so the course places particular emphasis on what the *P* value means and interpreting the *P* value in the context of effect size and study power. 
 
-Course overview
-====================
-
-Statistical maturity is a core competency for researchers and health professionals, but formal education in statistical methods and practice varies widely among the graduate schools at UCSF. Although graduate students may opt to take a full introductory course such as Biostat 183, no statistical classwork is required of BMS, Informatics, PSPG, or Tetrad students. Students arrive on a continuum between a complete lack of formal training and having completed Masters level work in statistics. This course will provide a flexible, introductory set of modules that will allow biomedical students to design studies, perform essential analysis, and consume statistical data.
-
-This course will emphasize practical considerations important to a working bench scientist. Mathematical detail and notation will be included where it is essential. The P value is both crucial and widely misunderstood, so the course places particular emphasis on what P means and interpreting P in the context of effect size and study power. Example data is placed in context through several interviews with the UCSF investigators who performed the studies. Material denoted in the syllabus as "intermediate topics" will not be covered in the first year’s version of these lessons.
-
-Core concepts and outcomes 
+Core concepts 
 ----------------------------
 
 * Types of studies, causation, falsifiability, and hypothesis testing
@@ -49,7 +27,56 @@ Core concepts and outcomes
 * How to perform and decide between frequently-used tests
 * Evaluating results using a combination of P value, effect size, confidence intervals, and statistical power, and not the P value alone
 * The intuition behind multiple testing correction
-* Performing reproducible statistical analysis with the R package
+* Performing reproducible statistical analysis 
+
+
+Course objectives
+---------------------
+
+This course will provide a flexible, introductory set of modules that will allow biomedical students to understand biostatistical methods required to design studies, perform essential analysis, and consume statistical data. This course will emphasize practical considerations important to a working bench scientist. Mathematical detail and notation will be included where it is essential. Upon completion of this course, students will be prepared to:
+
+1. describe the advantages and drawbacks of cohort, case-control, and RCT study design
+2. use and interpret the tools of exploratory data analysis, including histograms, box and whisker plots, and correlation
+3. calculate a P value, explain how P values are used in hypothesis testing, and adjust P values for multiple tests
+4. calculate and interpret confidence intervals
+5. calculate and perform power calculations
+6. Apply common statistical tests including the t test and Fisher’s exact test
+7. Perform reproducible statistical analysis using the R language
+
+Because mastery of biostatistics requires long-term practice, students lacking previous background in statistics are not expected to have mastered all of these points at the completion of this course. The primary goal of the course is to provide the background for further study.
+
+
+Module outline
+-----------------------
+
+Module | Description 
+------ | ------- 
+1.1    | [Course introduction and overview](module_01.1.html)
+1.2    | [Sampling and sources of error](module_01.2.html)
+1.3    | [Observational studies](module_01.3.html)
+1.4    | [Interventional studies and causality](module_01.4.html)
+2.1    | [Just enough R to get started](module_02.html)
+3.1    | [Data types](module_03.1.html)
+3.2    | [Exploratory Data Analysis](module_03.2.html)
+3.3    | [Histograms and variance](module_03.3.html)
+4.1    | [Probability and the P value](module_04.1.html)
+4.2    | [Making decisions with P values](module_04.2.html)
+4.3    | [Adjusting P values when there are many tests](module_04.3.html)
+5.1    | [Statistical distributions, uniform and normal](module_05.1.html)
+5.2    | [Quantifying the confidence of an estimate](module_05.2.html)
+5.3    | [Small samples and Student’s t distribution](module_05.3.html)
+5.4    | [The t test: comparing the mean between groups](module_05.4.html)
+6.1    | [Comparisons between two continuous variables: correlation](module_06.1.html)
+7.1    | [The Binomial, Chi-squared and Fisher's Exact tests](module_07.1.html)
+7.2    | [The Poisson distribution](module_07.2.html)
+7.3    | [ANOVA](module_07.3.html)
+8.1    | [Robust statistics and Outliers](module_08.1.html)
+9.1    | [Reproducible Statistical Analysis](module_09.1.html)
+
+Instructor
+-----------------------
+
+This course was developed by [David Quigley](http://davidquigley.com), a member of the [UCSF Helen Diller Comprehensive Cancer Center](http://cancer.ucsf.edu) and the [UCSF Department of Epidemiology and Biostatistics](http://epibiostat.ucsf.edu). This work was supported by a grant from the UCSF Graduate division.
 
 Pedagogical method
 ----------------------------
@@ -58,5 +85,5 @@ Course material is organized into modules which consist of:
 
 * Recorded lectures
 * Written material produced as R Markdown documents that can be rendered as PDF or HTML, and loaded directly into R Studio for worked examples
-* Exercises and projects
+* Classroom exercises
 
